@@ -1,5 +1,5 @@
 import { ApolloProvider } from '@apollo/client';
-import { SessionProvider } from 'next-auth/react';
+import { SessionProvider, useSession } from 'next-auth/react';
 import type { AppProps } from 'next/app';
 import { ThemeProvider } from 'styled-components';
 

@@ -1,6 +1,6 @@
 import { ApolloConsumer } from '@apollo/client';
-import { useSession } from 'next-auth/react';
-import Link from 'next/link';
+import { signIn, useSession } from 'next-auth/react';
+// import Link from 'next/link';
 import React, { useContext, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
@@ -14,6 +14,7 @@ export type PageProps = {
 
 const Page: React.FC<PageProps> = ({ title, children }) => {
   const { data: session } = useSession();
+  console.log('page', { session });
   const themeContext = useContext(ThemeContext);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -24,7 +25,8 @@ const Page: React.FC<PageProps> = ({ title, children }) => {
           <Canvas theme={themeContext}>
             {!session ? (
               <SignUp>
-                <Link href="/api/auth/signin">Log in</Link>
+                {/* <Link href="/api/auth/signin">Log in</Link> */}
+                <button onClick={() => signIn('github')}>Sign in</button>
               </SignUp>
             ) : (
               <Wrapper theme={themeContext} isExpanded={isExpanded}>

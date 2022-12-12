@@ -1,71 +1,63 @@
-// import { NextApiHandler } from 'next';
-// import NextAuth, { Session } from 'next-auth';
-// import Providers from 'next-auth/providers';
-// import Adapters from 'next-auth/adapters';
+import { PrismaAdapter } from '@next-auth/prisma-adapter';
+import NextAuth, { Session } from 'next-auth';
+import { JWT } from 'next-auth/jwt';
+import GithubProvider from 'next-auth/providers/github';
 
-// import prisma from '../../../lib/prisma';
+import prisma from '../../../lib/prisma';
 
-// const authHandler: NextApiHandler = (req, res) => NextAuth(req, res, options);
-// export default authHandler;
+type UserProps = {
+  id: string;
+  role?: string;
+};
 
-// // type UserProps = {
-// //   id?: number;
-// //   authURL?: string;
-// //   evernoteExpiration?: string;
-// //   evernoteAuthToken?: string;
-// //   evernoteReqToken?: string;
-// //   evernoteReqSecret?: string;
-// //   role?: string;
-// //   noteImportOffset?: number;
-// // }
+type SessionProps = {
+  session: Session;
+  token: JWT;
+  user: UserProps;
+};
 
-// type TokenProps = {
-//   id?: number;
-//   authURL?: string;
-//   evernoteAuthToken?: string;
-//   evernoteReqToken?: string;
-//   evernoteReqSecret?: string;
-//   userId?: number;
-//   noteImportOffset?: number;
-//   evernoteExpiration?: string;
-// };
+type SignInProps = {
+  user: UserProps;
+};
 
-// const options = {
-//   providers: [
-//     Providers.GitHub({
-//       clientId: process.env.GITHUB_ID,
-//       clientSecret: process.env.GITHUB_SECRET
-//     })
-//   ],
-//   adapter: Adapters.Prisma.Adapter({ prisma }),
-//   secret: process.env.SECRET,
-//   callbacks: {
-//     // session starts out with our name, email and image from github
-//     // rename token to 'user'; this is actually our user object from prisma
-//     async session(session: Session, token: TokenProps) {
-//       // for whatever reason these don't always populate client side
-//       session.user.evernoteAuthToken = token.evernoteAuthToken;
-//       session.user.evernoteReqToken = token.evernoteReqToken;
-//       session.user.evernoteReqSecret = token.evernoteReqSecret;
-//       session.user.evernoteExpiration = token.evernoteExpiration;
-//       session.user.noteImportOffset = token?.noteImportOffset || 0;
-//       session.user.userId = token.id;
+export const authOptions = {
+  adapter: PrismaAdapter(prisma),
+  providers: [
+    GithubProvider({
+      clientId: `${process.env.NEXT_PUBLIC_GITHUB_ID}`,
+      clientSecret: `${process.env.NEXT_PUBLIC_GITHUB_SECRET}`
+    })
+  ],
+  secret: process.env.NEXT_PUBLIC_NEXT_AUTH_SECRET,
+  callbacks: {
+    async session({ session }: SessionProps): Promise<Session> {
+      // console.log('session', { session, token, user });
+      if (!session?.user) {
+        return session;
+      }
 
-//       return session;
-//     },
-//     async signIn(/* user: UserProps */) {
-//       // const { role,  name } = user;
-//       const isAllowedToSignIn = true; // role === 'ADMIN' || role === 'USER';
-//       if (isAllowedToSignIn) {
-//         return true;
-//       } else {
-//         // Return false to display a default error message
-//         return false;
-//         // Or you can return a URL to redirect to:
-//         // return '/unauthorized'
-//       }
-//     }
-//   }
-// };
-
-export {};
+      // for whatever reason these don't always populate client side
+      // session.user.evernoteAuthToken = token.evernoteAuthToken;
+      // session.user.evernoteReqToken = token.evernoteReqToken;
+      // session.user.evernoteReqSecret = token.evernoteReqSecret;
+      // session.user.evernoteExpiration = token.evernoteExpiration;
+      // session.user.noteImportOffset = token?.noteImportOffset || 0;
+      // session.user.userId = token.id;
+      return session;
+    },
+    async signIn({ user }: SignInProps): Promise<boolean> {
+      console.log('signIn', { user });
+      const { role } = user;
+      const isAllowedToSignIn = role === 'SUPERADMIN';
+      if (isAllowedToSignIn) {
+        return true;
+      } else {
+        // Return false to display a default error message
+        return false;
+        // Or you can return a URL to redirect to:
+        // return '/unauthorized'
+      }
+    }
+  }
+};
+export default NextAuth(authOptions);
