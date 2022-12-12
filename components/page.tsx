@@ -1,9 +1,9 @@
 import { ApolloConsumer } from '@apollo/client';
 import { signIn, useSession } from 'next-auth/react';
-// import Link from 'next/link';
 import React, { useContext, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
+import Button from './common/button';
 import Header from './header';
 import Nav from './nav';
 
@@ -14,20 +14,16 @@ export type PageProps = {
 
 const Page: React.FC<PageProps> = ({ title, children }) => {
   const { data: session } = useSession();
-  console.log('page', { session });
   const themeContext = useContext(ThemeContext);
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
     <ApolloConsumer>
       {(client) => (
-        <React.Fragment>
+        <>
           <Canvas theme={themeContext}>
             {!session ? (
-              <SignUp>
-                {/* <Link href="/api/auth/signin">Log in</Link> */}
-                <button onClick={() => signIn('github')}>Sign in</button>
-              </SignUp>
+              <SignIn label="Sign In" onClick={() => signIn('github')} />
             ) : (
               <Wrapper theme={themeContext} isExpanded={isExpanded}>
                 <Nav isExpanded={isExpanded} setIsExpanded={setIsExpanded} />
@@ -36,19 +32,7 @@ const Page: React.FC<PageProps> = ({ title, children }) => {
               </Wrapper>
             )}
           </Canvas>
-          <style global jsx>
-            {`
-              html,
-              body,
-              body > div:first-child,
-              div#__next,
-              div#__next > div {
-                height: 100vh;
-                min-height: 100vh;
-              }
-            `}
-          </style>
-        </React.Fragment>
+        </>
       )}
     </ApolloConsumer>
   );
@@ -56,23 +40,25 @@ const Page: React.FC<PageProps> = ({ title, children }) => {
 
 export default Page;
 
-const SignUp = styled.div`
-  position: relative;
+const SignIn = styled(Button)`
+  text-decoration: none;
+  font-size: 20px;
+  color: ${({ theme }) => theme.colors.altGreen};
+  background: transparent;
+  font-weight: bold;
+  padding: 10px;
+  border-radius: 12px;
+  border: 0;
+  position: fixed; /* or absolute */
   top: 40%;
-  display: flex;
-  justify-content: center;
+  left: 50%;
 
-  a {
-    text-decoration: none;
-    font-size: 20px;
-    color: ${({ theme }) => theme.colors.altGreen};
-    font-weight: bold;
-    padding: 10px;
-
-    &:hover,
-    &:focus {
-      outline: 2px dotted ${({ theme }) => theme.colors.altGreen};
-    }
+  &:hover,
+  &:focus {
+    cursor: pointer;
+    outline: 2px dotted ${({ theme }) => theme.colors.altGreen};
+    color: white;
+    background: rgba(45, 78, 71, 0.7);
   }
 `;
 
@@ -81,7 +67,7 @@ const Canvas = styled.div`
   overflow-x: hidden;
   width: 100%;
   height: 100%;
-  background: ${({ theme }) => theme.colors.headerBackground};
+  background: ${({ theme }) => theme.colors.menuBackground};
 `;
 
 type ContentProps = {
@@ -90,7 +76,7 @@ type ContentProps = {
 
 const Content = styled.article<ContentProps>`
   padding: 20px 40px;
-  background: white;
+  background: ${({ theme }) => theme.colors.headerBackground};
   min-height: 100vh;
   color: ${({ theme }) => theme.colors.bodyText};
   font-size: 16px;

@@ -82,6 +82,10 @@ type NavStylesProps = {
   isExpanded: boolean;
 };
 
+type NavigationButtonProps = {
+  ref: React.MutableRefObject<HTMLButtonElement | null>;
+};
+
 const NavStyles = styled.nav<NavStylesProps>`
   /* mobile top nav */
   background: ${({ theme }) => theme.colors.menuBackground};
@@ -152,10 +156,6 @@ const SignOut = styled(Button)`
     transform: translate(-50%, -50%);
   }
 `;
-
-type NavigationButtonProps = {
-  ref: React.MutableRefObject<HTMLButtonElement | null>;
-};
 
 const NavigationButton = styled(Button)<NavigationButtonProps>`
   top: 20px;
