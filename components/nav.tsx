@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import React, { useCallback, useContext, useEffect, useRef } from 'react';
+import React, { useContext, useRef } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 import { lighten } from 'polished';
 import { signOut } from 'next-auth/react';
@@ -10,10 +10,16 @@ import HomeIcon from 'public/icons/home-solid.svg';
 import CloudDownloadIcon from 'public/icons/cloud-download-alt-solid.svg';
 import LemonIcon from 'public/icons/lemon-solid.svg';
 import FolderIcon from 'public/icons/folder-open-solid.svg';
+import useNavigationButton from '../hooks/use-navigation-button';
 
 type NavProps = {
   isExpanded: boolean;
   setIsExpanded: (_value: boolean) => void;
+};
+
+type IconProps = {
+  icon: JSX.Element;
+  label: string;
 };
 
 const links = [
@@ -25,72 +31,15 @@ const links = [
 
 const Navigation: React.FC<NavProps> = ({ isExpanded, setIsExpanded }) => {
   const themeContext = useContext(ThemeContext);
-  const {
-    sizes: { tablet }
-  } = themeContext;
-  const tabletSize = parseInt(tablet, 10);
-
-  const navRef = useRef<HTMLDivElement>(null);
-  const navRefCurrent = navRef?.current;
+  const navRef = useRef<HTMLElement | null>(null);
   const navIconRef = useRef<HTMLButtonElement | null>(null);
-
-  // TODO move all of this behavior into a hook
-  // note: need to use native mouse event for the event handlers
-  const handleMouseOver = useCallback(
-    (e: MouseEvent) => {
-      // enable event listeners if we're in at least tablet size
-      if (window.innerWidth > tabletSize) {
-        const yPosition = e.clientY - 20 < 0 ? 20 : e.clientY - 10;
-
-        // move the menu icon to where ever our cursor is
-        if (navIconRef?.current) {
-          navIconRef.current.style.top = `${yPosition}px`;
-        }
-
-        // keep updating this anytime we move our mouse around the nav
-        if (navRef?.current) {
-          navRef.current.addEventListener('mousemove', handleMouseOver);
-        }
-      }
-    },
-    [tabletSize]
-  );
-
-  const handleMouseLeave = useCallback(() => {
-    // cleanup this event if we're not in the nav
-    if (navRef?.current) {
-      navRef.current.removeEventListener('mousemove', handleMouseOver);
-    }
-
-    // if we're in mobile, make sure we put our menu icon back at the top
-    if (navIconRef?.current && window.innerWidth > tabletSize) {
-      navIconRef.current.style.top = '20px';
-    }
-  }, [handleMouseOver, tabletSize]);
-
-  useEffect(() => {
-    if (navRefCurrent) {
-      navRefCurrent.addEventListener('mouseover', handleMouseOver);
-      navRefCurrent.addEventListener('mouseleave', handleMouseLeave);
-    }
-
-    return () => {
-      if (navRefCurrent) {
-        navRefCurrent.removeEventListener('mouseover', handleMouseOver);
-        navRefCurrent.removeEventListener('mouseleave', handleMouseLeave);
-      }
-    };
-  }, [handleMouseOver, handleMouseLeave, navRefCurrent]);
-
-  function handleNavigationToggle(e: React.MouseEvent) {
-    e.preventDefault();
-    setIsExpanded(!isExpanded);
-  }
-
-  type IconProps = {
-    icon: JSX.Element;
-    label: string;
-  };
+  const { handleNavigationToggle } = useNavigationButton({
+    isExpanded,
+    navRef,
+    navIconRef,
+    setIsExpanded,
+    themeContext
+  });
 
   const IconAndLabel = ({ icon, label }: IconProps): JSX.Element => (
     <>
@@ -129,6 +78,7 @@ const Navigation: React.FC<NavProps> = ({ isExpanded, setIsExpanded }) => {
 export default Navigation;
 
 type NavStylesProps = {
+  ref: React.MutableRefObject<HTMLElement | null>;
   isExpanded: boolean;
 };
 
@@ -203,7 +153,11 @@ const SignOut = styled(Button)`
   }
 `;
 
-const NavigationButton = styled(Button)`
+type NavigationButtonProps = {
+  ref: React.MutableRefObject<HTMLButtonElement | null>;
+};
+
+const NavigationButton = styled(Button)<NavigationButtonProps>`
   top: 20px;
   color: ${({ theme }) => theme.colors.menuColor};
   cursor: pointer;
