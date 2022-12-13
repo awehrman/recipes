@@ -11,16 +11,22 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime? @map("email_verified")
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  role          Role      @default(USER)
+  id                 String    @id @default(cuid())
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  name               String?
+  email              String?   @unique
+  emailVerified      DateTime? @map("email_verified")
+  image              String?
+  accounts           Account[]
+  sessions           Session[]
+  role               Role      @default(USER)
+  evernoteAuthToken  String?   @map(name: "evernote_auth_token")
+  evernoteReqToken   String?   @map(name: "evernote_req_token")
+  evernoteReqSecret  String?   @map(name: "evernote_req_secret")
+  evernoteExpiration String?   @map(name: "evernote_expiration")
+  importedRecipes    Recipe[]
+  noteImportOffset   Int?      @map(name: "note_import_offset")
 
   @@map("users")
 }
@@ -68,4 +74,189 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("verification_tokens")
+}
+
+model EvernoteAuthenticationResponse {
+  id                 String  @id @default(cuid())
+  authURL            String?
+  errorMessage       String?
+  isAuthPending      Boolean @default(false)
+  isAuthenticated    Boolean @default(false)
+  evernoteAuthToken  String? @map(name: "evernote_auth_token")
+  evernoteReqToken   String? @map(name: "evernote_req_token")
+  evernoteReqSecret  String? @map(name: "evernote_req_secret")
+  evernoteExpiration String? @map(name: "evernote_expiration")
+
+  @@map(name: "evernote_authentication_responses")
+}
+
+model Ingredient {
+  id                   String          @id @default(cuid())
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+  name                 String          @unique
+  plural               String?         @unique
+  alternateNames       AlternateName[]
+  properties           Properties[]
+  isComposedIngredient Boolean         @default(false) @map(name: "is_composed_ingredient")
+  isValidated          Boolean         @default(false) @map(name: "is_validated")
+
+  parentId           String?
+  parent             Ingredient?  @relation("relatedIngredients", fields: [parentId], references: [id])
+  relatedIngredients Ingredient[] @relation("relatedIngredients")
+
+  substitutes         Ingredient[] @relation("substitutes")
+  substitutesRelation Ingredient[] @relation("substitutes")
+
+  ParsedSegment ParsedSegment[]
+  references    IngredientLine[]
+
+  @@map(name: "ingredients")
+}
+
+enum Properties {
+  MEAT
+  POULTRY
+  FISH
+  DAIRY
+  SOY
+  GLUTEN
+}
+
+model AlternateName {
+  name         String     @unique
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+  ingredientId String
+
+  @@map(name: "alternate_names")
+}
+
+model Recipe {
+  id             String   @id @default(cuid())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  importedUser   User     @relation(fields: [importedUserId], references: [id])
+  importedUserId String   @map(name: "imported_user_id")
+
+  evernoteGUID String   @map(name: "evernote_guid")
+  title        String
+  sources      String[]
+  image        String
+
+  // book   Book @relation(fields: [bookId], references: [id])
+  // bookId Int  @map(name: "book_id")
+  // author
+  // authorId
+
+  categories Category[]
+  tags       Tag[]
+
+  IngredientLine  IngredientLine[]
+  InstructionLine InstructionLine[]
+
+  @@map(name: "recipes")
+}
+
+model Category {
+  id           String  @id @default(cuid())
+  name         String  @unique
+  evernoteGUID String? @map(name: "evernote_guid")
+
+  recipes Recipe[]
+  notes   Note[]
+
+  @@map(name: "categories")
+}
+
+model Tag {
+  id           String  @id @default(cuid())
+  name         String  @unique
+  evernoteGUID String? @map(name: "evernote_guid")
+
+  recipes Recipe[]
+  notes   Note[]
+
+  @@map(name: "tags")
+}
+
+model IngredientLine {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  blockIndex Int             @map(name: "block_index")
+  lineIndex  Int             @map(name: "line_index")
+  reference  String
+  rule       String?
+  isParsed   Boolean         @map(name: "is_parsed")
+  parsed     ParsedSegment[]
+
+  recipe   Recipe? @relation(fields: [recipeId], references: [id])
+  recipeId String?
+
+  Note   Note?   @relation(fields: [noteId], references: [id])
+  noteId String?
+
+  Ingredient   Ingredient? @relation(fields: [ingredientId], references: [id])
+  ingredientId String?
+
+  @@map(name: "ingredient_lines")
+}
+
+model InstructionLine {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  blockIndex Int    @map(name: "block_index")
+  reference  String
+
+  note   Note?   @relation(fields: [noteId], references: [id])
+  noteId String?
+
+  Recipe   Recipe? @relation(fields: [recipeId], references: [id])
+  recipeId String?
+
+  @@map(name: "instruction_lines")
+}
+
+model ParsedSegment {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  index Int
+  rule  String
+  type  String
+  value String
+
+  ingredient   Ingredient? @relation(fields: [ingredientId], references: [id])
+  ingredientId String?     @map("ingredient_id")
+
+  ingredientLine   IngredientLine @relation(fields: [ingredientLineId], references: [id])
+  ingredientLineId String         @map("ingredient_line_id")
+
+  @@map(name: "parsed_segments")
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  evernoteGUID String  @map(name: "evernote_guid")
+  title        String
+  source       String?
+
+  categories Category[]
+  tags       Tag[]
+
+  image    String?
+  content  String?
+  isParsed Boolean @default(false) @map(name: "is_parsed")
+
+  ingredients  IngredientLine[]
+  instructions InstructionLine[]
+
+  @@map(name: "notes")
 }
