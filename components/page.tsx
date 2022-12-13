@@ -9,7 +9,7 @@ import Nav from './nav';
 
 export type PageProps = {
   title: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 };
 
 const Page: React.FC<PageProps> = ({ title, children }) => {
