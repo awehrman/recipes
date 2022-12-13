@@ -22,9 +22,9 @@ model User {
   sessions           Session[]
   role               Role      @default(USER)
   evernoteAuthToken  String?   @map(name: "evernote_auth_token")
+  evernoteExpiration String?   @map(name: "evernote_expiration")
   evernoteReqToken   String?   @map(name: "evernote_req_token")
   evernoteReqSecret  String?   @map(name: "evernote_req_secret")
-  evernoteExpiration String?   @map(name: "evernote_expiration")
   importedRecipes    Recipe[]
   noteImportOffset   Int?      @map(name: "note_import_offset")
 

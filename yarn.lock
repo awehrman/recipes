@@ -1653,6 +1653,13 @@
   resolved "https://registry.yarnpkg.com/@tsconfig/node16/-/node16-1.0.3.tgz#472eaab5f15c1ffdd7f8628bd4c4f753995ec79e"
   integrity sha512-yOlFc+7UtL/89t2ZhjPvvB/DeAr3r+Dq58IgzsFkOAvVC6NMJXmCGjbptdXdR9qsX7pKcTL+s87FtYREi2dEEQ==
 
+"@types/evernote@^2.0.2":
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@types/evernote/-/evernote-2.0.2.tgz#9fe16eb781f3027ddd58f2b1c63a2e41bc8452b0"
+  integrity sha512-KJGf/erlo6+GhH8oqSDgBlnh5PSalkVB24yZpQwxR7KJFvIS0f37K+tF9RMMrG9E1Zj7Mwhy1Z7Af/8oo0E4Hg==
+  dependencies:
+    "@types/oauth" "*"
+
 "@types/hoist-non-react-statics@*":
   version "3.3.1"
   resolved "https://registry.yarnpkg.com/@types/hoist-non-react-statics/-/hoist-non-react-statics-3.3.1.tgz#1124aafe5118cb591977aeb1ceaaed1070eb039f"
@@ -1701,6 +1708,13 @@
   version "10.17.60"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.17.60.tgz#35f3d6213daed95da7f0f73e75bcc6980e90597b"
   integrity sha512-F0KIgDJfy2nA3zMLmWGKxcH2ZVEtCZXHHdOQs2gSaQ27+lNeEfGxzkIw90aXswATX7AZ33tahPbzy6KAfUreVw==
+
+"@types/oauth@*":
+  version "0.9.1"
+  resolved "https://registry.yarnpkg.com/@types/oauth/-/oauth-0.9.1.tgz#e17221e7f7936b0459ae7d006255dff61adca305"
+  integrity sha512-a1iY62/a3yhZ7qH7cNUsxoI3U/0Fe9+RnuFrpTKr+0WVOzbKlSLojShCKe20aOD1Sppv+i8Zlq0pLDuTJnwS4A==
+  dependencies:
+    "@types/node" "*"
 
 "@types/parse-json@^4.0.0":
   version "4.0.0"
@@ -2809,6 +2823,13 @@ esutils@^2.0.2:
   resolved "https://registry.yarnpkg.com/esutils/-/esutils-2.0.3.tgz#74d2eb4de0b8da1293711910d50775b9b710ef64"
   integrity sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==
 
+evernote@^2.0.5:
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/evernote/-/evernote-2.0.5.tgz#187f979b450d93d54190d852c69494e48e677e23"
+  integrity sha512-DuOk3t9HKwkxZBaZU1Mz8vmZSEM2LVI3eLdML90Is3+8WlPwpYcLeo4z+eklT8NUGD3GA6oOnlP+6e0z0rDX1Q==
+  dependencies:
+    oauth "^0.9.14"
+
 execa@^6.1.0:
   version "6.1.0"
   resolved "https://registry.yarnpkg.com/execa/-/execa-6.1.0.tgz#cea16dee211ff011246556388effa0818394fb20"
@@ -3739,7 +3760,7 @@ nth-check@^2.0.1:
   dependencies:
     boolbase "^1.0.0"
 
-oauth@^0.9.15:
+oauth@^0.9.14, oauth@^0.9.15:
   version "0.9.15"
   resolved "https://registry.yarnpkg.com/oauth/-/oauth-0.9.15.tgz#bd1fefaf686c96b75475aed5196412ff60cfb9c1"
   integrity sha512-a5ERWK1kh38ExDEfoO6qUHJb32rd7aYmPHuyCu3Fta/cnICvYmgd2uhuKXvPD+PXB+gCEYYEaQdIRAjCOwAKNA==

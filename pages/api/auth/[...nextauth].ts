@@ -1,23 +1,26 @@
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
-import NextAuth, { Session } from 'next-auth';
-import { JWT } from 'next-auth/jwt';
+import NextAuth, { Account, Profile, Session, User } from 'next-auth';
+import { AdapterUser } from 'next-auth/adapters';
+import { CredentialInput } from 'next-auth/providers';
 import GithubProvider from 'next-auth/providers/github';
+import type { JWT } from 'next-auth/jwt';
 
 import prisma from '../../../lib/prisma';
 
-type UserProps = {
-  id: string;
-  role?: string;
+type SignInProps = {
+  user: User | AdapterUser;
+  account: Account | null;
+  profile?: Profile;
+  email?: {
+    verificationRequest?: boolean;
+  };
+  credentials?: Record<string, CredentialInput>;
 };
 
 type SessionProps = {
   session: Session;
+  user: User | AdapterUser;
   token: JWT;
-  user: UserProps;
-};
-
-type SignInProps = {
-  user: UserProps;
 };
 
 export const authOptions = {
@@ -30,33 +33,22 @@ export const authOptions = {
   ],
   secret: process.env.NEXT_PUBLIC_NEXT_AUTH_SECRET,
   callbacks: {
-    async session({ session }: SessionProps): Promise<Session> {
-      // console.log('session', { session, token, user });
-      if (!session?.user) {
-        return session;
+    async session({ session, user }: SessionProps): Promise<Session> {
+      if (session?.user) {
+        // save some user information into our session
+        session.user.noteImportOffset = user?.noteImportOffset ?? 0;
+        session.user.id = user.id;
       }
-
-      // for whatever reason these don't always populate client side
-      // session.user.evernoteAuthToken = token.evernoteAuthToken;
-      // session.user.evernoteReqToken = token.evernoteReqToken;
-      // session.user.evernoteReqSecret = token.evernoteReqSecret;
-      // session.user.evernoteExpiration = token.evernoteExpiration;
-      // session.user.noteImportOffset = token?.noteImportOffset || 0;
-      // session.user.userId = token.id;
       return session;
     },
     async signIn({ user }: SignInProps): Promise<boolean> {
-      console.log('signIn', { user });
       const { role } = user;
-      const isAllowedToSignIn = role === 'SUPERADMIN';
-      if (isAllowedToSignIn) {
+      const isAuthorized = role === 'SUPERADMIN' || role === 'ADMIN';
+
+      if (isAuthorized) {
         return true;
-      } else {
-        // Return false to display a default error message
-        return false;
-        // Or you can return a URL to redirect to:
-        // return '/unauthorized'
       }
+      return false;
     }
   }
 };
