@@ -15,7 +15,7 @@ type NoteImporterProps = {};
 
 const NoteImporter: React.FC<NoteImporterProps> = () => {
   // const { resetDatabase } = useAdminTools();
-  const { isAuthenticated } = useEvernote();
+  // const { isAuthenticated } = useEvernote();
   const [status, setStatus] = useState(defaultLoadingStatus);
   // const { importNotes, notes = [], saveRecipes } = useNotes(status, setStatus);
   const notes = [];
@@ -41,13 +41,13 @@ const NoteImporter: React.FC<NoteImporterProps> = () => {
         <AuthenticateEvernote />
 
         {/* Import Notes */}
-        {isAuthenticated ? (
+        {/* {isAuthenticated ? (
           <Button
             disabled={status.meta}
             label="Import Notes"
             onClick={handleImportNotes}
           />
-        ) : null}
+        ) : null} */}
 
         {/* Save Recipes */}
         {notes.length > 0 && !isLoading && !isSaving ? (

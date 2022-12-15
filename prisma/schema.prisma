@@ -11,22 +11,19 @@ datasource db {
 }
 
 model User {
-  id                 String    @id @default(cuid())
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-  name               String?
-  email              String?   @unique
-  emailVerified      DateTime? @map("email_verified")
-  image              String?
-  accounts           Account[]
-  sessions           Session[]
-  role               Role      @default(USER)
-  evernoteAuthToken  String?   @map(name: "evernote_auth_token")
-  evernoteExpiration String?   @map(name: "evernote_expiration")
-  evernoteReqToken   String?   @map(name: "evernote_req_token")
-  evernoteReqSecret  String?   @map(name: "evernote_req_secret")
-  importedRecipes    Recipe[]
-  noteImportOffset   Int?      @map(name: "note_import_offset")
+  id               String            @id @default(cuid())
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  name             String?
+  email            String?           @unique
+  emailVerified    DateTime?         @map("email_verified")
+  image            String?
+  accounts         Account[]
+  sessions         Session[]
+  role             Role              @default(USER)
+  importedRecipes  Recipe[]
+  noteImportOffset Int?              @map(name: "note_import_offset")
+  evernoteSession  EvernoteSession[]
 
   @@map("users")
 }
@@ -76,18 +73,23 @@ model VerificationToken {
   @@map("verification_tokens")
 }
 
-model EvernoteAuthenticationResponse {
-  id                 String  @id @default(cuid())
-  authURL            String?
-  errorMessage       String?
-  isAuthPending      Boolean @default(false)
-  isAuthenticated    Boolean @default(false)
-  evernoteAuthToken  String? @map(name: "evernote_auth_token")
-  evernoteReqToken   String? @map(name: "evernote_req_token")
-  evernoteReqSecret  String? @map(name: "evernote_req_secret")
-  evernoteExpiration String? @map(name: "evernote_expiration")
+model EvernoteSession {
+  id      String    @id @default(cuid())
+  expires DateTime?
 
-  @@map(name: "evernote_authentication_responses")
+  authURL       String?
+  oauthVerifier String?
+  error         String?
+  loading       Boolean @default(false)
+
+  evernoteAuthToken String? @map(name: "evernote_auth_token")
+  evernoteReqToken  String? @map(name: "evernote_req_token")
+  evernoteReqSecret String? @map(name: "evernote_req_secret")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
+
+  @@map(name: "evernote_sessions")
 }
 
 model Ingredient {
@@ -252,7 +254,7 @@ model Note {
   tags       Tag[]
 
   image    String?
-  content  String?
+  content  String? @db.Text
   isParsed Boolean @default(false) @map(name: "is_parsed")
 
   ingredients  IngredientLine[]

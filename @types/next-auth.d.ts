@@ -1,4 +1,4 @@
-import { Role } from '@prisma/client';
+import { Role, User } from '@prisma/client';
 import NextAuth, { DefaultSession } from 'next/auth';
 
 declare module 'next-auth' {
@@ -7,15 +7,29 @@ declare module 'next-auth' {
   }
 
   interface User {
-    id?: string;
-    evernoteAuthToken?: string;
-    evernoteExpiration?: string;
-    evernoteReqToken?: string;
-    evernoteReqSecret?: string;
+    id: string;
     noteImportOffset?: number;
     role: Role;
+    evernoteSession: EvernoteSession[];
   }
 }
+
+type EvernoteSession = {
+  id: string;
+  expires?: string;
+
+  authURL?: string;
+  oauthVerifier?: string;
+  error?: string;
+  loading: boolean;
+
+  evernoteAuthToken?: string;
+  evernoteReqToken?: string;
+  evernoteReqSecret?: string;
+
+  user: User;
+  userId: string;
+};
 
 enum Role {
   USER,

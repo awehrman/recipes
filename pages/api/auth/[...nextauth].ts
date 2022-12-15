@@ -35,9 +35,11 @@ export const authOptions = {
   callbacks: {
     async session({ session, user }: SessionProps): Promise<Session> {
       if (session?.user) {
-        // save some user information into our session
-        session.user.noteImportOffset = user?.noteImportOffset ?? 0;
-        session.user.id = user.id;
+        // make sure we transfer our user info to the session
+        session.user = {
+          ...session.user,
+          ...user
+        };
       }
       return session;
     },

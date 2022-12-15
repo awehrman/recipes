@@ -4,15 +4,13 @@ export const GET_USER_AUTHENTICATION_QUERY = gql`
   query GET_USER_AUTHENTICATION_QUERY($id: ID) {
     user(id: $id) {
       id
-      evernoteAuthToken
-      evernoteReqToken
-      evernoteReqSecret
-      evernoteExpiration
       noteImportOffset
     }
   }
 `;
 
-export default {
+const all = {
   GET_USER_AUTHENTICATION_QUERY
 };
+
+export default all;

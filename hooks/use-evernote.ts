@@ -1,15 +1,11 @@
 import { useQuery, useMutation } from '@apollo/client';
-import { Session } from 'next-auth';
 import { useSession } from 'next-auth/react';
 import { useRouter, NextRouter } from 'next/router';
 import { useEffect } from 'react';
 
-import {
-  AUTHENTICATE_EVERNOTE_MUTATION,
-  CLEAR_EVERNOTE_AUTH_MUTATION
-} from '../graphql/mutations/evernote';
-import { GET_USER_AUTHENTICATION_QUERY } from '../graphql/queries/user';
 import { MAX_NOTES_LIMIT } from '../constants/evernote';
+import { AUTHENTICATE_EVERNOTE_MUTATION } from '../graphql/mutations/evernote-session';
+import { GET_EVERNOTE_SESSION_FOR_USER_QUERY } from '../graphql/queries/evernote-session';
 
 const onHandleOAuthParams = (router: NextRouter) => {
   // clear out the params sent back from the authentication
@@ -17,32 +13,33 @@ const onHandleOAuthParams = (router: NextRouter) => {
 };
 
 function useEvernote() {
-  console.log('useEvernote');
+  const { data } = useSession();
+  if (!data?.user) {
+    throw new Error('User not in session!');
+  }
   const router: NextRouter = useRouter();
   const bundleSize = MAX_NOTES_LIMIT;
   const {
     query: { oauth_verifier }
   } = router;
-  const { data: session } = useSession();
+
   const {
     user: { id }
-  } = session || {};
+  } = data;
 
-  console.log({ session, id });
-
-  // idk why but grabbing these tokens off the session
-  // doesn't immediately update on the client so we want to rely
-  // on querying the user for auth status
-  const { data, loading, refetch } = useQuery(GET_USER_AUTHENTICATION_QUERY, {
+  const {
+    data: evernoteSessionData,
+    loading,
+    refetch
+  } = useQuery(GET_EVERNOTE_SESSION_FOR_USER_QUERY, {
     variables: { id }
   });
 
-  const evernoteAuthToken = !loading && data?.user?.evernoteAuthToken;
-  const evernoteExpiration = !loading && data?.user?.evernoteExpiration;
+  !loading && console.log({ ...(evernoteSessionData?.evernoteSession ?? {}) });
+  const evernoteAuthToken = !loading && evernoteSessionData.evernoteAuthToken;
+  const evernoteExpiration = !loading && evernoteSessionData.expires;
   const isExpired = !!(!loading && Date.now() > parseInt(evernoteExpiration));
   const isAuthenticated = !!(!loading && evernoteAuthToken && !isExpired);
-
-  useEffect(handleEvernoteAuthVerifier, [oauth_verifier]);
 
   const [authenticateEvernote] = useMutation(AUTHENTICATE_EVERNOTE_MUTATION, {
     update: (_cache, { data: { authenticateEvernote } }) => {
@@ -54,9 +51,14 @@ function useEvernote() {
     }
   });
 
-  const [clearAuthentication] = useMutation(CLEAR_EVERNOTE_AUTH_MUTATION, {
-    update: () => refetch({ id })
-  });
+  useEffect(handleEvernoteAuthVerifier, [
+    authenticateEvernote,
+    evernoteAuthToken,
+    id,
+    oauth_verifier,
+    refetch,
+    router
+  ]);
 
   function handleEvernoteAuthVerifier() {
     if (oauth_verifier) {
@@ -65,6 +67,7 @@ function useEvernote() {
         variables: { oauthVerifier: oauth_verifier }
       });
     } else if (!evernoteAuthToken) {
+      console.log('refetching');
       refetch({ id });
     }
   }
@@ -73,9 +76,8 @@ function useEvernote() {
     meta: {
       bundleSize
     },
-    authenticateEvernote,
-    clearAuthentication,
-    isAuthenticated
+    isAuthenticated,
+    authenticateEvernote
   };
 }
 

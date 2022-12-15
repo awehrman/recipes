@@ -1,3 +1,4 @@
+import { useSession } from 'next-auth/react';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -7,15 +8,25 @@ import Button from '../common/button';
 type AuthenticateEvernoteProps = {};
 
 const AuthenticateEvernote: React.FC<AuthenticateEvernoteProps> = () => {
-  const { authenticateEvernote, isAuthenticated, clearAuthentication } =
-    useEvernote();
+  const { data } = useSession();
+  if (!data?.user) {
+    throw new Error('User not in session!');
+  }
+  const {
+    user: { id }
+  } = data;
+  const {
+    authenticateEvernote,
+    isAuthenticated
+    // clearAuthentication
+  } = useEvernote();
 
   function handleAuthentication() {
-    authenticateEvernote();
+    authenticateEvernote({ variables: { userId: id } });
   }
 
   function handleClearAuthentication() {
-    clearAuthentication();
+    // clearAuthentication();
   }
 
   return (

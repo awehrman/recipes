@@ -26,7 +26,9 @@ export const TOGGLE_CONTAINER_INGREDIENT_MUTATION = gql`
   }
 `;
 
-export default {
+const all = {
   TOGGLE_CONTAINER_MUTATION,
   TOGGLE_CONTAINER_INGREDIENT_MUTATION
 };
+
+export default all;

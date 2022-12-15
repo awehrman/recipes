@@ -2,7 +2,40 @@
 ### Do not make changes to this file directly
 
 
+type Account {
+  access_token: String
+  expires_at: Int
+  id: String!
+  id_token: String
+  provider: String!
+  providerAccountId: String!
+  refresh_token: String
+  scope: String
+  session_state: String
+  token_type: String
+  type: String!
+  userId: String!
+}
+
+type EvernoteSession {
+  authURL: String
+  error: String
+  evernoteAuthToken: String
+  evernoteReqSecret: String
+  evernoteReqToken: String
+  expires: String
+  id: String!
+  loading: Boolean
+  oauthVerifier: String
+  userId: String
+}
+
+type Mutation {
+  authenticateEvernote(oauthVerifier: String, userId: String): EvernoteSession
+}
+
 type Query {
+  evernoteSession(userId: String): EvernoteSession
   users: [User]!
 }
 
@@ -12,8 +45,20 @@ enum Role {
   USER
 }
 
-type User {
-  email: String
+type Session {
+  expires: String!
   id: String!
+  sessionToken: String!
+  userId: String!
+}
+
+type User {
+  createdAt: String
+  email: String
+  evernoteSession: EvernoteSession
+  id: String!
+  name: String
+  noteImportOffset: Int
   role: Role
+  updatedAt: String
 }
