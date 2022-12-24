@@ -2,7 +2,8 @@ import { extendType, FieldResolver, objectType, stringArg } from 'nexus';
 
 import {
   getEvernoteSessionForUser,
-  handleAuthenticateEvernoteSession
+  handleAuthenticateEvernoteSession,
+  handleClearEvernoteSession
 } from '../resolvers/evernote-session';
 
 export const EvernoteSession = objectType({
@@ -10,6 +11,7 @@ export const EvernoteSession = objectType({
   definition(t) {
     t.nonNull.string('id');
     t.string('expires');
+    t.boolean('isExpired');
 
     t.string('authURL');
     t.string('oauthVerifier');
@@ -47,6 +49,20 @@ export const AuthenticateEvernoteSessionMutation = extendType({
       resolve: handleAuthenticateEvernoteSession as FieldResolver<
         'Mutation',
         'authenticateEvernote'
+      >
+    });
+  }
+});
+
+export const ClearEvernoteSessionMutation = extendType({
+  type: 'Mutation',
+  definition(t) {
+    t.field('clearEvernoteSession', {
+      type: 'EvernoteSession',
+      args: { userId: stringArg() },
+      resolve: handleClearEvernoteSession as FieldResolver<
+        'Mutation',
+        'clearEvernoteSession'
       >
     });
   }

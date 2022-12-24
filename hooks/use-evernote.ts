@@ -4,7 +4,10 @@ import { useRouter, NextRouter } from 'next/router';
 import { useEffect } from 'react';
 
 import { MAX_NOTES_LIMIT } from '../constants/evernote';
-import { AUTHENTICATE_EVERNOTE_MUTATION } from '../graphql/mutations/evernote-session';
+import {
+  AUTHENTICATE_EVERNOTE_MUTATION,
+  CLEAR_EVERNOTE_SESSION_MUTATION
+} from '../graphql/mutations/evernote-session';
 import { GET_EVERNOTE_SESSION_FOR_USER_QUERY } from '../graphql/queries/evernote-session';
 
 const onHandleOAuthParams = (router: NextRouter) => {
@@ -28,17 +31,25 @@ function useEvernote() {
   } = data;
 
   const {
-    data: evernoteSessionData,
+    data: evernoteData,
     loading,
     refetch
   } = useQuery(GET_EVERNOTE_SESSION_FOR_USER_QUERY, {
     variables: { id }
   });
 
-  !loading && console.log({ ...(evernoteSessionData?.evernoteSession ?? {}) });
-  const evernoteAuthToken = !loading && evernoteSessionData.evernoteAuthToken;
-  const evernoteExpiration = !loading && evernoteSessionData.expires;
-  const isExpired = !!(!loading && Date.now() > parseInt(evernoteExpiration));
+  const evernoteAuthToken =
+    !loading && evernoteData
+      ? evernoteData.evernoteSession?.evernoteAuthToken
+      : null;
+  const evernoteExpiration =
+    !loading && evernoteData ? evernoteData.evernoteSession?.expires : null;
+  const isExpired = !!(
+    !loading &&
+    evernoteData &&
+    !evernoteData.isExpired &&
+    Date.now() > evernoteExpiration
+  );
   const isAuthenticated = !!(!loading && evernoteAuthToken && !isExpired);
 
   const [authenticateEvernote] = useMutation(AUTHENTICATE_EVERNOTE_MUTATION, {
@@ -49,6 +60,10 @@ function useEvernote() {
         window.open(authURL, '_self');
       }
     }
+  });
+
+  const [clearAuthentication] = useMutation(CLEAR_EVERNOTE_SESSION_MUTATION, {
+    update: () => refetch({ id })
   });
 
   useEffect(handleEvernoteAuthVerifier, [
@@ -67,17 +82,19 @@ function useEvernote() {
         variables: { oauthVerifier: oauth_verifier }
       });
     } else if (!evernoteAuthToken) {
-      console.log('refetching');
       refetch({ id });
     }
   }
 
+  !loading && console.log('[useEvernote]', { isAuthenticated, isExpired });
   return {
     meta: {
       bundleSize
     },
     isAuthenticated,
-    authenticateEvernote
+    loading,
+    authenticateEvernote,
+    clearAuthentication
   };
 }
 

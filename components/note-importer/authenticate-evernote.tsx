@@ -17,16 +17,21 @@ const AuthenticateEvernote: React.FC<AuthenticateEvernoteProps> = () => {
   } = data;
   const {
     authenticateEvernote,
-    isAuthenticated
-    // clearAuthentication
+    isAuthenticated,
+    clearAuthentication,
+    loading
   } = useEvernote();
+
+  if (loading) {
+    return <>Loading...</>;
+  }
 
   function handleAuthentication() {
     authenticateEvernote({ variables: { userId: id } });
   }
 
   function handleClearAuthentication() {
-    // clearAuthentication();
+    clearAuthentication();
   }
 
   return (

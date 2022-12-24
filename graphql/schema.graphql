@@ -25,6 +25,7 @@ type EvernoteSession {
   evernoteReqToken: String
   expires: String
   id: String!
+  isExpired: Boolean
   loading: Boolean
   oauthVerifier: String
   userId: String
@@ -32,6 +33,7 @@ type EvernoteSession {
 
 type Mutation {
   authenticateEvernote(oauthVerifier: String, userId: String): EvernoteSession
+  clearEvernoteSession(userId: String): EvernoteSession
 }
 
 type Query {
@@ -55,7 +57,6 @@ type Session {
 type User {
   createdAt: String
   email: String
-  evernoteSession: EvernoteSession
   id: String!
   name: String
   noteImportOffset: Int

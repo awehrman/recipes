@@ -8,6 +8,7 @@ export const AUTHENTICATE_EVERNOTE_MUTATION = gql`
     authenticateEvernote(oauthVerifier: $oauthVerifier, userId: $userId) {
       id
       expires
+      isExpired
       authURL
       oauthVerifier
       error
@@ -20,6 +21,16 @@ export const AUTHENTICATE_EVERNOTE_MUTATION = gql`
   }
 `;
 
-const all = { AUTHENTICATE_EVERNOTE_MUTATION };
+export const CLEAR_EVERNOTE_SESSION_MUTATION = gql`
+  mutation CLEAR_EVERNOTE_SESSION_MUTATION($userId: String) {
+    clearEvernoteSession(userId: $userId) {
+      id
+      isExpired
+      userId
+    }
+  }
+`;
+
+const all = { AUTHENTICATE_EVERNOTE_MUTATION, CLEAR_EVERNOTE_SESSION_MUTATION };
 
 export default all;

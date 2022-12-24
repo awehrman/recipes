@@ -5,6 +5,7 @@ export const GET_EVERNOTE_SESSION_FOR_USER_QUERY = gql`
     evernoteSession(userId: $userId) {
       id
       expires
+      isExpired
 
       authURL
       oauthVerifier

@@ -76,7 +76,7 @@ type ContentProps = {
 
 const Content = styled.article<ContentProps>`
   padding: 20px 40px;
-  background: ${({ theme }) => theme.colors.headerBackground};
+  background: #fff;
   min-height: 100vh;
   color: ${({ theme }) => theme.colors.bodyText};
   font-size: 16px;

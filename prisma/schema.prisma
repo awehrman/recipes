@@ -74,8 +74,9 @@ model VerificationToken {
 }
 
 model EvernoteSession {
-  id      String    @id @default(cuid())
-  expires DateTime?
+  id        String    @id @default(cuid())
+  expires   DateTime?
+  isExpired Boolean   @default(false)
 
   authURL       String?
   oauthVerifier String?

@@ -1,6 +1,6 @@
 import { enumType, extendType, objectType } from 'nexus';
 
-import { EvernoteSession } from './evernote-session';
+// import { EvernoteSession } from './evernote-session';
 
 export const User = objectType({
   name: 'User',

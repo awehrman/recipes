@@ -17,6 +17,7 @@ declare module 'next-auth' {
 type EvernoteSession = {
   id: string;
   expires?: string;
+  isExpired: boolean;
 
   authURL?: string;
   oauthVerifier?: string;

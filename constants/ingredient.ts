@@ -7,6 +7,8 @@ export const PROPERTY_ENUMS = [
   'GLUTEN'
 ];
 
-export default {
+const all = {
   PROPERTY_ENUMS
 };
+
+export default all;
