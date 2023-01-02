@@ -10,7 +10,7 @@ type NoteMeta = {
   id?: string;
   evernoteGUID?: string;
   title?: string;
-  source?: string;
+  source?: string | null;
   image?: string;
   // tags {
   //   id
@@ -35,7 +35,7 @@ export const getNotesMeta = async (
   console.log('getNotesMeta - resolvers');
   const { session } = ctx;
   if (!session) {
-    throw new Error('No session available'); // TODO make this a nicer error
+    throw new AuthenticationError('No evernote session available');
   }
 
   const {
@@ -51,8 +51,7 @@ export const getNotesMeta = async (
 
   try {
     const notes = await fetchNotesMeta(ctx);
-    console.log({ notes });
-    response.notes = []; // TODO
+    response.notes = notes;
   } catch (err) {
     response.error = `${err}`;
   }

@@ -33,7 +33,7 @@ export const getAuthorizedClient = (
   }
   const client = new Evernote.Client({
     token,
-    sandbox: process.env.EVERNOTE_ENVIRONMENT === 'sandbox',
+    sandbox: process.env.NEXT_PUBLIC_EVERNOTE_ENVIRONMENT === 'sandbox',
     china: false
   });
 
@@ -62,7 +62,6 @@ export const getDefaultEvernoteSessionResponse = (
 export const getEvernoteStore = async (
   session: EvernoteSession
 ): Promise<Evernote.NoteStoreClient> => {
-  console.log('getEvernoteStore', { session });
   const { evernoteAuthToken } = session;
   const client = getAuthorizedClient(`${evernoteAuthToken}`);
 
@@ -85,7 +84,6 @@ export const getInFlightSession = (
 export const isAuthenticated = async (
   session: EvernoteSession | null
 ): Promise<boolean> => {
-  console.log();
   if (!session) {
     return false;
   }
@@ -93,7 +91,6 @@ export const isAuthenticated = async (
   const isExpired = !!(new Date().getTime() > new Date(`${expires}`).getTime());
   const isAuthenticated = !!(evernoteAuthToken && !isExpired);
 
-  console.log('isAuthenticated', { isAuthenticated });
   return isAuthenticated;
 };
 

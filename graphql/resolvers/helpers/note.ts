@@ -14,6 +14,7 @@ import { getEvernoteStore } from './evernote-session';
 // import { EvernoteNoteMeta } from 'types/note';
 
 import { PrismaContext } from '../../context';
+import { AuthenticationError } from 'apollo-server-micro';
 
 export type EvernoteNoteMeta = {
   id?: string;
@@ -144,87 +145,90 @@ export const fetchNotesMeta = async (
   ctx: PrismaContext
 ): Promise<EvernoteNoteMeta[]> => {
   const { session } = ctx;
-  console.log('fetchNotesMeta', { session });
-  // const store = await getEvernoteStore(session);
-  // const session = await getSession();
-
-  // const { noteImportOffset = 0 } = session?.user ?? {};
+  if (!session) {
+    throw new AuthenticationError('No evernote session available');
+  }
+  const store = await getEvernoteStore(session.user.evernote);
+  const { noteImportOffset } = session?.user;
 
   // // fetch new note content from evernote
-  // try {
-  //   const t0 = performance.now();
+  const t0 = performance.now();
 
-  //   const notes = await store
-  //     .findNotesMetadata(
-  //       NOTE_FILTER,
-  //       noteImportOffset,
-  //       MAX_NOTES_LIMIT,
-  //       METADATA_NOTE_SPEC
-  //     )
-  //     // ensure that we haven't saved these as notes or recipes yet
-  //     // .then(async (meta: Evernote.NoteStore.NotesMetadataList) =>
-  //     //   validateNotes(ctx, store, meta?.notes ?? [])
-  //     // )
-  //     // // write our metadata to our db
-  //     // .then(async (data) => {
-  //     //   // prisma doesn't support a select statement on createMany
-  //     //   const savedMeta = await prisma.$transaction(
-  //     //     data.map((note: Note) =>
-  //     //       prisma.note.create({
-  //     //         data: {
-  //     //           title: note.title,
-  //     //           evernoteGUID: note.guid,
-  //     //           source: note?.attributes?.sourceURL
-  //     //         },
-  //     //         select: {
-  //     //           id: true,
-  //     //           title: true,
-  //     //           source: true,
-  //     //           evernoteGUID: true
-  //     //         }
-  //     //       })
-  //     //     )
-  //     //   );
+  const notes = await store
+    .findNotesMetadata(
+      NOTE_FILTER,
+      noteImportOffset ?? 0,
+      MAX_NOTES_LIMIT,
+      METADATA_NOTE_SPEC
+    )
+    // ensure that we haven't saved these as notes or recipes yet
+    .then(async (meta: Evernote.NoteStore.NotesMetadataList) => {
+      // validateNotes(ctx, store, meta?.notes ?? [])
+      console.log({ meta });
+      return meta;
+    })
+    // // write our metadata to our db
+    // .then(async (data) => {
+    //   // prisma doesn't support a select statement on createMany
+    //   const savedMeta = await prisma.$transaction(
+    //     data.map((note: Note) =>
+    //       prisma.note.create({
+    //         data: {
+    //           title: note.title,
+    //           evernoteGUID: note.guid,
+    //           source: note?.attributes?.sourceURL
+    //         },
+    //         select: {
+    //           id: true,
+    //           title: true,
+    //           source: true,
+    //           evernoteGUID: true
+    //         }
+    //       })
+    //     )
+    //   );
 
-  //     //   const noteGUIDHash = {};
-  //     //   await Promise.all(
-  //     //     data.map(async (note: NoteMeta) => {
-  //     //       if (note?.guid !== undefined) {
-  //     //         const noteMeta = savedMeta.find(
-  //     //           (meta) => meta.evernoteGUID === note.guid
-  //     //         );
-  //     //         const noteId = noteMeta.id;
+    //   const noteGUIDHash = {};
+    //   await Promise.all(
+    //     data.map(async (note: NoteMeta) => {
+    //       if (note?.guid !== undefined) {
+    //         const noteMeta = savedMeta.find(
+    //           (meta) => meta.evernoteGUID === note.guid
+    //         );
+    //         const noteId = noteMeta.id;
 
-  //     //         const relations = await resolveCategoriesAndTagsHash(
-  //     //           note,
-  //     //           noteId,
-  //     //           prisma,
-  //     //           store
-  //     //         );
-  //     //         noteGUIDHash[`${note.guid}`] = relations;
-  //     //       }
-  //     //     })
-  //     //   );
+    //         const relations = await resolveCategoriesAndTagsHash(
+    //           note,
+    //           noteId,
+    //           prisma,
+    //           store
+    //         );
+    //         noteGUIDHash[`${note.guid}`] = relations;
+    //       }
+    //     })
+    //   );
 
-  //     //   const notes = savedMeta.map((note) => {
-  //     //     const { categories, tags } = noteGUIDHash[note.evernoteGUID];
-  //     //     const response = {
-  //     //       ...note,
-  //     //       image: null
-  //     //     };
-  //     //     if (categories) {
-  //     //       response.categories = categories;
-  //     //     }
-  //     //     if (tags?.length > 0) {
-  //     //       response.tags = [...tags];
-  //     //     }
-  //     //     return response;
-  //     //   });
-  //     //   return notes;
-  //     // })
-  //     .catch((err: Error) => {
-  //       throw new Error(`Could not fetch notes metadata. ${err}`);
-  //     });
+    //   const notes = savedMeta.map((note) => {
+    //     const { categories, tags } = noteGUIDHash[note.evernoteGUID];
+    //     const response = {
+    //       ...note,
+    //       image: null
+    //     };
+    //     if (categories) {
+    //       response.categories = categories;
+    //     }
+    //     if (tags?.length > 0) {
+    //       response.tags = [...tags];
+    //     }
+    //     return response;
+    //   });
+    //   return notes;
+    // })
+    .catch((err: Error) => {
+      console.log({ err: JSON.stringify(err, null, 2) });
+
+      throw new Error(`Could not fetch notes metadata.`);
+    });
 
   //   console.log({ notes });
   //   // increment the notes offset in our session
@@ -233,10 +237,8 @@ export const fetchNotesMeta = async (
   //   // }
   //   const t1 = performance.now();
   //   console.log(`[fetchNotesMeta] took ${(t1 - t0).toFixed(2)} milliseconds.`);
+  console.log({ notes });
   return [];
-  // } catch (err) {
-  //   throw new Error(`An error occurred in fetchNotesMeta: ${err}`);
-  // }
 };
 
 // export const fetchNotesContent = async (

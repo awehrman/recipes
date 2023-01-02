@@ -54,7 +54,6 @@ type Ingredient {
   isComposedIngredient: Boolean
   isValidated: Boolean
   name: String
-  parent: Ingredient
   plural: String
   properties: [Properties]
   references: [IngredientLine]
