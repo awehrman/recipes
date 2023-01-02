@@ -49,7 +49,9 @@ export const GET_INGREDIENT_QUERY = gql`
   }
 `;
 
-export default {
+const all = {
   GET_ALL_INGREDIENTS_QUERY,
   GET_INGREDIENT_QUERY
 };
+
+export default all;

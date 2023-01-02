@@ -81,7 +81,8 @@ model EvernoteSession {
   authURL       String?
   oauthVerifier String?
   error         String?
-  loading       Boolean @default(false)
+
+  loading Boolean @default(false)
 
   evernoteAuthToken String? @map(name: "evernote_auth_token")
   evernoteReqToken  String? @map(name: "evernote_req_token")
@@ -111,8 +112,8 @@ model Ingredient {
   substitutes         Ingredient[] @relation("substitutes")
   substitutesRelation Ingredient[] @relation("substitutes")
 
-  ParsedSegment ParsedSegment[]
-  references    IngredientLine[]
+  references     IngredientLine[]
+  parsedSegments ParsedSegment[]
 
   @@map(name: "ingredients")
 }

@@ -1,13 +1,7 @@
+import { Session } from 'next-auth';
 import { PrismaClient } from '@prisma/client';
-
-import prisma from '../lib/prisma';
 
 export type PrismaContext = {
   prisma: PrismaClient;
+  session: Session | null;
 };
-
-export async function createContext(): Promise<PrismaContext> {
-  return {
-    prisma
-  };
-}

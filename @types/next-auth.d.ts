@@ -10,7 +10,7 @@ declare module 'next-auth' {
     id: string;
     noteImportOffset?: number;
     role: Role;
-    evernoteSession: EvernoteSession[];
+    evernote: EvernoteSession[];
   }
 }
 

@@ -65,7 +65,9 @@ export const NOTE_META_FIELDS = gql`
   }
 `;
 
-export default {
+const all = {
   ALL_NOTE_FIELDS,
   NOTE_META_FIELDS
 };
+
+export default all;

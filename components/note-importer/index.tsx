@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { defaultLoadingStatus } from 'constants/note';
 // import useAdminTools from 'hooks/use-admin-tools';
 import useEvernote from 'hooks/use-evernote';
-// import useNotes from 'hooks/use-notes';
+import useNotes from 'hooks/use-notes';
 
 import { Button } from '../common';
 // import Notes from '../notes';
@@ -15,15 +15,17 @@ type NoteImporterProps = {};
 
 const NoteImporter: React.FC<NoteImporterProps> = () => {
   // const { resetDatabase } = useAdminTools();
-  // const { isAuthenticated } = useEvernote();
+  const { isAuthenticated } = useEvernote();
   const [status, setStatus] = useState(defaultLoadingStatus);
-  // const { importNotes, notes = [], saveRecipes } = useNotes(status, setStatus);
-  const notes = [];
+  const { importNotes, notes = [] /*, saveRecipes */ } = useNotes(
+    status,
+    setStatus
+  );
   const isLoading = status.meta || status.content || status.parsing;
   const isSaving = status.saving;
 
   function handleImportNotes() {
-    // importNotes();
+    importNotes();
   }
 
   function handleReset() {
@@ -41,22 +43,22 @@ const NoteImporter: React.FC<NoteImporterProps> = () => {
         <AuthenticateEvernote />
 
         {/* Import Notes */}
-        {/* {isAuthenticated ? (
+        {isAuthenticated ? (
           <Button
             disabled={status.meta}
             label="Import Notes"
             onClick={handleImportNotes}
           />
-        ) : null} */}
+        ) : null}
 
-        {/* Save Recipes */}
+        {/* Save Recipes
         {notes.length > 0 && !isLoading && !isSaving ? (
           <Button
             disabled={status.saving}
             label="Save Recipes"
             onClick={handleSaveRecipes}
           />
-        ) : null}
+        ) : null} */}
 
         {/* No Notes Placeholder */}
         {/* {notes.length === 0 && !isLoading ? (

@@ -25,26 +25,14 @@ type ClearEvernoteSessionArgs = {
 };
 
 export const getEvernoteSessionForUser = async (
-  _source: unknown,
+  _root: unknown,
   args: EvernoteSessionForUserArgs,
   ctx: PrismaContext
 ): Promise<EvernoteSession> => {
   const { prisma } = ctx;
   const { userId } = args;
 
-  let response: EvernoteSession = {
-    id: v4(),
-    expires: null,
-    isExpired: false,
-    authURL: null,
-    oauthVerifier: null,
-    error: null,
-    loading: true,
-    evernoteAuthToken: null,
-    evernoteReqToken: null,
-    evernoteReqSecret: null,
-    userId
-  };
+  let response: EvernoteSession = getDefaultEvernoteSessionResponse(userId);
 
   try {
     const evernoteSessions = await prisma.evernoteSession.findMany({
@@ -70,7 +58,6 @@ export const getEvernoteSessionForUser = async (
       const now = new Date();
       const comparison =
         activeSession?.expires && !(new Date() > activeSession.expires);
-      console.log({ now, comparison, expires: activeSession?.expires });
 
       if (activeSession) {
         response = { ...activeSession, userId };
@@ -83,7 +70,7 @@ export const getEvernoteSessionForUser = async (
 };
 
 export const handleAuthenticateEvernoteSession = async (
-  _source: unknown,
+  _root: unknown,
   args: AuthenticateEvernoteSessionArgs,
   ctx: PrismaContext
 ): Promise<EvernoteSession> => {
@@ -128,7 +115,7 @@ export const handleAuthenticateEvernoteSession = async (
 };
 
 export const handleClearEvernoteSession = async (
-  _source: unknown,
+  _root: unknown,
   args: ClearEvernoteSessionArgs,
   ctx: PrismaContext
 ): Promise<EvernoteSession> => {

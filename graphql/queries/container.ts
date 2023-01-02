@@ -44,7 +44,9 @@ export const GET_CONTAINER_QUERY = gql`
   }
 `;
 
-export default {
+const all = {
   GET_ALL_CONTAINERS_QUERY,
   GET_CONTAINER_QUERY
 };
+
+export default all;

@@ -1,4 +1,4 @@
-import { enumType, extendType, objectType, scalarType } from 'nexus';
+import { objectType } from 'nexus';
 
 export const Account = objectType({
   name: 'Account',

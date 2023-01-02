@@ -25,6 +25,24 @@ export const getActiveSession = (
 ): EvernoteSession | undefined =>
   sessions.find(({ expires }) => !!(Date.now() > parseInt(`${expires}`)));
 
+export const getAuthorizedClient = (
+  token: string | undefined
+): Evernote.Client => {
+  if (!token) {
+    throw new Error('No access token provided for Evernote client!');
+  }
+  const client = new Evernote.Client({
+    token,
+    sandbox: process.env.EVERNOTE_ENVIRONMENT === 'sandbox',
+    china: false
+  });
+
+  if (!client) {
+    throw new Error('Could not create Evernote client!');
+  }
+  return client;
+};
+
 export const getDefaultEvernoteSessionResponse = (
   userId: string
 ): EvernoteSession => ({
@@ -41,12 +59,43 @@ export const getDefaultEvernoteSessionResponse = (
   userId
 });
 
+export const getEvernoteStore = async (
+  session: EvernoteSession
+): Promise<Evernote.NoteStoreClient> => {
+  console.log('getEvernoteStore', { session });
+  const { evernoteAuthToken } = session;
+  const client = getAuthorizedClient(`${evernoteAuthToken}`);
+
+  try {
+    const store = await client.getNoteStore();
+    return store;
+  } catch (err) {
+    throw new Error('Could not access Evernote store!');
+  }
+};
+
 export const getInFlightSession = (
-  sessions: EvernoteSession[] = []
+  sessions: EvernoteSession[]
 ): EvernoteSession | undefined =>
   sessions.find(
-    (session) => !!session.evernoteReqToken && !!session.evernoteReqSecret
+    (session: EvernoteSession) =>
+      !!session?.evernoteReqToken && !!session?.evernoteReqSecret
   );
+
+export const isAuthenticated = async (
+  session: EvernoteSession | null
+): Promise<boolean> => {
+  console.log();
+  if (!session) {
+    return false;
+  }
+  const { evernoteAuthToken, expires } = session;
+  const isExpired = !!(new Date().getTime() > new Date(`${expires}`).getTime());
+  const isAuthenticated = !!(evernoteAuthToken && !isExpired);
+
+  console.log('isAuthenticated', { isAuthenticated });
+  return isAuthenticated;
+};
 
 export const finalizeAuthentication = async (
   session: EvernoteSession,

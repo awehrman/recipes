@@ -8,6 +8,8 @@ export const IMPORT_LOCAL_MUTATION = gql`
   }
 `;
 
-export default {
+const all = {
   IMPORT_LOCAL_MUTATION
 };
+
+export default all;

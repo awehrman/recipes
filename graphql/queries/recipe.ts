@@ -9,6 +9,8 @@ export const GET_ALL_RECIPES_QUERY = gql`
   }
 `;
 
-export default {
+const all = {
   GET_ALL_RECIPES_QUERY
 };
+
+export default all;

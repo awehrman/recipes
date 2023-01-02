@@ -42,6 +42,8 @@ export const ALL_RECIPE_FIELDS = gql`
   }
 `;
 
-export default {
+const all = {
   ALL_RECIPE_FIELDS
 };
+
+export default all;

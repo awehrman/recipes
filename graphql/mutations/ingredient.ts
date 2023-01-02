@@ -9,6 +9,8 @@ export const SAVE_INGREDIENT_MUTATION = gql`
   }
 `;
 
-export default {
+const all = {
   SAVE_INGREDIENT_MUTATION
 };
+
+export default all;

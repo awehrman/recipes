@@ -64,8 +64,10 @@ export const GET_NOTES_COUNT_QUERY = gql`
   }
 `;
 
-export default {
+const all = {
   GET_ALL_NOTES_QUERY,
   GET_DASHBOARD_PARSING_QUERY,
   GET_NOTES_COUNT_QUERY
 };
+
+export default all;

@@ -3,7 +3,8 @@ import NextAuth, { Account, Profile, Session, User } from 'next-auth';
 import { AdapterUser } from 'next-auth/adapters';
 import { CredentialInput } from 'next-auth/providers';
 import GithubProvider from 'next-auth/providers/github';
-import type { JWT } from 'next-auth/jwt';
+
+import { getEvernoteSessionForUser } from '../../../graphql/resolvers/evernote-session';
 
 import prisma from '../../../lib/prisma';
 
@@ -20,7 +21,6 @@ type SignInProps = {
 type SessionProps = {
   session: Session;
   user: User | AdapterUser;
-  token: JWT;
 };
 
 export const authOptions = {
@@ -35,11 +35,19 @@ export const authOptions = {
   callbacks: {
     async session({ session, user }: SessionProps): Promise<Session> {
       if (session?.user) {
-        // make sure we transfer our user info to the session
         session.user = {
           ...session.user,
           ...user
         };
+
+        // pull out an active evernote session if we have one
+        const evernoteSession = await getEvernoteSessionForUser(
+          null,
+          { userId: user.id },
+          { prisma, session: null }
+        );
+
+        session.user.evernote = evernoteSession;
       }
       return session;
     },

@@ -74,7 +74,11 @@ export const SAVE_RECIPES_MUTATION = gql`
   }
 `;
 
-export default {
+const all = {
   GET_NOTES_CONTENT_MUTATION,
-  GET_NOTES_METADATA_MUTATION
+  GET_PARSED_NOTES_MUTATION,
+  GET_NOTES_METADATA_MUTATION,
+  SAVE_RECIPES_MUTATION
 };
+
+export default all;

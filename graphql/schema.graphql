@@ -17,6 +17,22 @@ type Account {
   userId: String!
 }
 
+type AlternateName {
+  ingredientId: String!
+  name: String!
+}
+
+type Category {
+  evernoteGUID: String
+  id: String!
+  name: String
+}
+
+type EvernoteNotesResponse {
+  error: String
+  notes: [Note]
+}
+
 type EvernoteSession {
   authURL: String
   error: String
@@ -31,13 +47,98 @@ type EvernoteSession {
   userId: String
 }
 
+type Ingredient {
+  alternateNames: [AlternateName]
+  createdAt: String
+  id: String!
+  isComposedIngredient: Boolean
+  isValidated: Boolean
+  name: String
+  parent: Ingredient
+  plural: String
+  properties: [Properties]
+  references: [IngredientLine]
+  relatedIngredients: [Ingredient]
+  substitutes: [Ingredient]
+  updatedAt: String
+}
+
+type IngredientLine {
+  blockIndex: Int
+  createdAt: String
+  id: String!
+  isParsed: Boolean
+  lineIndex: Int
+  parsed: [ParsedSegment]
+  reference: String
+  rule: String
+  updatedAt: String
+}
+
+type InstructionLine {
+  blockIndex: Int!
+  createdAt: String
+  id: String!
+  reference: String!
+  updatedAt: String
+}
+
 type Mutation {
   authenticateEvernote(oauthVerifier: String, userId: String): EvernoteSession
   clearEvernoteSession(userId: String): EvernoteSession
+  getNotesMeta: EvernoteNotesResponse
+}
+
+type Note {
+  categories: [Category]
+  content: String
+  createdAt: String
+  evernoteGUID: String!
+  id: String!
+  image: String
+  ingredients: [IngredientLine]
+  instructions: [InstructionLine]
+  isParsed: Boolean
+  source: String
+  tags: [Tag]
+  title: String!
+  updatedAt: String
+}
+
+type NoteMeta {
+  evernoteGUID: String!
+  id: String!
+  title: String!
+}
+
+type ParsedSegment {
+  createdAt: String
+  id: String!
+  index: Int
+  ingredient: Ingredient
+  ingredientId: String
+  ingredientLineId: String
+  rule: String
+  type: String
+  updatedAt: String
+  value: String
+}
+
+enum Properties {
+  DAIRY
+  FISH
+  GLUTEN
+  MEAT
+  POULTRY
+  SOY
 }
 
 type Query {
   evernoteSession(userId: String): EvernoteSession
+  ingredient(id: ID): Ingredient
+  ingredients: [Ingredient]
+  note(id: ID): Note
+  notes: [Note]
   users: [User]!
 }
 
@@ -52,6 +153,12 @@ type Session {
   id: String!
   sessionToken: String!
   userId: String!
+}
+
+type Tag {
+  evernoteGUID: String
+  id: String!
+  name: String
 }
 
 type User {
