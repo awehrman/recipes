@@ -1,4 +1,4 @@
-import { PrismaContext } from '../../context';
+import { AppContext } from '../../context';
 
 type IngredientLineArgs = {};
 
@@ -9,7 +9,7 @@ type IngredientLineRoot = {
 export const getIngredientLines = async (
   root: IngredientLineRoot,
   _args: IngredientLineArgs,
-  ctx: PrismaContext
+  ctx: AppContext
 ) => {
   console.log('getIngredientLines', { root });
   if (!root?.id) {

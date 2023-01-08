@@ -6,3 +6,6 @@ node_modules
 next-env.d.ts
 next.config.ts
 yarn.lock
+lib/line-parser.min.js
+lib/line-parser.js
+lib/line-parser.pegjs

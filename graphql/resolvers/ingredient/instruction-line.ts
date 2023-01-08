@@ -1,4 +1,4 @@
-import { PrismaContext } from '../../context';
+import { AppContext } from '../../context';
 
 type InstructionLineArgs = {};
 
@@ -9,7 +9,7 @@ type InstructionLineRoot = {
 export const getInstructionLines = async (
   root: InstructionLineRoot,
   _args: InstructionLineArgs,
-  ctx: PrismaContext
+  ctx: AppContext
 ) => {
   console.log('getInstructionLines', { root });
   if (!root?.id) {

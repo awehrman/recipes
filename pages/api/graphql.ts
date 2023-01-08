@@ -1,22 +1,30 @@
 import { ApolloServer } from 'apollo-server-micro';
 import { MicroRequest } from 'apollo-server-micro/dist/types';
-
-import { schema } from '../../graphql/schema';
-import { getSession } from 'next-auth/react';
-import { Session } from 'next-auth';
-import prisma from '../../lib/prisma';
-
-import { PrismaContext } from '../../graphql/context';
-
+import Evernote from 'evernote';
 import Cors from 'micro-cors';
+import { Session } from 'next-auth';
+import { getSession } from 'next-auth/react';
+
+import { AppContext } from '../../graphql/context';
+import { schema } from '../../graphql/schema';
+import prisma from '../../lib/prisma';
 
 const cors = Cors();
 
 const apolloServer = new ApolloServer({
   schema,
-  context: async (ctx: { req: MicroRequest }): Promise<PrismaContext> => {
+  context: async (ctx: { req: MicroRequest }): Promise<AppContext> => {
     const session: Session | null = (await getSession(ctx)) ?? null;
-    return { prisma, session };
+
+    // an unauthorized client used to fetch our auth keys
+    const evernoteClient = new Evernote.Client({
+      consumerKey: process.env.NEXT_PUBLIC_EVERNOTE_API_CONSUMER_KEY,
+      consumerSecret: process.env.NEXT_PUBLIC_EVERNOTE_API_CONSUMER_SECRET,
+      sandbox: process.env.NEXT_PUBLIC_EVERNOTE_ENVIRONMENT === 'sandbox',
+      china: false
+    });
+
+    return { evernoteClient, prisma, session };
   }
 });
 

@@ -2,6 +2,8 @@ import { EvernoteSession, PrismaClient } from '@prisma/client';
 import Evernote from 'evernote';
 import { v4 } from 'uuid';
 
+import { AppContext } from '../../context';
+
 type EvernoteAuthTokenProps = {
   evernoteAuthToken: string;
   expires: string;
@@ -11,14 +13,6 @@ type EvernoteRequestTokenProps = {
   evernoteReqSecret: string;
   evernoteReqToken: string;
 };
-
-// TODO should we tack this onto our main context alongside prisma?
-export const client = new Evernote.Client({
-  consumerKey: process.env.NEXT_PUBLIC_EVERNOTE_API_CONSUMER_KEY,
-  consumerSecret: process.env.NEXT_PUBLIC_EVERNOTE_API_CONSUMER_SECRET,
-  sandbox: process.env.NEXT_PUBLIC_EVERNOTE_ENVIRONMENT === 'sandbox',
-  china: false
-});
 
 export const getActiveSession = (
   sessions: EvernoteSession[] = []
@@ -31,16 +25,18 @@ export const getAuthorizedClient = (
   if (!token) {
     throw new Error('No access token provided for Evernote client!');
   }
-  const client = new Evernote.Client({
+  const authenticatedClient = new Evernote.Client({
     token,
+    consumerKey: process.env.NEXT_PUBLIC_EVERNOTE_API_CONSUMER_KEY,
+    consumerSecret: process.env.NEXT_PUBLIC_EVERNOTE_API_CONSUMER_SECRET,
     sandbox: process.env.NEXT_PUBLIC_EVERNOTE_ENVIRONMENT === 'sandbox',
     china: false
   });
 
-  if (!client) {
+  if (!authenticatedClient) {
     throw new Error('Could not create Evernote client!');
   }
-  return client;
+  return authenticatedClient;
 };
 
 export const getDefaultEvernoteSessionResponse = (
@@ -95,13 +91,18 @@ export const isAuthenticated = async (
 };
 
 export const finalizeAuthentication = async (
+  ctx: AppContext,
   session: EvernoteSession,
-  prisma: PrismaClient,
   oauthVerifier: string
 ): Promise<EvernoteSession> => {
+  const { evernoteClient, prisma } = ctx;
+  if (!session) {
+    throw new Error('No Session available');
+  }
   const { evernoteReqSecret, evernoteReqToken, id } = session;
   try {
     const { evernoteAuthToken, expires } = await requestEvernoteAuthToken(
+      evernoteClient,
       `${evernoteReqToken}`,
       `${evernoteReqSecret}`,
       oauthVerifier
@@ -126,6 +127,7 @@ export const finalizeAuthentication = async (
 };
 
 export const requestEvernoteAuthToken = (
+  evernoteClient: Evernote.Client,
   evernoteReqToken: string,
   evernoteReqSecret: string,
   oauthVerifier: string
@@ -148,7 +150,7 @@ export const requestEvernoteAuthToken = (
         expires: `${results?.edam_expires}`
       });
     };
-    client.getAccessToken(
+    evernoteClient.getAccessToken(
       `${evernoteReqToken}`,
       `${evernoteReqSecret}`,
       `${oauthVerifier}`,
@@ -156,46 +158,60 @@ export const requestEvernoteAuthToken = (
     );
   });
 
-export const requestEvernoteRequestToken =
-  (): Promise<EvernoteRequestTokenProps> =>
-    new Promise((resolve, reject) => {
-      const cb = (
-        error: { statusCode: number; data?: any },
-        evernoteReqToken: string,
-        evernoteReqSecret: string
-      ) => {
-        if (error) {
-          reject(error);
-        }
-        resolve({ evernoteReqToken, evernoteReqSecret });
-      };
-      client.getRequestToken(
-        `${process.env.NEXT_PUBLIC_EVERNOTE_OAUTH_CALLBACK}`,
-        cb
-      );
-    });
+export const requestEvernoteRequestToken = (
+  evernoteClient: Evernote.Client
+): Promise<EvernoteRequestTokenProps> =>
+  new Promise((resolve, reject) => {
+    const cb = (
+      error: { statusCode: number; data?: any },
+      evernoteReqToken: string,
+      evernoteReqSecret: string
+    ) => {
+      if (error) {
+        reject(error);
+      }
+      resolve({ evernoteReqToken, evernoteReqSecret });
+    };
+    evernoteClient.getRequestToken(
+      `${process.env.NEXT_PUBLIC_EVERNOTE_OAUTH_CALLBACK}`,
+      cb
+    );
+  });
 
 export const startAuthentication = async (
-  session: EvernoteSession,
-  prisma: PrismaClient
+  ctx: AppContext
 ): Promise<EvernoteSession> => {
+  const { evernoteClient, prisma, session } = ctx;
+
+  if (!session) {
+    throw new Error('No session available.');
+  }
   const { evernoteReqToken, evernoteReqSecret } =
-    await requestEvernoteRequestToken();
-
-  session.authURL = `${client.getAuthorizeUrl(evernoteReqToken)}` ?? null;
-  session.loading = true;
-  session.evernoteReqToken = evernoteReqToken;
-  session.evernoteReqSecret = evernoteReqSecret;
-
-  await prisma.evernoteSession.update({
-    data: {
-      authURL: `${client.getAuthorizeUrl(evernoteReqToken)}` ?? null,
+    await requestEvernoteRequestToken(evernoteClient);
+  session.user.evernote.authURL =
+    `${evernoteClient.getAuthorizeUrl(evernoteReqToken)}` ?? null;
+  session.user.evernote.loading = true;
+  session.user.evernote.evernoteReqToken = evernoteReqToken;
+  session.user.evernote.evernoteReqSecret = evernoteReqSecret;
+  const authURL = `${evernoteClient.getAuthorizeUrl(evernoteReqToken)}` ?? null;
+  await prisma.evernoteSession.upsert({
+    where: { id: session.user.evernote.id },
+    update: {
+      authURL,
       loading: true,
       evernoteReqToken,
       evernoteReqSecret
     },
-    where: { id: session.id }
+    create: {
+      authURL,
+      loading: true,
+      evernoteReqToken,
+      evernoteReqSecret,
+      user: {
+        connect: { id: session.user.id }
+      }
+    }
   });
 
-  return session;
+  return session.user.evernote;
 };

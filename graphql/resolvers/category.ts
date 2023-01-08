@@ -1,4 +1,4 @@
-import { PrismaContext } from '../context';
+import { AppContext } from '../context';
 
 type NoteCategoryArgs = {};
 
@@ -9,7 +9,7 @@ type NoteCategoryRoot = {
 export const getNoteCategories = async (
   root: NoteCategoryRoot,
   _args: NoteCategoryArgs,
-  ctx: PrismaContext
+  ctx: AppContext
 ) => {
   console.log('getNoteCategories', { root });
   if (!root?.id) {

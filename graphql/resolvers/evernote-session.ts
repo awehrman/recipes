@@ -1,7 +1,6 @@
-import { EvernoteSession } from '@prisma/client';
-import { v4 } from 'uuid';
+import { EvernoteSession, PrismaClient } from '@prisma/client';
 
-import { PrismaContext } from '../context';
+import { AppContext } from '../context';
 
 import {
   getActiveSession,
@@ -24,10 +23,14 @@ type ClearEvernoteSessionArgs = {
   userId: string;
 };
 
+type PartialAppContext = {
+  prisma: PrismaClient;
+};
+
 export const getEvernoteSessionForUser = async (
   _root: unknown,
   args: EvernoteSessionForUserArgs,
-  ctx: PrismaContext
+  ctx: PartialAppContext | AppContext
 ): Promise<EvernoteSession> => {
   const { prisma } = ctx;
   const { userId } = args;
@@ -35,18 +38,19 @@ export const getEvernoteSessionForUser = async (
   let response: EvernoteSession = getDefaultEvernoteSessionResponse(userId);
 
   try {
-    const evernoteSessions = await prisma.evernoteSession.findMany({
-      where: {
-        userId,
-        isExpired: false,
-        NOT: {
-          AND: {
-            expires: null,
-            evernoteAuthToken: null
+    const evernoteSessions: EvernoteSession[] =
+      await prisma.evernoteSession.findMany({
+        where: {
+          userId,
+          isExpired: false,
+          NOT: {
+            AND: {
+              expires: null,
+              evernoteAuthToken: null
+            }
           }
         }
-      }
-    });
+      });
 
     if (evernoteSessions.length > 0) {
       // look for an active one
@@ -72,7 +76,7 @@ export const getEvernoteSessionForUser = async (
 export const handleAuthenticateEvernoteSession = async (
   _root: unknown,
   args: AuthenticateEvernoteSessionArgs,
-  ctx: PrismaContext
+  ctx: AppContext
 ): Promise<EvernoteSession> => {
   const { prisma } = ctx;
   const { oauthVerifier = null, userId } = args;
@@ -99,7 +103,7 @@ export const handleAuthenticateEvernoteSession = async (
     // check for partial evernote session response
     const inFlightSession = !!oauthVerifier && getInFlightSession(userSessions);
     if (!!inFlightSession) {
-      return finalizeAuthentication(inFlightSession, prisma, oauthVerifier);
+      return finalizeAuthentication(ctx, inFlightSession, oauthVerifier);
     }
 
     // otherwise create a new session and start the auth process
@@ -107,7 +111,7 @@ export const handleAuthenticateEvernoteSession = async (
       data: { loading: true, user: { connect: { id: userId } } }
     });
 
-    return startAuthentication(session, prisma);
+    return startAuthentication(ctx);
   } catch (err) {
     response.error = `${err}`;
   }
@@ -117,7 +121,7 @@ export const handleAuthenticateEvernoteSession = async (
 export const handleClearEvernoteSession = async (
   _root: unknown,
   args: ClearEvernoteSessionArgs,
-  ctx: PrismaContext
+  ctx: AppContext
 ): Promise<EvernoteSession> => {
   const { prisma } = ctx;
   const { userId } = args;
@@ -143,6 +147,5 @@ export const handleClearEvernoteSession = async (
   } catch (err) {
     response.error = `${err}`;
   }
-  console.log({ response });
   return response;
 };

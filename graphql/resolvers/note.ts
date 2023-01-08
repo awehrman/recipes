@@ -1,38 +1,24 @@
-import { Note, PrismaClient } from '@prisma/client';
+import {
+  EvernoteNotesMetaResponse,
+  EvernoteNotesResponse,
+  NoteMeta,
+  NoteWithRelations
+} from '@prisma/client';
 import { AuthenticationError } from 'apollo-server-micro';
 
-import { PrismaContext } from '../context';
-import { fetchNotesMeta } from './helpers/note';
+import { AppContext } from '../context';
+import { fetchNotesMeta, fetchNotesContent } from './helpers/note';
 
 import { isAuthenticated } from './helpers/evernote-session';
-
-type NoteMeta = {
-  id?: string;
-  evernoteGUID?: string;
-  title?: string;
-  source?: string | null;
-  image?: string;
-  // tags {
-  //   id
-  //   name
-  // }
-  // categories {
-  //   id
-  //   name
-  // }
-};
-
-type EvernoteNotesResponse = {
-  error?: string;
-  notes?: NoteMeta[];
-};
+import { parseNotes } from './helpers/parser';
 
 export const getNotesMeta = async (
   _root: unknown,
   _args: unknown,
-  ctx: PrismaContext
-): Promise<EvernoteNotesResponse> => {
-  console.log('getNotesMeta - resolvers');
+  ctx: AppContext
+): Promise<EvernoteNotesMetaResponse> => {
+  console.log('[getNotesMeta]');
+  // TODO dry up this auth error section
   const { session } = ctx;
   if (!session) {
     throw new AuthenticationError('No evernote session available');
@@ -47,10 +33,45 @@ export const getNotesMeta = async (
     throw new AuthenticationError('Evernote is not authenticated');
   }
 
-  const response: EvernoteNotesResponse = {};
+  const response: EvernoteNotesMetaResponse = {
+    notes: []
+  };
 
   try {
-    const notes = await fetchNotesMeta(ctx);
+    const notes: NoteMeta[] = await fetchNotesMeta(ctx);
+    response.notes = notes;
+  } catch (err) {
+    response.error = `${err}`;
+  }
+  return response;
+};
+
+export const getNotesContent = async (
+  _root: unknown,
+  _args: unknown,
+  ctx: AppContext
+): Promise<EvernoteNotesResponse> => {
+  console.log('[getNotesContent]');
+  const { session } = ctx;
+  if (!session) {
+    throw new AuthenticationError('No evernote session available');
+  }
+
+  const {
+    user: { evernote }
+  } = session;
+  const authenticated = isAuthenticated(evernote);
+
+  if (!authenticated) {
+    throw new AuthenticationError('Evernote is not authenticated');
+  }
+
+  const response: EvernoteNotesResponse = {
+    notes: []
+  };
+
+  try {
+    const notes: NoteWithRelations[] = await fetchNotesContent(ctx);
     response.notes = notes;
   } catch (err) {
     response.error = `${err}`;
@@ -59,52 +80,38 @@ export const getNotesMeta = async (
   return response;
 };
 
-// export const getNotesContent = async (
-//   _root: unknown,
-//   _args: unknown,
-//   ctx: PrismaContext
-// ): Promise<EvernoteNotesResponse> => {
-//   const { req } = ctx;
-//   const authenticated = isAuthenticated(req);
+export const getParsedNotes = async (
+  _root: unknown,
+  _args: unknown,
+  ctx: AppContext
+): Promise<EvernoteNotesResponse> => {
+  const { prisma, session } = ctx;
+  if (!session) {
+    throw new AuthenticationError('No evernote session available');
+  }
 
-//   if (!authenticated) {
-//     throw new AuthenticationError('Evernote is not authenticated');
-//   }
+  const {
+    user: { evernote }
+  } = session;
+  const authenticated = isAuthenticated(evernote);
 
-//   const response: EvernoteNotesResponse = {};
+  if (!authenticated) {
+    throw new AuthenticationError('Evernote is not authenticated');
+  }
 
-//   try {
-//     const notes = await fetchNotesContent(ctx);
-//     response.notes = notes;
-//   } catch (err) {
-//     response.error = `${err}`;
-//   }
-//   return response;
-// };
+  const response: EvernoteNotesResponse = {
+    notes: []
+  };
 
-// export const getParsedNotes = async (
-//   _root: unknown,
-//   _args: unknown,
-//   ctx: PrismaContext
-// ): Promise<EvernoteNotesResponse> => {
-//   const { req, prisma } = ctx;
-//   const authenticated = isAuthenticated(req);
-
-//   if (!authenticated) {
-//     throw new AuthenticationError('Evernote is not authenticated');
-//   }
-
-//   const response: EvernoteNotesResponse = {};
-
-//   try {
-//     const notes = await parseNotes(prisma);
-//     response.notes = notes;
-//   } catch (err) {
-//     console.log({ err });
-//     response.error = `${err}`;
-//   }
-//   return response;
-// };
+  try {
+    const notes = await parseNotes(prisma);
+    response.notes = notes;
+  } catch (err) {
+    console.log({ err });
+    response.error = `${err}`;
+  }
+  return response;
+};
 
 // const saveRecipe = async (
 //   note: unknown,
@@ -153,7 +160,7 @@ export const getNotesMeta = async (
 // export const saveRecipes = async (
 //   _root: unknown,
 //   _args: unknown,
-//   ctx: PrismaContext
+//   ctx: AppContext
 // ): Promise<EvernoteResponse> => {
 //   const response: EvernoteResponse = {};
 //   const { prisma, req } = ctx;

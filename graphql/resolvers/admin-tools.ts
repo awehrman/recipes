@@ -1,5 +1,5 @@
 import { EvernoteSession } from '@prisma/client';
-import { PrismaContext } from '../context';
+import { AppContext } from '../context';
 
 import { getDefaultEvernoteSessionResponse } from './helpers/evernote-session';
 
@@ -10,7 +10,7 @@ type ResetDatabaseArgs = {
 export const resetDatabase = async (
   _root: unknown,
   args: ResetDatabaseArgs,
-  ctx: PrismaContext
+  ctx: AppContext
 ): Promise<EvernoteSession> => {
   const { prisma } = ctx;
   const { userId } = args;

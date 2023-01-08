@@ -48,12 +48,16 @@ export const ALL_NOTE_FIELDS = gql`
 `;
 
 export const NOTE_META_FIELDS = gql`
-  fragment NoteMetaFields on Note {
+  fragment NoteMetaFields on NoteMeta {
     id
+    createdAt
+    updatedAt
     evernoteGUID
     title
     source
     image
+    content
+    isParsed
     tags {
       id
       name

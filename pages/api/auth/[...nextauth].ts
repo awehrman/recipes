@@ -44,7 +44,7 @@ export const authOptions = {
         const evernoteSession = await getEvernoteSessionForUser(
           null,
           { userId: user.id },
-          { prisma, session: null }
+          { prisma }
         );
 
         session.user.evernote = evernoteSession;

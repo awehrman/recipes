@@ -17,7 +17,6 @@ const GET_ALL_USERS_QUERY = gql`
 
 const Dashboard: React.FC<DashboardProps> = () => {
   const { data, loading, error } = useQuery(GET_ALL_USERS_QUERY);
-  console.log({ data, loading, error });
   return <Page title="Dashboard">There&apos;s nothing here yet!</Page>;
 };
 

@@ -1,4 +1,4 @@
-import { PrismaContext } from '../context';
+import { AppContext } from '../context';
 
 type NoteTagArgs = {};
 
@@ -9,7 +9,7 @@ type NoteTagRoot = {
 export const getNoteTags = async (
   root: NoteTagRoot,
   _args: NoteTagArgs,
-  ctx: PrismaContext
+  ctx: AppContext
 ) => {
   console.log('getNoteTags', { root });
   if (!root?.id) {

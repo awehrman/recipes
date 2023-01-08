@@ -1,312 +1,322 @@
-import { PrismaClient, Category, Note, Tag } from '@prisma/client';
+import {
+  NoteMeta,
+  NoteWithRelations,
+  Prisma,
+  PrismaClient
+} from '@prisma/client';
+import { AuthenticationError } from 'apollo-server-micro';
 import Evernote from 'evernote';
-import { getSession } from 'next-auth/react';
 import { performance } from 'perf_hooks';
 
 import {
   METADATA_NOTE_SPEC,
   MAX_NOTES_LIMIT,
-  NOTE_FILTER
-  // NOTE_SPEC
+  NOTE_FILTER,
+  NOTE_SPEC
 } from 'constants/evernote';
+import { AppContext } from '../../context';
 
+import { addNewCategories } from './category';
 import { getEvernoteStore } from './evernote-session';
-// import { EvernoteNoteMeta } from 'types/note';
-
-import { PrismaContext } from '../../context';
-import { AuthenticationError } from 'apollo-server-micro';
-
-export type EvernoteNoteMeta = {
-  id?: string;
-  categories: Category[];
-  evernoteGUID: string;
-  source: string | null;
-  title: string;
-  tags: Tag[];
-};
-
-// const buildCategories = async (
-//   noteId: string,
-//   notebookGUID: string,
-//   prisma: PrismaClient,
-//   store: Evernote.NoteStoreClient
-// ): Promise<unknown> => {
-//   if (!notebookGUID) {
-//     return null;
-//   }
-
-//   // see if we have this notebookGUID locally
-//   const existing = await prisma.category.findMany({
-//     where: { evernoteGUID: notebookGUID },
-//     select: {
-//       id: true,
-//       name: true
-//     }
-//   });
-
-//   if (existing?.length > 0) {
-//     return existing[0];
-//   }
-
-//   // fetch this info from evernote
-//   const notebook = await store.getNotebook(notebookGUID);
-
-//   if (notebook) {
-//     const saved = await prisma.category.create({
-//       data: {
-//         name: `${notebook.name}`,
-//         evernoteGUID: notebook.guid,
-//         notes: { connect: [{ id: noteId }] }
-//       },
-//       select: {
-//         id: true,
-//         name: true,
-//         evernoteGUID: true
-//       }
-//     });
-//     return saved;
-//   }
-// };
-
-// const buildTags = async (
-//   noteId: string,
-//   tagGUIDs: string[],
-//   prisma: PrismaClient,
-//   store: Evernote.NoteStoreClient
-// ) => {
-//   if (!tagGUIDs?.length) {
-//     return null;
-//   }
-
-//   // see if we have this tagGUID locally
-//   const existing = await prisma.tag.findMany({
-//     where: { evernoteGUID: { in: tagGUIDs } },
-//     select: {
-//       id: true,
-//       name: true,
-//       evernoteGUID: true
-//     }
-//   });
-
-//   const tags = await Promise.all(
-//     tagGUIDs.map(async (tagGUID: string) => {
-//       const existingTag = existing.find((tag) => tag.evernoteGUID === tagGUID);
-
-//       if (existingTag) {
-//         return {
-//           id: existingTag.id,
-//           name: existingTag.name
-//         };
-//       }
-
-//       // look up the name from evernote
-//       const evernoteTag = await store.getTag(tagGUID);
-
-//       // create the tag
-//       const saved = await prisma.tag.create({
-//         data: {
-//           name: `${evernoteTag.name}`,
-//           evernoteGUID: tagGUID,
-//           notes: { connect: [{ id: noteId }] }
-//         },
-//         select: {
-//           id: true,
-//           name: true
-//         }
-//       });
-//       return saved;
-//     })
-//   );
-//   return tags;
-// };
-
-// const resolveCategoriesAndTagsHash = async (
-//   note: Note,
-//   noteId: string,
-//   prisma: PrismaClient,
-//   store: Evernote.NoteStoreClient
-// ): Promise<unknown> => {
-//   // TODO keep a hash in our session of current prisma categories and tags so that we can limit these calls
-//   const tags = await buildTags(noteId, note?.tagGuids ?? [], prisma, store);
-//   const categories = await buildCategories(
-//     noteId,
-//     note?.notebookGuid,
-//     prisma,
-//     store
-//   );
-
-//   return {
-//     categories,
-//     tags
-//   };
-// };
+import { uploadImage } from './image';
+import { parseHTML } from './parser';
+import { addNewTags } from './tag';
+import { formatInstructionLineUpsert } from './ingredient/instruction-line';
+import { formatIngredientLineUpsert } from './ingredient/ingredient-line';
 
 export const fetchNotesMeta = async (
-  ctx: PrismaContext
-): Promise<EvernoteNoteMeta[]> => {
+  ctx: AppContext,
+  offset?: number
+): Promise<NoteMeta[]> => {
   const { session } = ctx;
   if (!session) {
     throw new AuthenticationError('No evernote session available');
   }
   const store = await getEvernoteStore(session.user.evernote);
-  const { noteImportOffset } = session?.user;
+  const { noteImportOffset = 0 } = session?.user;
 
   // // fetch new note content from evernote
   const t0 = performance.now();
 
-  const notes = await store
+  console.log('offset:', offset ?? noteImportOffset);
+  const notes: NoteMeta[] = await store
     .findNotesMetadata(
       NOTE_FILTER,
-      noteImportOffset ?? 0,
+      offset ?? noteImportOffset,
       MAX_NOTES_LIMIT,
       METADATA_NOTE_SPEC
     )
-    // ensure that we haven't saved these as notes or recipes yet
-    .then(async (meta: Evernote.NoteStore.NotesMetadataList) => {
-      // validateNotes(ctx, store, meta?.notes ?? [])
-      console.log({ meta });
-      return meta;
-    })
-    // // write our metadata to our db
-    // .then(async (data) => {
-    //   // prisma doesn't support a select statement on createMany
-    //   const savedMeta = await prisma.$transaction(
-    //     data.map((note: Note) =>
-    //       prisma.note.create({
-    //         data: {
-    //           title: note.title,
-    //           evernoteGUID: note.guid,
-    //           source: note?.attributes?.sourceURL
-    //         },
-    //         select: {
-    //           id: true,
-    //           title: true,
-    //           source: true,
-    //           evernoteGUID: true
-    //         }
-    //       })
-    //     )
-    //   );
-
-    //   const noteGUIDHash = {};
-    //   await Promise.all(
-    //     data.map(async (note: NoteMeta) => {
-    //       if (note?.guid !== undefined) {
-    //         const noteMeta = savedMeta.find(
-    //           (meta) => meta.evernoteGUID === note.guid
-    //         );
-    //         const noteId = noteMeta.id;
-
-    //         const relations = await resolveCategoriesAndTagsHash(
-    //           note,
-    //           noteId,
-    //           prisma,
-    //           store
-    //         );
-    //         noteGUIDHash[`${note.guid}`] = relations;
-    //       }
-    //     })
-    //   );
-
-    //   const notes = savedMeta.map((note) => {
-    //     const { categories, tags } = noteGUIDHash[note.evernoteGUID];
-    //     const response = {
-    //       ...note,
-    //       image: null
-    //     };
-    //     if (categories) {
-    //       response.categories = categories;
-    //     }
-    //     if (tags?.length > 0) {
-    //       response.tags = [...tags];
-    //     }
-    //     return response;
-    //   });
-    //   return notes;
-    // })
+    // write our metadata to our db
+    .then(async (meta: Evernote.NoteStore.NotesMetadataList) =>
+      saveNoteMetaData(ctx, store, meta?.notes ?? [])
+    )
     .catch((err: Error) => {
-      console.log({ err: JSON.stringify(err, null, 2) });
-
       throw new Error(`Could not fetch notes metadata.`);
     });
 
-  //   console.log({ notes });
-  //   // increment the notes offset in our session
-  //   // if (notes?.length > 0) {
-  //   //   await incrementOffset(req, prisma, notes.length);
-  //   // }
-  //   const t1 = performance.now();
-  //   console.log(`[fetchNotesMeta] took ${(t1 - t0).toFixed(2)} milliseconds.`);
-  console.log({ notes });
-  return [];
+  // increment the notes offset in our session
+  await incrementOffset(ctx, notes.length);
+  const t1 = performance.now();
+  console.log(`[fetchNotesMeta] took ${(t1 - t0).toFixed(2)} milliseconds.`);
+  return notes;
 };
 
-// export const fetchNotesContent = async (
-//   ctx: PrismaContext
-// ): Promise<EvernoteNoteMeta[]> => {
-//   const { req, prisma } = ctx;
-//   const store = await getEvernoteStore(req); // TODO could we store this in session? i'd love to speed this up
+const saveNoteMetaData = async (
+  ctx: AppContext,
+  store: Evernote.NoteStoreClient,
+  notesMeta: Evernote.NoteStore.NoteMetadata[] = []
+): Promise<NoteMeta[]> => {
+  const { prisma } = ctx;
 
-//   // fetch new note content from evernote
-//   try {
-//     const t0 = performance.now();
-//     // fetch the notes lacking content
-//     const notesSansContent = await prisma.note.findMany({
-//       where: { content: null },
-//       select: {
-//         id: true,
-//         evernoteGUID: true,
-//         image: true,
-//         source: true,
-//         title: true
-//       }
-//     });
+  // TODO verify that these are indeed new notes
+  const verifiedNotesMeta = await verifyNotes(ctx, notesMeta);
+  console.log('# verified', verifiedNotesMeta.length);
 
-//     const resolveContent = notesSansContent.map(async (noteMeta) => {
-//       const { content, resources } = await store.getNoteWithResultSpec(
-//         noteMeta.evernoteGUID,
-//         NOTE_SPEC
-//       );
-//       // save image
-//       const imageBinary = resources?.[0]?.data?.body ?? '';
-//       if (!imageBinary?.length) {
-//         console.log('No image found!');
-//       }
-//       const image = await uploadImage(Buffer.from(imageBinary), {
-//         folder: 'recipes'
-//       })
-//         .then((data) => data?.secure_url)
-//         .catch((err) => {
-//           throw err;
-//         });
+  const categoriesHash = await addNewCategories(prisma, store, notesMeta);
+  const tagsHash = await addNewTags(prisma, store, notesMeta);
 
-//       // parse note content
-//       const { ingredients, instructions } = parseHTML(`${content}`, noteMeta);
+  const notes: NoteMeta[] = await prisma.$transaction(
+    notesMeta.map((meta) => {
+      const data: Prisma.NoteCreateInput = {
+        title: `${meta.title}`,
+        evernoteGUID: `${meta.guid}`,
+        source: meta?.attributes?.sourceURL ?? null
+      };
 
-//       const note = {
-//         ...noteMeta,
-//         content,
-//         image,
-//         ingredients,
-//         instructions
-//       };
+      const categoryId: string | null =
+        meta?.notebookGuid && categoriesHash?.[meta.notebookGuid]
+          ? `${categoriesHash[meta.notebookGuid]?.id}`
+          : null;
 
-//       // save new note info
-//       await saveNote(note, prisma);
+      if (categoryId) {
+        data.categories = {
+          connect: { id: categoryId }
+        };
+      }
 
-//       return note;
-//     });
+      const tagGuids: Prisma.Enumerable<Prisma.TagWhereUniqueInput> = (
+        meta.tagGuids ?? []
+      ).map((guid) => ({
+        id: `${tagsHash[guid]?.id}`
+      }));
 
-//     const notes = await Promise.all(resolveContent);
+      if (tagGuids?.length) {
+        data.tags = {
+          connect: tagGuids
+        };
+      }
 
-//     const t1 = performance.now();
-//     console.log(
-//       `[fetchNotesContent] took ${(t1 - t0).toFixed(2)} milliseconds.`
-//     );
-//     return notes;
-//   } catch (err) {
-//     throw new Error(
-//       `An error occurred in fetchNotesContent: ${JSON.stringify(err, null, 2)}`
-//     );
-//   }
-// };
+      const select = {
+        id: true,
+        title: true,
+        source: true,
+        evernoteGUID: true,
+        tags: {
+          select: {
+            id: true,
+            name: true,
+            evernoteGUID: true
+          }
+        },
+        categories: {
+          select: {
+            id: true,
+            name: true,
+            evernoteGUID: true
+          }
+        }
+      };
+
+      return prisma.note.create({
+        data,
+        select
+      });
+    })
+  );
+
+  return notes;
+};
+
+const verifyNotes = async (
+  ctx: AppContext,
+  notes: Evernote.NoteStore.NoteMetadata[]
+): Promise<Evernote.NoteStore.NoteMetadata[]> => {
+  console.log('verifyNotes');
+  const { prisma, session } = ctx;
+  const { noteImportOffset = 0 } = session?.user;
+
+  // check if we've already imported any of these notes
+  const evernoteGUIDs = notes.map((note) => `${note.guid}`);
+  const existingNotes = await prisma.note.findMany({
+    where: {
+      evernoteGUID: {
+        in: evernoteGUIDs
+      }
+    }
+  });
+
+  if (!existingNotes.length) {
+    console.log('all good; nothing new');
+    return notes;
+  }
+  const offset = noteImportOffset + existingNotes.length;
+  console.log('incrementing', offset);
+  await incrementOffset(ctx, offset);
+  const moreNotes = await fetchNotesMeta(ctx, offset);
+  console.log('moreNotes', moreNotes.length);
+  return [...moreNotes, ...notes];
+};
+
+const incrementOffset = async (
+  ctx: AppContext,
+  noteImportOffset: number
+): Promise<void> => {
+  const { prisma, session } = ctx;
+
+  if (session) {
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: {
+        noteImportOffset
+      }
+    });
+  }
+};
+
+export const fetchNotesContent = async (
+  ctx: AppContext
+): Promise<NoteWithRelations[]> => {
+  const { prisma, session } = ctx;
+  if (!session) {
+    throw new AuthenticationError('No evernote session available');
+  }
+  const store = await getEvernoteStore(session.user.evernote);
+
+  // fetch new note content from evernote
+  const t0 = performance.now();
+  // fetch the notes lacking content
+  const notesSansContent: NoteMeta[] | undefined = await prisma.note.findMany({
+    where: { content: null },
+    select: {
+      id: true,
+      createdAt: true,
+      updatedAt: true,
+      evernoteGUID: true,
+      title: true,
+      source: true,
+      image: true,
+      content: true,
+      isParsed: true,
+      categories: {
+        select: {
+          id: true,
+          name: true
+        }
+      },
+      tags: {
+        select: {
+          id: true,
+          name: true
+        }
+      }
+    }
+  });
+
+  if (!notesSansContent?.length) {
+    return [];
+  }
+  const notes = await resolveContent(notesSansContent, store, prisma);
+  const t1 = performance.now();
+  console.log(`[fetchNotesContent] took ${(t1 - t0).toFixed(2)} milliseconds.`);
+  return notes;
+};
+
+const resolveContent = async (
+  notesSansContent: NoteMeta[],
+  store: Evernote.NoteStoreClient,
+  prisma: PrismaClient
+): Promise<NoteWithRelations[]> =>
+  await Promise.all(
+    notesSansContent.map(async (noteMeta): Promise<NoteWithRelations> => {
+      const { content, resources } = await store.getNoteWithResultSpec(
+        noteMeta.evernoteGUID,
+        NOTE_SPEC
+      );
+
+      // save image
+      const imageBinary = resources?.[0]?.data?.body ?? null;
+      let image = null;
+      if (imageBinary) {
+        const buffer = Buffer.from(imageBinary);
+        const folder = { folder: 'recipes' };
+        image = await uploadImage(buffer, folder).then(
+          (data) => data?.secure_url
+        );
+      }
+
+      // parse note content
+      const { ingredients, instructions } = parseHTML(`${content}`, noteMeta);
+
+      const note: NoteWithRelations = {
+        ...noteMeta,
+        content: `${content}`,
+        image: image ? `${image}` : null,
+        ingredients,
+        instructions
+      };
+
+      // save new note info
+      await saveNote(note, prisma);
+
+      return note;
+    })
+  );
+
+export const saveNote = async (
+  note: NoteWithRelations,
+  prisma: PrismaClient
+): Promise<NoteWithRelations> => {
+  const instructions = formatInstructionLineUpsert(note.instructions);
+  const ingredients = await formatIngredientLineUpsert(
+    note.ingredients,
+    prisma
+  );
+
+  const updatedNote = await prisma.note.update({
+    data: {
+      // TODO eventually we'll add in the ability to edit these
+      // title: note.title,
+      source: note.source,
+      // // categories?:
+      // // tags?:
+      image: note.image,
+      content: note.content,
+      isParsed: true,
+      instructions,
+      ingredients
+    },
+    where: { id: note.id },
+    select: {
+      id: true,
+      source: true,
+      image: true,
+      content: true,
+      isParsed: true,
+      // TODO figure out what we actually want returned here
+      ingredients: {
+        select: {
+          id: true,
+          reference: true
+        }
+      },
+      instructions: {
+        select: {
+          id: true,
+          reference: true
+        }
+      }
+    }
+  });
+
+  return updatedNote;
+};

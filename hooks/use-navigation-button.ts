@@ -1,4 +1,4 @@
-import React, { useCallback, useLayoutEffect, useRef } from 'react';
+import React, { useCallback, useLayoutEffect } from 'react';
 
 type ThemeProps = {
   sizes: {
@@ -17,12 +17,6 @@ type ButtonProps = {
 type HookProps = {
   handleNavigationToggle: (e: React.MouseEvent) => void;
 };
-
-interface FancyButtonProps extends React.MutableRefObject<HTMLButtonElement> {
-  style?: {
-    top?: string;
-  };
-}
 
 const useNavigationButton = ({
   isExpanded,
@@ -82,7 +76,7 @@ const useNavigationButton = ({
         navRefCurrent.removeEventListener('mouseleave', handleMouseLeave);
       }
     };
-  }, [handleMouseOver, handleMouseLeave, navRef, navRefCurrent]);
+  }, [handleMouseOver, handleMouseLeave, navRefCurrent]);
 
   function handleNavigationToggle(e: React.MouseEvent) {
     e.preventDefault();

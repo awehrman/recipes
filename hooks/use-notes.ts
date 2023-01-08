@@ -1,17 +1,12 @@
-import {
-  useQuery,
-  useMutation,
-  ApolloCache,
-  FetchResult
-} from '@apollo/client';
+import { useQuery, useMutation, FetchResult } from '@apollo/client';
 import { Note } from '@prisma/client';
 
 import { GET_ALL_NOTES_QUERY } from '../graphql/queries/note';
 import {
-  GET_NOTES_METADATA_MUTATION
-  // GET_NOTES_CONTENT_MUTATION,
-  // GET_PARSED_NOTES_MUTATION,
-  // SAVE_RECIPES_MUTATION
+  GET_NOTES_METADATA_MUTATION,
+  GET_NOTES_CONTENT_MUTATION,
+  GET_PARSED_NOTES_MUTATION,
+  SAVE_RECIPES_MUTATION
 } from '../graphql/mutations/note';
 import { MAX_NOTES_LIMIT } from '../constants/evernote';
 import {
@@ -34,12 +29,6 @@ type NotesResponse = {
 type GetNotesMetaPayload = {
   error?: string | undefined;
   notes?: Note[] | undefined;
-};
-
-type EvernoteNotesMetaDataResponse = {
-  data: {
-    getNotesMeta: GetNotesMetaPayload;
-  };
 };
 
 // TODO move these
@@ -97,30 +86,32 @@ function useNotes(
   //   }
   // });
 
-  // const [getNotesContent] = useMutation(GET_NOTES_CONTENT_MUTATION, {
-  //   update: (cache, { data: { getNotesContent } }) => {
-  //     const newNotesFromResponse = getNotesContent?.notes ?? [];
+  const [getNotesContent] = useMutation(GET_NOTES_CONTENT_MUTATION, {
+    update: (cache, { data: { getNotesContent } }) => {
+      console.log({ data });
+      const notesWithContent = getNotesContent?.notes ?? [];
+      console.log({ notesWithContent });
+      if (notesWithContent.length) {
+        const data = {
+          notes: notesWithContent
+        };
+        console.log('[getNotesContent] update', { data });
+        cache.writeQuery({
+          query: GET_ALL_NOTES_QUERY,
+          data
+        });
+      }
 
-  //     if (newNotesFromResponse.length) {
-  //       const data = {
-  //         notes: newNotesFromResponse.flatMap()
-  //       };
+      const updatedStatus = { ...status };
+      updatedStatus.content = false;
+      updatedStatus.parsing = true;
+      setStatus(updatedStatus);
 
-  //       cache.writeQuery({
-  //         query: GET_ALL_NOTES_QUERY,
-  //         data
-  //       });
-  //     }
-
-  //     const updatedStatus = { ...status };
-  //     updatedStatus.content = false;
-  //     updatedStatus.parsing = true;
-  //     setStatus(updatedStatus);
-
-  //     // kick off parsing process
-  //     getParsedNotes();
-  //   }
-  // });
+      // kick off parsing process
+      console.log('TODO kick off parsing');
+      // getParsedNotes();
+    }
+  });
 
   const [getNotesMeta] = useMutation(GET_NOTES_METADATA_MUTATION, {
     optimisticResponse: {
@@ -128,47 +119,47 @@ function useNotes(
         notes: loadingSkeleton
       }
     },
-    update: (cache, { data }: FetchResult<any>) => {
-      console.log('update', { data });
-      const returnedNotes = data?.getNotesMeta?.notes ?? [];
+    update: (cache, { data: { getNotesMeta } }: FetchResult<any>) => {
+      const returnedNotes = getNotesMeta?.notes ?? [];
       const isOptimisticResponse = returnedNotes.some(
         (note: Note) => !!note.evernoteGUID.includes('loading_note_skeleton_')
       );
-      // if (isOptimisticResponse) {
-      //   console.log({ returnedNotes });
-      //   return returnedNotes;
-      // }
 
+      if (isOptimisticResponse) {
+        return returnedNotes;
+      }
+
+      console.log('update', { returnedNotes });
       const existingNotes: NotesResponse | null = cache.readQuery({
         query: GET_ALL_NOTES_QUERY
       });
 
-      // const data = {
-      //   notes: [newNotesFromResponse, ...(existingNotes?.notes ?? [])]
-      // };
+      const data = {
+        notes: [returnedNotes, ...(existingNotes?.notes ?? [])]
+      };
 
-      // // tack on skeletons
-      // if (!isOptimisticResponse) {
-      //   data.notes = loadingContent(data.notes);
-      // }
+      // tack on skeletons
+      data.notes = loadingContent(data.notes);
 
-      // if (data.notes.length > 0) {
-      //   cache.writeQuery({
-      //     query: GET_ALL_NOTES_QUERY,
-      //     data
-      //   });
+      if (data.notes.length > 0) {
+        console.log('writing cache', { data });
+        cache.writeQuery({
+          query: GET_ALL_NOTES_QUERY,
+          data
+        });
 
-      //   // kick off the next process
-      //   if (!isOptimisticResponse) {
-      //     // update status
-      //     const updatedStatus = { ...status };
-      //     updatedStatus.meta = false;
-      //     updatedStatus.content = true;
-      //     setStatus(updatedStatus);
+        // kick off the next process
+        if (!isOptimisticResponse) {
+          // update status
+          const updatedStatus = { ...status };
+          updatedStatus.meta = false;
+          updatedStatus.content = true;
+          setStatus(updatedStatus);
 
-      //     // getNotesContent();
-      // }
-      // }
+          console.log('getting notes content');
+          getNotesContent();
+        }
+      }
     }
   });
 

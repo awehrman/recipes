@@ -86,7 +86,6 @@ function useEvernote() {
     }
   }
 
-  !loading && console.log('[useEvernote]', { isAuthenticated, isExpired });
   return {
     meta: {
       bundleSize

@@ -51,7 +51,7 @@ const Navigation: React.FC<NavProps> = ({ isExpanded, setIsExpanded }) => {
   function renderLinks() {
     const linkElements = links.map((link) => (
       <li key={link.label}>
-        <Link href={link.href}>
+        <Link href={link.href} shallow>
           <IconAndLabel icon={link.icon} label={link.label} />
         </Link>
       </li>

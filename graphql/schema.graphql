@@ -28,6 +28,11 @@ type Category {
   name: String
 }
 
+type EvernoteNotesMetaResponse {
+  error: String
+  notes: [NoteMeta]
+}
+
 type EvernoteNotesResponse {
   error: String
   notes: [Note]
@@ -85,7 +90,9 @@ type InstructionLine {
 type Mutation {
   authenticateEvernote(oauthVerifier: String, userId: String): EvernoteSession
   clearEvernoteSession(userId: String): EvernoteSession
-  getNotesMeta: EvernoteNotesResponse
+  getNotesContent: EvernoteNotesResponse
+  getNotesMeta: EvernoteNotesMetaResponse
+  getParsedNotes: EvernoteNotesResponse
 }
 
 type Note {
@@ -105,9 +112,17 @@ type Note {
 }
 
 type NoteMeta {
+  categories: [Category]
+  content: String
+  createdAt: String
   evernoteGUID: String!
   id: String!
+  image: String
+  isParsed: Boolean
+  source: String
+  tags: [Tag]
   title: String!
+  updatedAt: String
 }
 
 type ParsedSegment {
