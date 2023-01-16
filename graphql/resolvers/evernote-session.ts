@@ -10,6 +10,7 @@ import {
   startAuthentication
 } from './helpers/evernote-session';
 
+// TODO move these
 type EvernoteSessionForUserArgs = {
   userId: string;
 };
@@ -58,10 +59,6 @@ export const getEvernoteSessionForUser = async (
         ({ evernoteAuthToken, expires }) =>
           evernoteAuthToken && expires && !(new Date() > expires)
       );
-
-      const now = new Date();
-      const comparison =
-        activeSession?.expires && !(new Date() > activeSession.expires);
 
       if (activeSession) {
         response = { ...activeSession, userId };

@@ -150,7 +150,7 @@ export const IngredientQuery = extendType({
       type: Ingredient,
       args: { id: idArg() },
       resolve: async (root, args, ctx) => {
-        const id = parseInt(`${args.id}`, 10);
+        const id = args.id;
         const ingredient = await ctx.prisma.ingredient.findUnique({
           where: { id },
           select: {
@@ -160,31 +160,31 @@ export const IngredientQuery = extendType({
             plural: true,
             isComposedIngredient: true,
             properties: true,
-            parent: {
-              select: {
-                id: true,
-                name: true
-              }
-            },
-            alternateNames: {
-              select: {
-                name: true
-              }
-            },
-            relatedIngredients: {
-              select: {
-                id: true,
-                name: true,
-                isValidated: true
-              }
-            },
-            substitutes: {
-              select: {
-                id: true,
-                name: true,
-                isValidated: true
-              }
-            },
+            // parent: {
+            //   select: {
+            //     id: true,
+            //     name: true
+            //   }
+            // },
+            // alternateNames: {
+            //   select: {
+            //     name: true
+            //   }
+            // },
+            // relatedIngredients: {
+            //   select: {
+            //     id: true,
+            //     name: true,
+            //     isValidated: true
+            //   }
+            // },
+            // substitutes: {
+            //   select: {
+            //     id: true,
+            //     name: true,
+            //     isValidated: true
+            //   }
+            // },
             references: {
               select: {
                 id: true,

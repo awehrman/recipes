@@ -1,24 +1,47 @@
 import { InstructionLine, Prisma } from '@prisma/client';
 
-export const formatInstructionLineUpsert = (
+type InstructionLineCreateManyNoteInputEnvelope = {
+  data: Prisma.InstructionLineCreateManyNoteInput[];
+  skipDuplicates?: boolean;
+};
+
+export const formatInstructionLinesUpsert = (
   instructions: InstructionLine[] = []
 ): Prisma.InstructionLineUpdateManyWithoutNoteNestedInput => {
-  // TODO this a pretty dumb check; will want to replace this with _.every
-  const isCreateInstructions = instructions?.[0]?.id === undefined;
+  let updateMany: Array<Prisma.InstructionLineUpdateManyWithWhereWithoutNoteInput> =
+    new Array<Prisma.InstructionLineUpdateManyWithWhereWithoutNoteInput>();
+  const data: Prisma.InstructionLineCreateManyNoteInput[] = [];
+  const createMany: InstructionLineCreateManyNoteInputEnvelope = {
+    data,
+    skipDuplicates: true
+  };
 
-  const createInstructions = instructions.map((line: InstructionLine) => ({
-    blockIndex: line.blockIndex,
-    reference: line.reference
-  }));
+  instructions.forEach((line) => {
+    if (!line?.id) {
+      data.push({
+        blockIndex: line.blockIndex,
+        reference: line.reference
+      });
+    } else {
+      updateMany.push({
+        where: { id: line.id },
+        data: {
+          blockIndex: line.blockIndex,
+          reference: line.reference
+        }
+      });
+    }
+  });
 
-  const updateInstructions = instructions.map((line: InstructionLine) => ({
-    where: { id: line.id },
-    data: { blockIndex: line.blockIndex, reference: line.reference }
-  }));
+  const response: Prisma.InstructionLineUpdateManyWithoutNoteNestedInput = {};
 
-  const upsert = isCreateInstructions
-    ? { create: createInstructions }
-    : { update: updateInstructions };
+  if (updateMany && updateMany?.length) {
+    response.updateMany = updateMany;
+  }
 
-  return upsert;
+  if (data?.length) {
+    response.createMany = createMany;
+  }
+
+  return response;
 };

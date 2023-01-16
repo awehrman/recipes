@@ -3,7 +3,7 @@ import { objectType } from 'nexus';
 export const IngredientLine = objectType({
   name: 'IngredientLine',
   definition(t) {
-    t.nonNull.string('id');
+    t.string('id');
     t.string('createdAt');
     t.string('updatedAt');
     t.int('blockIndex');

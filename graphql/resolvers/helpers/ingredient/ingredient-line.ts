@@ -1,39 +1,81 @@
-import { IngredientLine, Prisma, PrismaClient } from '@prisma/client';
+import {
+  IngredientWithAltNames,
+  IngredientLineWithParsed,
+  Prisma,
+  ParsedSegment
+} from '@prisma/client';
 
-export const formatIngredientLineUpsert = async (
-  ingredients: IngredientLine[] = [],
-  prisma: PrismaClient
-): Promise<Prisma.IngredientLineUpdateManyWithoutNoteNestedInput> => {
-  // TODO this a pretty dumb check; will want to replace this with _.every
-  const isCreateIngredients = ingredients?.[0]?.id === undefined;
-
-  const createIngredients = await createIngredientLines(ingredients, prisma);
-  const updateIngredients = await updateIngredientLines(ingredients, prisma);
-
-  const upsert = isCreateIngredients
-    ? { create: createIngredients }
-    : { update: updateIngredients };
-
-  return upsert;
+type IngredientLineCreateManyNoteInputEnvelope = {
+  data: Prisma.IngredientLineCreateManyNoteInput[];
+  skipDuplicates?: boolean;
 };
 
-const createIngredientLines = async (
-  ingredients: IngredientLine[] = [],
-  prisma: PrismaClient
-): Promise<
-  Prisma.XOR<
-    Prisma.Enumerable<Prisma.IngredientLineCreateWithoutNoteInput>,
-    Prisma.Enumerable<Prisma.IngredientLineUncheckedCreateWithoutNoteInput>
-  >
-> => {
-  return [];
+type IngredientValueHash = {
+  [value: string]: IngredientWithAltNames | null;
 };
 
-const updateIngredientLines = async (
-  ingredients: IngredientLine[] = [],
-  prisma: PrismaClient
-): Promise<
-  Prisma.Enumerable<Prisma.IngredientLineUpdateWithWhereUniqueWithoutNoteInput>
-> => {
-  return [];
+type CreateIngredientData = {
+  name: string;
+  plural?: string;
+};
+
+type IngredientHash = {
+  matchBy: string[];
+  valueHash: IngredientValueHash;
+  createData: CreateIngredientData[];
+};
+
+export const formatIngredientLinesUpsert = (
+  lines: IngredientLineWithParsed[] = [],
+  ingHash: IngredientHash
+): Prisma.IngredientLineUpdateManyWithoutNoteNestedInput => {
+  let updateMany: Array<Prisma.IngredientLineUpdateManyWithWhereWithoutNoteInput> =
+    new Array<Prisma.IngredientLineUpdateManyWithWhereWithoutNoteInput>();
+  const data: Prisma.IngredientLineCreateManyNoteInput[] = [];
+  const createMany: IngredientLineCreateManyNoteInputEnvelope = {
+    data,
+    skipDuplicates: true
+  };
+
+  lines.forEach((line: IngredientLineWithParsed, index: number) => {
+    // TODO it would be dope to put the parsed value on the fucking line in the schema
+    const ingredientValue = line?.parsed
+      ? line.parsed.find((p: ParsedSegment) => p.type === 'ingredient')?.value
+      : null;
+    const ingredientId = ingHash.valueHash?.[ingredientValue]?.id ?? null;
+    if (!line?.id) {
+      data.push({
+        blockIndex: line.blockIndex,
+        lineIndex: index,
+        reference: line.reference,
+        rule: line?.rule ?? null,
+        isParsed: !!line?.parsed,
+        ingredientId
+      });
+    } else {
+      updateMany.push({
+        where: { id: line.id },
+        data: {
+          blockIndex: line.blockIndex,
+          lineIndex: index,
+          reference: line.reference,
+          rule: line?.rule ?? null,
+          isParsed: !!line?.parsed,
+          ingredientId
+        }
+      });
+    }
+  });
+
+  const response: Prisma.IngredientLineUpdateManyWithoutNoteNestedInput = {};
+
+  if (updateMany && updateMany?.length) {
+    response.updateMany = updateMany;
+  }
+
+  if (data?.length) {
+    response.createMany = createMany;
+  }
+
+  return response;
 };

@@ -1,27 +1,31 @@
+import { useSession } from 'next-auth/react';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
 import { defaultLoadingStatus } from 'constants/note';
-// import useAdminTools from 'hooks/use-admin-tools';
+import useAdminTools from 'hooks/use-admin-tools';
 import useEvernote from 'hooks/use-evernote';
 import useNotes from 'hooks/use-notes';
 
 import { Button } from '../common';
-// import Notes from '../notes';
+import Notes from '../notes';
 
 import AuthenticateEvernote from './authenticate-evernote';
 
 type NoteImporterProps = {};
 
 const NoteImporter: React.FC<NoteImporterProps> = () => {
-  // const { resetDatabase } = useAdminTools();
+  const { data: session } = useSession();
+  const { resetDatabase } = useAdminTools();
   const { isAuthenticated } = useEvernote();
   const [status, setStatus] = useState(defaultLoadingStatus);
-  const { importNotes, notes = [] /*, saveRecipes */ } = useNotes(
-    status,
-    setStatus
-  );
-  const isLoading = status.meta || status.content || status.parsing;
+  const {
+    importNotes,
+    loading,
+    notes = [],
+    saveRecipes
+  } = useNotes(status, setStatus);
+  const isLoading = loading || status.meta || status.content;
   const isSaving = status.saving;
 
   function handleImportNotes() {
@@ -29,11 +33,13 @@ const NoteImporter: React.FC<NoteImporterProps> = () => {
   }
 
   function handleReset() {
-    // resetDatabase();
+    if (session?.user.id) {
+      resetDatabase({ variables: { userId: session.user.id } });
+    }
   }
 
   function handleSaveRecipes() {
-    // saveRecipes();
+    saveRecipes();
   }
 
   return (
@@ -51,28 +57,28 @@ const NoteImporter: React.FC<NoteImporterProps> = () => {
           />
         ) : null}
 
-        {/* Save Recipes
+        {/* Save Recipes */}
         {notes.length > 0 && !isLoading && !isSaving ? (
           <Button
             disabled={status.saving}
             label="Save Recipes"
             onClick={handleSaveRecipes}
           />
-        ) : null} */}
+        ) : null}
 
         {/* No Notes Placeholder */}
-        {/* {notes.length === 0 && !isLoading ? (
+        {notes.length === 0 && !isLoading ? (
           <Placeholder>No imported notes.</Placeholder>
-        ) : null} */}
+        ) : null}
 
         {/* Notes */}
-        {/* <Notes status={status} /> */}
+        <Notes status={status} notes={notes} />
       </NoteActions>
 
-      {/* TEMP dev shortcuts */}
-      {/* <AdminHelpers>
+      {/* dev shortcuts */}
+      <AdminHelpers>
         <Button label="reset" onClick={handleReset} type="button" />
-      </AdminHelpers> */}
+      </AdminHelpers>
     </Wrapper>
   );
 };

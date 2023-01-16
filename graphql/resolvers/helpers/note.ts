@@ -1,12 +1,14 @@
 import {
+  IngredientLineWithParsed,
+  IngredientWithAltNames,
   NoteMeta,
   NoteWithRelations,
+  ParsedSegment,
   Prisma,
   PrismaClient
 } from '@prisma/client';
 import { AuthenticationError } from 'apollo-server-micro';
 import Evernote from 'evernote';
-import { performance } from 'perf_hooks';
 
 import {
   METADATA_NOTE_SPEC,
@@ -21,8 +23,8 @@ import { getEvernoteStore } from './evernote-session';
 import { uploadImage } from './image';
 import { parseHTML } from './parser';
 import { addNewTags } from './tag';
-import { formatInstructionLineUpsert } from './ingredient/instruction-line';
-import { formatIngredientLineUpsert } from './ingredient/ingredient-line';
+import { formatInstructionLinesUpsert } from './ingredient/instruction-line';
+import { formatIngredientLinesUpsert } from './ingredient/ingredient-line';
 
 export const fetchNotesMeta = async (
   ctx: AppContext,
@@ -35,10 +37,6 @@ export const fetchNotesMeta = async (
   const store = await getEvernoteStore(session.user.evernote);
   const { noteImportOffset = 0 } = session?.user;
 
-  // // fetch new note content from evernote
-  const t0 = performance.now();
-
-  console.log('offset:', offset ?? noteImportOffset);
   const notes: NoteMeta[] = await store
     .findNotesMetadata(
       NOTE_FILTER,
@@ -46,18 +44,11 @@ export const fetchNotesMeta = async (
       MAX_NOTES_LIMIT,
       METADATA_NOTE_SPEC
     )
-    // write our metadata to our db
     .then(async (meta: Evernote.NoteStore.NotesMetadataList) =>
       saveNoteMetaData(ctx, store, meta?.notes ?? [])
-    )
-    .catch((err: Error) => {
-      throw new Error(`Could not fetch notes metadata.`);
-    });
+    );
 
-  // increment the notes offset in our session
   await incrementOffset(ctx, notes.length);
-  const t1 = performance.now();
-  console.log(`[fetchNotesMeta] took ${(t1 - t0).toFixed(2)} milliseconds.`);
   return notes;
 };
 
@@ -67,16 +58,13 @@ const saveNoteMetaData = async (
   notesMeta: Evernote.NoteStore.NoteMetadata[] = []
 ): Promise<NoteMeta[]> => {
   const { prisma } = ctx;
-
-  // TODO verify that these are indeed new notes
-  const verifiedNotesMeta = await verifyNotes(ctx, notesMeta);
-  console.log('# verified', verifiedNotesMeta.length);
+  await verifyNotes(ctx, notesMeta);
 
   const categoriesHash = await addNewCategories(prisma, store, notesMeta);
   const tagsHash = await addNewTags(prisma, store, notesMeta);
 
   const notes: NoteMeta[] = await prisma.$transaction(
-    notesMeta.map((meta) => {
+    notesMeta.map((meta: NoteMeta) => {
       const data: Prisma.NoteCreateInput = {
         title: `${meta.title}`,
         evernoteGUID: `${meta.guid}`,
@@ -94,11 +82,11 @@ const saveNoteMetaData = async (
         };
       }
 
-      const tagGuids: Prisma.Enumerable<Prisma.TagWhereUniqueInput> = (
-        meta.tagGuids ?? []
-      ).map((guid) => ({
-        id: `${tagsHash[guid]?.id}`
-      }));
+      const tagGuids: Prisma.TagWhereUniqueInput[] = (meta.tagGuids ?? []).map(
+        (guid: string) => ({
+          id: `${tagsHash[guid]?.id}`
+        })
+      );
 
       if (tagGuids?.length) {
         data.tags = {
@@ -141,12 +129,13 @@ const verifyNotes = async (
   ctx: AppContext,
   notes: Evernote.NoteStore.NoteMetadata[]
 ): Promise<Evernote.NoteStore.NoteMetadata[]> => {
-  console.log('verifyNotes');
   const { prisma, session } = ctx;
   const { noteImportOffset = 0 } = session?.user;
 
   // check if we've already imported any of these notes
-  const evernoteGUIDs = notes.map((note) => `${note.guid}`);
+  const evernoteGUIDs = notes.map(
+    (note: Evernote.NoteStore.NoteMetadata) => `${note.guid}`
+  );
   const existingNotes = await prisma.note.findMany({
     where: {
       evernoteGUID: {
@@ -156,7 +145,6 @@ const verifyNotes = async (
   });
 
   if (!existingNotes.length) {
-    console.log('all good; nothing new');
     return notes;
   }
   const offset = noteImportOffset + existingNotes.length;
@@ -192,9 +180,6 @@ export const fetchNotesContent = async (
   }
   const store = await getEvernoteStore(session.user.evernote);
 
-  // fetch new note content from evernote
-  const t0 = performance.now();
-  // fetch the notes lacking content
   const notesSansContent: NoteMeta[] | undefined = await prisma.note.findMany({
     where: { content: null },
     select: {
@@ -225,98 +210,340 @@ export const fetchNotesContent = async (
   if (!notesSansContent?.length) {
     return [];
   }
-  const notes = await resolveContent(notesSansContent, store, prisma);
-  const t1 = performance.now();
-  console.log(`[fetchNotesContent] took ${(t1 - t0).toFixed(2)} milliseconds.`);
+
+  const { parsedNotes, ingHash } = await getParsedNoteContent(
+    notesSansContent,
+    store
+  );
+  const updatedHash = await saveNoteIngredients(ingHash, prisma);
+
+  const notes = await saveNotes(parsedNotes, updatedHash, prisma);
   return notes;
 };
 
-const resolveContent = async (
-  notesSansContent: NoteMeta[],
-  store: Evernote.NoteStoreClient,
+const saveNoteIngredients = async (
+  ingHash: IngredientHash,
   prisma: PrismaClient
-): Promise<NoteWithRelations[]> =>
-  await Promise.all(
-    notesSansContent.map(async (noteMeta): Promise<NoteWithRelations> => {
-      const { content, resources } = await store.getNoteWithResultSpec(
-        noteMeta.evernoteGUID,
-        NOTE_SPEC
-      );
+): Promise<IngredientHash> => {
+  // attempt to create new ingredients; any existing should be skipped
+  await prisma.ingredient.createMany({
+    data: ingHash.createData,
+    skipDuplicates: true
+  });
 
-      // save image
-      const imageBinary = resources?.[0]?.data?.body ?? null;
-      let image = null;
-      if (imageBinary) {
-        const buffer = Buffer.from(imageBinary);
-        const folder = { folder: 'recipes' };
-        image = await uploadImage(buffer, folder).then(
-          (data) => data?.secure_url
-        );
+  const select = {
+    id: true,
+    name: true,
+    plural: true,
+    properties: true,
+    isComposedIngredient: true,
+    isValidated: true,
+    alternateNames: {
+      select: {
+        name: true
       }
+    }
+  };
 
-      // parse note content
-      const { ingredients, instructions } = parseHTML(`${content}`, noteMeta);
+  const where = {
+    OR: [
+      {
+        name: {
+          in: ingHash.matchBy
+        }
+      },
+      {
+        plural: {
+          in: ingHash.matchBy
+        }
+      },
+      {
+        alternateNames: {
+          some: {
+            name: {
+              in: ingHash.matchBy
+            }
+          }
+        }
+      }
+    ]
+  };
 
-      const note: NoteWithRelations = {
-        ...noteMeta,
-        content: `${content}`,
-        image: image ? `${image}` : null,
+  // lookup these new ingredients
+  const ingredients = await prisma.ingredient.findMany({
+    where,
+    select
+  });
+
+  // setup quick ingredient access by value
+  const valueHash: IngredientValueHash = {};
+  ingredients.forEach((ing) => {
+    valueHash[ing.name] = ing;
+    if (ing?.plural) {
+      valueHash[ing.plural] = ing;
+    }
+
+    (ing.alternateNames ?? []).forEach((alt) => {
+      valueHash[alt.name] = ing;
+    });
+  });
+  ingHash.valueHash = valueHash;
+
+  return ingHash;
+};
+
+// TODO move
+type IngredientValueHash = {
+  [value: string]: IngredientWithAltNames | null;
+};
+
+type CreateIngredientData = {
+  name: string;
+  plural?: string;
+};
+
+type IngredientHash = {
+  matchBy: string[];
+  valueHash: IngredientValueHash;
+  createData: CreateIngredientData[];
+};
+
+type CreateParsedSegment = {
+  // updatedAt: Date
+  index: number;
+  rule: string;
+  type: string;
+  value: string;
+  ingredientId: string | null;
+  ingredientLineId: string;
+};
+
+const saveNotes = async (
+  parsedNotes: NoteWithRelations[],
+  ingHash: IngredientHash,
+  prisma: PrismaClient
+): Promise<NoteWithRelations[]> => {
+  const noteIds: string[] = [];
+
+  // update notes with content, ingredients and instruction lines
+  const basicNotes: NoteWithRelations = await prisma.$transaction(
+    parsedNotes.map((note: NoteWithRelations) => {
+      noteIds.push(note.id);
+      const ingredients: Prisma.IngredientLineUpdateManyWithoutNoteNestedInput =
+        formatIngredientLinesUpsert(note.ingredients, ingHash);
+      const instructions: Prisma.InstructionLineUpdateManyWithoutNoteNestedInput =
+        formatInstructionLinesUpsert(note.instructions);
+      const data: Prisma.NoteUpdateInput = {
+        title: note.title,
+        source: note.source,
+        // categories?:
+        // tags?:
+        image: note.image,
+        content: note.content,
         ingredients,
         instructions
       };
 
-      // save new note info
-      await saveNote(note, prisma);
-
-      return note;
+      return prisma.note.update({
+        data,
+        where: { id: note.id },
+        select: {
+          id: true,
+          source: true,
+          title: true,
+          evernoteGUID: true,
+          image: true,
+          content: true,
+          isParsed: true,
+          ingredients: {
+            select: {
+              id: true,
+              reference: true,
+              blockIndex: true,
+              lineIndex: true
+            }
+          },
+          instructions: {
+            select: {
+              id: true,
+              blockIndex: true,
+              reference: true
+            }
+          }
+        }
+      });
     })
   );
 
-export const saveNote = async (
-  note: NoteWithRelations,
-  prisma: PrismaClient
-): Promise<NoteWithRelations> => {
-  const instructions = formatInstructionLineUpsert(note.instructions);
-  const ingredients = await formatIngredientLineUpsert(
-    note.ingredients,
-    prisma
-  );
+  // update the parsedSegments and link to our ingredients line
+  const data: Prisma.ParsedSegmentCreateManyInput[] = [];
 
-  const updatedNote = await prisma.note.update({
-    data: {
-      // TODO eventually we'll add in the ability to edit these
-      // title: note.title,
-      source: note.source,
-      // // categories?:
-      // // tags?:
-      image: note.image,
-      content: note.content,
-      isParsed: true,
-      instructions,
-      ingredients
+  parsedNotes.forEach((note: NoteWithRelations, noteIndex: number) => {
+    const { ingredients } = note;
+    ingredients.forEach((line: IngredientLineWithParsed, lineIndex: number) => {
+      const ingredientLineId: string | null =
+        basicNotes?.[noteIndex]?.ingredients?.[lineIndex]?.id ?? null;
+
+      if (ingredientLineId) {
+        line.parsed.forEach((parsed: ParsedSegment) => {
+          const ingredientId: string | null =
+            parsed.type === 'ingredient'
+              ? ingHash.valueHash?.[parsed.value]?.id ?? null
+              : null;
+          const segment: CreateParsedSegment = {
+            // updatedAt
+            index: parsed.index,
+            rule: parsed.rule,
+            type: parsed.type,
+            value: parsed.value,
+            ingredientId: parsed.type === 'ingredient' ? ingredientId : null,
+            ingredientLineId
+          };
+          data.push(segment);
+        });
+      }
+    });
+  });
+
+  await prisma.parsedSegment.createMany({
+    data,
+    skipDuplicates: true
+  });
+
+  // fetch updated note
+  const notes = await prisma.note.findMany({
+    where: {
+      id: {
+        in: noteIds
+      }
     },
-    where: { id: note.id },
     select: {
       id: true,
       source: true,
+      title: true,
+      evernoteGUID: true,
       image: true,
       content: true,
       isParsed: true,
-      // TODO figure out what we actually want returned here
       ingredients: {
         select: {
           id: true,
-          reference: true
+          reference: true,
+          blockIndex: true,
+          lineIndex: true,
+          parsed: {
+            select: {
+              value: true
+            }
+          },
+          // TODO go fix your schema capitalization
+          Ingredient: {
+            select: {
+              id: true,
+              isComposedIngredient: true,
+              isValidated: true
+            }
+          }
         }
       },
       instructions: {
         select: {
           id: true,
+          blockIndex: true,
           reference: true
         }
       }
     }
   });
 
-  return updatedNote;
+  return notes;
+};
+
+type NotesWithIngredients = {
+  parsedNotes: NoteWithRelations[];
+  ingHash: IngredientHash;
+};
+
+const getParsedNoteContent = async (
+  notesSansContent: NoteMeta[],
+  store: Evernote.NoteStoreClient
+): Promise<NotesWithIngredients> => {
+  const ingHash: IngredientHash = {
+    matchBy: [],
+    valueHash: {},
+    createData: []
+  };
+  const parsedNotes = await Promise.all(
+    notesSansContent.map(
+      async (noteMeta) =>
+        await getNoteContent(noteMeta, store)
+          .then((note) => parseNoteContent(note, ingHash))
+          .then((response: ParsedNoteContent) => {
+            ingHash.matchBy = [
+              ...new Set([...ingHash.matchBy, ...response.ingHash.matchBy])
+            ];
+            ingHash.valueHash = {
+              ...ingHash.valueHash,
+              ...response.ingHash.valueHash
+            };
+            ingHash.createData = [
+              ...new Set([
+                ...ingHash.createData,
+                ...response.ingHash.createData
+              ])
+            ];
+            return response.parsedNote;
+          })
+    )
+  );
+
+  return { parsedNotes, ingHash };
+};
+
+const getNoteContent = async (
+  noteMeta: NoteMeta,
+  store: Evernote.NoteStoreClient
+): Promise<NoteWithRelations> => {
+  const { content, resources } = await store.getNoteWithResultSpec(
+    noteMeta.evernoteGUID,
+    NOTE_SPEC
+  );
+
+  // get image data
+  const imageBinary = resources?.[0]?.data?.body ?? null;
+  let image = null;
+  if (imageBinary) {
+    const buffer = Buffer.from(imageBinary);
+    const folder = { folder: 'recipes' };
+    image = await uploadImage(buffer, folder).then((data) => data?.secure_url);
+  }
+
+  const note: NoteWithRelations = {
+    ...noteMeta,
+    content: `${content}`,
+    image: image ? `${image}` : null
+  };
+
+  return note;
+};
+
+type ParsedNoteContent = {
+  parsedNote: NoteWithRelations;
+  ingHash: IngredientHash;
+};
+
+const parseNoteContent = (
+  note: NoteWithRelations,
+  ingHash: IngredientHash
+): ParsedNoteContent => {
+  const response = parseHTML(note, ingHash);
+
+  return {
+    parsedNote: {
+      ...note,
+      ingredients: response.ingredients,
+      instructions: response.instructions
+    },
+    ingHash: { ...response.ingHash }
+  };
 };

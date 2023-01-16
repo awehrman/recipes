@@ -70,7 +70,7 @@ type Ingredient {
 type IngredientLine {
   blockIndex: Int
   createdAt: String
-  id: String!
+  id: String
   isParsed: Boolean
   lineIndex: Int
   parsed: [ParsedSegment]
@@ -92,7 +92,8 @@ type Mutation {
   clearEvernoteSession(userId: String): EvernoteSession
   getNotesContent: EvernoteNotesResponse
   getNotesMeta: EvernoteNotesMetaResponse
-  getParsedNotes: EvernoteNotesResponse
+  resetDatabase(userId: String): EvernoteSession
+  saveRecipes: EvernoteNotesResponse
 }
 
 type Note {
@@ -152,7 +153,7 @@ type Query {
   ingredient(id: ID): Ingredient
   ingredients: [Ingredient]
   note(id: ID): Note
-  notes: [Note]
+  notes: [Note]!
   users: [User]!
 }
 

@@ -1,12 +1,14 @@
 import {
   IngredientLine,
+  IngredientLineWithParsed,
+  IngredientWithAltNames,
   InstructionLine,
-  Note,
   NoteWithRelations,
-  PrismaClient
+  ParsedSegment
 } from '@prisma/client';
 import * as cheerio from 'cheerio';
 
+import { determinePluralization } from './ingredient';
 import Parser from '../../../lib/line-parser.min.js';
 
 /*
@@ -57,6 +59,7 @@ import Parser from '../../../lib/line-parser.min.js';
 type ParsedContent = {
   ingredients: IngredientLine[];
   instructions: InstructionLine[];
+  ingHash: IngredientHash;
 };
 
 type BlockObject = {
@@ -68,15 +71,16 @@ type BlockObject = {
 type Blocks = Array<Array<BlockObject>>;
 
 export const parseHTML = (
-  content: string,
-  note: NoteWithRelations
+  note: NoteWithRelations,
+  ingHash: IngredientHash
 ): ParsedContent => {
   let ingredients: IngredientLine[] = [];
   let instructions: InstructionLine[] = [];
+  let newHash = { ...ingHash };
 
   // load our string dom content into a cheerio object
   // this will allow us to easily traverse the DOM tree
-  const $ = cheerio.load(content);
+  const $ = cheerio.load(note.content);
   const enNote = $('en-note');
   const children =
     enNote.children('div').length === 1
@@ -126,7 +130,10 @@ export const parseHTML = (
       if (isInstructionLine) {
         instructions.push(block as InstructionLine);
       } else {
-        ingredients.push(block as IngredientLine);
+        // parse ingredient line
+        const response = parseIngredientLine(block as IngredientLine, ingHash);
+        ingredients.push(response.line);
+        newHash = { ...response.ingHash };
       }
     });
   });
@@ -143,7 +150,8 @@ export const parseHTML = (
 
   return {
     ingredients,
-    instructions
+    instructions,
+    ingHash: newHash
   };
 };
 
@@ -168,9 +176,32 @@ export const parseHTML = (
 	}
 */
 
-const parseIngredientLine = (line: BlockObject) => {
+type IngredientValueHash = {
+  [value: string]: IngredientWithAltNames | null;
+};
+
+type CreateIngredientData = {
+  name: string;
+  plural?: string;
+};
+
+type IngredientHash = {
+  matchBy: string[];
+  valueHash: IngredientValueHash;
+  createData: CreateIngredientData[];
+};
+
+type ParsedIngredientLineResult = {
+  line: IngredientLine;
+  ingHash: IngredientHash;
+};
+
+export const parseIngredientLine = (
+  line: IngredientLineWithParsed,
+  ingHash: IngredientHash
+): ParsedIngredientLineResult => {
   const reference = line.reference.trim();
-  // IngredientLine
+
   const ingredientLine = {
     ...line,
     isParsed: false,
@@ -181,134 +212,35 @@ const parseIngredientLine = (line: BlockObject) => {
   try {
     parsed = Parser.parse(reference);
     ingredientLine.isParsed = true;
-    // ingredientLine.rule = parsed.rule;
-    // ingredientLine.parsed = parsed.values.map((data, index: number) => ({
-    //   ...data,
-    //   index,
-    //   value: data.value.trim()
-    // }));
-  } catch (err) {
-    console.log(`OH FUCK! failed to parse lineIndex: ${reference}`);
-  }
-  return ingredientLine;
-};
+    ingredientLine.rule = parsed.rule;
+    ingredientLine.parsed = parsed.values.map(
+      (data: ParsedSegment, index: number) => {
+        const value = data.value.trim();
+        const { name, plural } = determinePluralization(value);
+        if (data.type === 'ingredient') {
+          const ingredient: CreateIngredientData = { name };
+          ingHash.matchBy.push(name);
+          ingHash.valueHash[name] = ingHash.valueHash?.[name] ?? null;
 
-const saveParsedNote = async (
-  note: Note,
-  prisma: PrismaClient
-): Promise<unknown> => {
-  // const ingredients: Promise<unknown> = await buildIngredientLines(
-  //   note.ingredients,
-  //   prisma
-  // );
-  // await prisma.note.update({
-  //   data: {
-  //     isParsed: true,
-  //     ingredients
-  //   },
-  //   where: { id: note.id }
-  // });
-  // const updatedIngredients = await prisma.ingredientLine.findMany({
-  //   where: { noteId: note.id },
-  //   select: {
-  //     id: true,
-  //     reference: true,
-  //     parsed: {
-  //       select: {
-  //         ingredientId: true
-  //       }
-  //     }
-  //   }
-  // });
-
-  // // TODO again this is going to need to be updated for multi ingredient lines
-  // await Promise.all(
-  //   updatedIngredients.map((line) => updateIngredientLineRelation(line, prisma))
-  // );
-
-  const savedNote = await prisma.note.findUnique({
-    where: { id: note.id },
-    select: {
-      id: true,
-      title: true,
-      isParsed: true,
-      source: true,
-      image: true,
-      ingredients: {
-        select: {
-          id: true,
-          blockIndex: true,
-          isParsed: true,
-          lineIndex: true,
-          reference: true,
-          rule: true,
-          parsed: {
-            select: {
-              id: true,
-              index: true,
-              ingredient: {
-                select: {
-                  id: true,
-                  isValidated: true,
-                  name: true
-                }
-              },
-              // rule: true,
-              type: true,
-              value: true
-            }
+          if (plural) {
+            ingredient.plural = plural;
+            ingHash.matchBy.push(plural);
+            ingHash.valueHash[plural] = ingHash.valueHash?.[plural] ?? null;
           }
+          ingHash.createData.push(ingredient as CreateIngredientData);
         }
-      },
-      instructions: {
-        select: {
-          id: true,
-          blockIndex: true,
-          reference: true
-        }
+        return {
+          ...data,
+          index,
+          value
+        };
       }
-    }
-  });
-  return savedNote;
-};
-
-export const parseNotes = async (prisma: PrismaClient): Promise<unknown[]> => {
-  // get all notes with ingredientLines
-  const notes = await prisma.note.findMany({
-    where: {
-      ingredients: {
-        some: {
-          isParsed: false
-        }
-      }
-    },
-    select: {
-      id: true,
-      ingredients: {
-        select: {
-          id: true,
-          reference: true,
-          parsed: true
-        }
-      }
-    }
-  });
-
-  // parse notes
-  const parsedNotes = notes.map((note) => {
-    // const ingredients = note.ingredients.map((line) =>
-    //   parseIngredientLine(line)
-    // );
-    return {
-      id: note.id,
-      isParsed: true,
-      ingredients: []
-    };
-  });
-
-  // const saved = await Promise.all(
-  //   parsedNotes.map((note) => saveParsedNote(note, prisma))
-  // );
-  // return saved;
-  return [];
+    );
+  } catch (err) {
+    console.log(`!!! Parsing Error !!!: ${reference}`);
+  }
+  return {
+    line: ingredientLine,
+    ingHash
+  };
 };

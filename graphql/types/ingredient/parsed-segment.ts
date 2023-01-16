@@ -14,7 +14,7 @@ export const ParsedSegment = objectType({
           return null;
         }
         const data = await ctx.prisma.ingredient.findUnique({
-          where: { id: +root.ingredientId }
+          where: { id: root.ingredientId }
         });
 
         return {
