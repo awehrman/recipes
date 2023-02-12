@@ -22,10 +22,6 @@ const AuthenticateEvernote: React.FC<AuthenticateEvernoteProps> = () => {
     loading
   } = useEvernote();
 
-  if (loading) {
-    return <>Loading...</>;
-  }
-
   function handleAuthentication() {
     authenticateEvernote({ variables: { userId: id } });
   }
@@ -36,18 +32,15 @@ const AuthenticateEvernote: React.FC<AuthenticateEvernoteProps> = () => {
 
   return (
     <>
-      {!isAuthenticated ? (
-        <StyledButton
-          label="Authenticate Evernote"
+      {!isAuthenticated && !loading ? (
+        <ConnectToEvernote
+          label="Connect to Evernote"
           onClick={handleAuthentication}
-          type="button"
         />
       ) : (
-        <StyledButton
-          className="reset"
-          label="Clear Authentication"
+        <ResetConnection
+          label="Connected"
           onClick={handleClearAuthentication}
-          type="button"
         />
       )}
     </>
@@ -57,22 +50,19 @@ const AuthenticateEvernote: React.FC<AuthenticateEvernoteProps> = () => {
 export default AuthenticateEvernote;
 
 const StyledButton = styled(Button)`
-  cursor: pointer;
+  font-size: 14px;
+  color: #ccc;
+  position: absolute;
+  right: 34px;
+  top: 70px;
+  background: transparent;
   border: 0;
-  color: white;
-  background: #73c6b6;
-  border-radius: 5px;
-  padding: 6px 10px;
-  font-size: 16px;
-  font-weight: 600;
-  margin: 0 10px 10px;
+  margin: 0;
+  cursor: pointer;
+`;
 
-  &.reset {
-    background: #ddd;
-    color: #797979;
-  }
+const ConnectToEvernote = styled(StyledButton)``;
 
-  &:first-of-type {
-    margin-left: 0;
-  }
+const ResetConnection = styled(StyledButton)`
+  color: #82c968;
 `;

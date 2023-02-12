@@ -2,12 +2,15 @@ import {
   IngredientLine,
   StatusProps,
   ParsedSegment,
-  IngredientLineWithParsed
+  IngredientLineWithParsed,
+  Ingredient,
+  IngredientWithAltNames
 } from '@prisma/client';
 import styled, { keyframes } from 'styled-components';
 import React from 'react';
 
 type IngredientsProps = {
+  noteId: string;
   ingredients: IngredientLine[];
   status: StatusProps;
 };
@@ -15,30 +18,33 @@ type IngredientsProps = {
 const sortByIndexAsc = (a: ParsedSegment, b: ParsedSegment) =>
   a?.index > b?.index ? 1 : -1;
 
+type ParsedSegmentWithIngredient = ParsedSegment & {
+  ingredient: IngredientWithAltNames;
+};
+
 const Ingredients: React.FC<IngredientsProps> = ({
+  noteId,
   ingredients = [],
   status
 }) => {
   const ingBlocks = [...new Set(ingredients.map((i) => i.blockIndex))];
 
-  function renderParsed(parsed: ParsedSegment[] = []) {
+  function renderParsed(parsed: ParsedSegmentWithIngredient[] = []) {
     const sortedParsed = parsed?.length
       ? [...parsed].sort(sortByIndexAsc)
       : parsed;
-    return sortedParsed.map((v, index) => {
+    return sortedParsed.map((v: ParsedSegmentWithIngredient, index) => {
       let ingClassName = '';
-      // TODO
-      console.log({ v });
-      // if (v.ingredient) {
-      //   ingClassName = v.ingredient.isValidated ? ' valid' : ' invalid';
-      // }
+      if (v.ingredient) {
+        ingClassName = !!v.ingredient.isValidated ? ' valid' : ' invalid';
+      }
       // if v.value starts with a comma, remove the initial space
       // TODO extend this to a lookup of allowed punctuation characters
       const hasComma = v.value[0] === ',' ? 'noSpace' : '';
 
       return (
         <span
-          key={`parsed_segment_${v.value}_${index}`}
+          key={`${noteId}_parsed_segment_${v.value}_${index}`}
           className={`${v.type} ${ingClassName} ${hasComma}`}
         >
           {v.value}
@@ -49,10 +55,11 @@ const Ingredients: React.FC<IngredientsProps> = ({
 
   function renderBlock(index: number, status: StatusProps) {
     const blockIngredients = ingredients.filter((i) => i.blockIndex === index);
-
     return blockIngredients.map((line: IngredientLineWithParsed, lineIndex) => (
       <IngredientListItem
-        key={`parsed_ingredient_block_${index}_${line?.id ?? lineIndex}`}
+        key={`${noteId}_parsed_ingredient_block_${index}_${
+          line?.id ?? lineIndex
+        }`}
         className={status.content ? 'loading' : ''}
       >
         {line.isParsed && line?.parsed ? (
@@ -67,7 +74,10 @@ const Ingredients: React.FC<IngredientsProps> = ({
   // TODO need better keys here
   function renderIngredients(status: StatusProps) {
     return ingBlocks.map((blockIndex) => (
-      <Block key={`parsed_ingredient_block_${blockIndex}`} className="block">
+      <Block
+        key={`${noteId}_parsed_ingredient_block_${blockIndex}`}
+        className="block"
+      >
         {renderBlock(blockIndex, status)}
       </Block>
     ));
@@ -92,6 +102,7 @@ const Block = styled.ul`
     margin-bottom: 20px;
   }
 `;
+
 const Parsed = styled.span`
   span {
     margin-left: 2px;
@@ -115,11 +126,18 @@ const Parsed = styled.span`
   }
 `;
 
-const IngredientList = styled.ul`
-  &&& {
-    margin-top: 20px;
-    min-height: 220px;
-    max-width: 450px;
+const IngredientList = styled.div`
+  font-size: 12px;
+  left: 00px;
+  padding: 0;
+  margin: 0;
+  flex-grow: 2;
+  flex-basis: 100%;
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
   }
 `;
 

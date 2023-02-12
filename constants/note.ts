@@ -10,6 +10,7 @@ export const loadingIngredients = [
     blockIndex: 0,
     lineIndex: 0,
     reference: null,
+    rule: null,
     parsed: [],
     isParsed: false,
     __typeName: 'IngredientLine'
@@ -19,6 +20,7 @@ export const loadingIngredients = [
     blockIndex: 1,
     lineIndex: 0,
     reference: null,
+    rule: null,
     parsed: [],
     isParsed: false,
     __typeName: 'IngredientLine'
@@ -28,6 +30,7 @@ export const loadingIngredients = [
     blockIndex: 1,
     lineIndex: 1,
     reference: null,
+    rule: null,
     parsed: [],
     isParsed: false,
     __typeName: 'IngredientLine'

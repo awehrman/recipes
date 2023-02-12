@@ -12,14 +12,14 @@ const Loader = () => (
 
 const Icon = styled.div`
   display: inline-block;
-  position: relative;
-  right: 65px;
-  top: 8px;
+  position: absolute;
+  right: 80px;
+  top: 22px;
 
   div {
     position: absolute;
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     background: #e5e5e5;
     animation-timing-function: cubic-bezier(0, 1, 1, 0);

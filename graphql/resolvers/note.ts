@@ -3,7 +3,8 @@ import {
   EvernoteNotesResponse,
   NoteMeta,
   NoteWithRelations,
-  PrismaClient
+  PrismaClient,
+  Recipe
 } from '@prisma/client';
 import { AuthenticationError } from 'apollo-server-micro';
 import { performance } from 'perf_hooks';
@@ -84,7 +85,7 @@ const saveRecipe = async (
   note: NoteWithRelations,
   prisma: PrismaClient,
   importedUserId: string
-): Promise<void> => {
+): Promise<Recipe | void> => {
   const {
     categories = [],
     evernoteGUID,
@@ -101,28 +102,30 @@ const saveRecipe = async (
   if (source) {
     sources.push(source);
   }
-  await prisma.recipe.create({
-    data: {
-      importedUserId,
-      evernoteGUID,
-      title,
-      sources,
-      image,
-      categories: {
-        connect: categories
-      },
-      tags: {
-        connect: tags
-      },
-      // TODO fix this capitalization
-      IngredientLine: {
-        connect: ingredients
-      },
-      InstructionLine: {
-        connect: instructions
+  return prisma.recipe
+    .create({
+      data: {
+        importedUserId,
+        evernoteGUID,
+        title,
+        sources,
+        image,
+        categories: {
+          connect: categories
+        },
+        tags: {
+          connect: tags
+        },
+        // TODO fix this capitalization
+        IngredientLine: {
+          connect: ingredients
+        },
+        InstructionLine: {
+          connect: instructions
+        }
       }
-    }
-  });
+    })
+    .catch((err) => console.log({ err }));
 };
 
 export const saveRecipes = async (
@@ -130,19 +133,9 @@ export const saveRecipes = async (
   _args: unknown,
   ctx: AppContext
 ): Promise<EvernoteNotesResponse> => {
+  console.log('saveRecipes');
   const { prisma, session } = ctx;
-  if (!session) {
-    throw new AuthenticationError('No evernote session available');
-  }
-
-  const {
-    user: { evernote }
-  } = session;
-  const authenticated = isAuthenticated(evernote);
-
-  if (!authenticated) {
-    throw new AuthenticationError('Evernote is not authenticated');
-  }
+  validateSession(ctx);
 
   const response: EvernoteNotesResponse = {
     notes: []
@@ -180,12 +173,13 @@ export const saveRecipes = async (
         }
       }
     });
-    const noteIds = notes.map((note) => note.id);
-
+    const noteIds = (notes ?? []).map((note) => note.id);
     // create new recipes
-    await Promise.all(
-      notes.map((note) => saveRecipe(note, prisma, session.user.id))
-    );
+    if (session) {
+      const recipes = await Promise.all(
+        notes.map((note) => saveRecipe(note, prisma, session.user.id))
+      );
+    }
 
     // remove notes
     await prisma.note.deleteMany({

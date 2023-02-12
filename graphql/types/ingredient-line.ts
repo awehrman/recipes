@@ -1,3 +1,4 @@
+import { IngredientLineWithParsed } from '@prisma/client';
 import { objectType } from 'nexus';
 
 export const IngredientLine = objectType({
@@ -10,7 +11,13 @@ export const IngredientLine = objectType({
     t.int('lineIndex');
     t.string('reference');
     t.string('rule');
-    t.boolean('isParsed');
+    // not really sure why this comes thru as undefined when just set to t.boolean
+    t.field('isParsed', {
+      type: 'Boolean',
+      resolve: async (root: IngredientLineWithParsed, _args) => {
+        return !!root?.parsed;
+      }
+    });
     t.list.field('parsed', {
       type: 'ParsedSegment',
       resolve: async (root, _args, ctx) => {

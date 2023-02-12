@@ -5,6 +5,7 @@ export const GET_ALL_NOTES_QUERY = gql`
     notes {
       id
       title
+      source
       evernoteGUID
       image
       ingredients {
@@ -20,10 +21,12 @@ export const GET_ALL_NOTES_QUERY = gql`
             isValidated
             name
           }
+          rule
           type
           value
         }
         reference
+        rule
       }
       instructions {
         id

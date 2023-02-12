@@ -36,7 +36,22 @@ const loading = keyframes`
   }
 `;
 
-const InstructionList = styled.ul``;
+const InstructionList = styled.ul`
+  overflow: scroll;
+  font-size: 12px;
+
+  min-height: 220px;
+  width: 100%;
+  position: relative;
+
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  @media (min-width: ${({ theme }) => theme.sizes.desktop_small}) {
+    width: calc(100% - 460px);
+  }
+`;
 
 const InstructionListItem = styled.li`
   margin-bottom: 12px;

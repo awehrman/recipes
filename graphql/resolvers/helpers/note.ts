@@ -218,6 +218,7 @@ export const fetchNotesContent = async (
   const updatedHash = await saveNoteIngredients(ingHash, prisma);
 
   const notes = await saveNotes(parsedNotes, updatedHash, prisma);
+
   return notes;
 };
 
@@ -360,7 +361,8 @@ const saveNotes = async (
               id: true,
               reference: true,
               blockIndex: true,
-              lineIndex: true
+              lineIndex: true,
+              isParsed: true
             }
           },
           instructions: {
@@ -431,6 +433,7 @@ const saveNotes = async (
           reference: true,
           blockIndex: true,
           lineIndex: true,
+          isParsed: true,
           parsed: {
             select: {
               value: true
