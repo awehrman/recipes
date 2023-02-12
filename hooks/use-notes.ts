@@ -26,7 +26,6 @@ function useNotes(
 
   const [getNotesContent] = useMutation(GET_NOTES_CONTENT_MUTATION, {
     update: (cache, { data: { getNotesContent } }) => {
-      console.log('[getNotesContent] update');
       const notesWithContent = getNotesContent?.notes ?? [];
       if (notesWithContent.length) {
         cache.writeQuery({
@@ -101,7 +100,6 @@ function useNotes(
           updatedStatus.meta = false;
           updatedStatus.content = true;
           setStatus(updatedStatus);
-          console.log('go get notes content');
           return getNotesContent();
         }
 
@@ -113,6 +111,7 @@ function useNotes(
 
   const [saveRecipes] = useMutation(SAVE_RECIPES_MUTATION, {
     update: (cache) => {
+      console.log('save recipes update');
       cache.writeQuery({
         query: GET_ALL_NOTES_QUERY,
         data: { notes: [] }

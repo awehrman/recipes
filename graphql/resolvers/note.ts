@@ -47,7 +47,9 @@ export const getNotesMeta = async (
     const t0 = performance.now();
     const notes: NoteMeta[] = await fetchNotesMeta(ctx);
     const t1 = performance.now();
-    console.log(`[fetchNotesMeta] took ${(t1 - t0).toFixed(2)} milliseconds.`);
+    console.log(
+      `[fetchNotesMeta] took ${((t1 - t0) / 1000).toFixed(2)} seconds.`
+    );
     response.notes = notes;
   } catch (err) {
     response.error = `${err}`;
@@ -72,7 +74,7 @@ export const getNotesContent = async (
     const notes: NoteWithRelations[] = await fetchNotesContent(ctx);
     const t1 = performance.now();
     console.log(
-      `[fetchNotesContent] took ${(t1 - t0).toFixed(2)} milliseconds.`
+      `[fetchNotesContent] took ${((t1 - t0) / 1000).toFixed(2)} seconds.`
     );
     response.notes = notes;
   } catch (err) {
@@ -102,30 +104,28 @@ const saveRecipe = async (
   if (source) {
     sources.push(source);
   }
-  return prisma.recipe
-    .create({
-      data: {
-        importedUserId,
-        evernoteGUID,
-        title,
-        sources,
-        image,
-        categories: {
-          connect: categories
-        },
-        tags: {
-          connect: tags
-        },
-        // TODO fix this capitalization
-        IngredientLine: {
-          connect: ingredients
-        },
-        InstructionLine: {
-          connect: instructions
-        }
+  return prisma.recipe.create({
+    data: {
+      importedUserId,
+      evernoteGUID,
+      title,
+      sources,
+      image,
+      categories: {
+        connect: categories
+      },
+      tags: {
+        connect: tags
+      },
+      // TODO fix this capitalization
+      IngredientLine: {
+        connect: ingredients
+      },
+      InstructionLine: {
+        connect: instructions
       }
-    })
-    .catch((err) => console.log({ err }));
+    }
+  });
 };
 
 export const saveRecipes = async (
@@ -133,7 +133,7 @@ export const saveRecipes = async (
   _args: unknown,
   ctx: AppContext
 ): Promise<EvernoteNotesResponse> => {
-  console.log('saveRecipes');
+  console.log('[saveRecipes]');
   const { prisma, session } = ctx;
   validateSession(ctx);
 
@@ -142,6 +142,7 @@ export const saveRecipes = async (
   };
 
   try {
+    const t0 = performance.now();
     // find all parsed notes
     const notes = await prisma.note.findMany({
       where: { isParsed: true },
@@ -173,10 +174,13 @@ export const saveRecipes = async (
         }
       }
     });
+    if (!notes.length) {
+      throw new Error('No unparsed notes found!');
+    }
     const noteIds = (notes ?? []).map((note) => note.id);
     // create new recipes
     if (session) {
-      const recipes = await Promise.all(
+      await Promise.all(
         notes.map((note) => saveRecipe(note, prisma, session.user.id))
       );
     }
@@ -185,6 +189,8 @@ export const saveRecipes = async (
     await prisma.note.deleteMany({
       where: { id: { in: noteIds } }
     });
+    const t1 = performance.now();
+    console.log(`[saveRecipes] took ${((t1 - t0) / 1000).toFixed(2)} seconds.`);
   } catch (err) {
     response.error = `${err}`;
   }

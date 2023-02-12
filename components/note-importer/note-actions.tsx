@@ -102,7 +102,13 @@ const SyncNotes = styled(StyledButton)`
   margin-left: -3px;
 `;
 
-const SaveNotes = styled(StyledButton)``;
+const SaveNotes = styled(StyledButton)`
+  color: ${({ theme }) => theme.colors.altGreen};
+
+  &:hover {
+    border-bottom: 2px solid ${({ theme }) => theme.colors.altGreen};
+  }
+`;
 
 const ResetNotes = styled(StyledButton)`
   color: tomato;

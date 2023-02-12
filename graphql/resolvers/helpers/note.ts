@@ -48,7 +48,7 @@ export const fetchNotesMeta = async (
       saveNoteMetaData(ctx, store, meta?.notes ?? [])
     );
 
-  await incrementOffset(ctx, notes.length);
+  await incrementOffset(ctx, (offset ?? noteImportOffset) + notes.length);
   return notes;
 };
 
@@ -162,6 +162,7 @@ const incrementOffset = async (
   const { prisma, session } = ctx;
 
   if (session) {
+    console.log('updating offset for user', noteImportOffset);
     await prisma.user.update({
       where: { id: session.user.id },
       data: {
@@ -337,12 +338,13 @@ const saveNotes = async (
       const data: Prisma.NoteUpdateInput = {
         title: note.title,
         source: note.source,
-        // categories?:
-        // tags?:
+        // TODO categories?:
+        // TODO tags?:
         image: note.image,
         content: note.content,
         ingredients,
-        instructions
+        instructions,
+        isParsed: true
       };
 
       return prisma.note.update({

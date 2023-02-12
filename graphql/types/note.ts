@@ -1,11 +1,5 @@
-import {
-  extendType,
-  FieldResolver,
-  idArg,
-  nonNull,
-  objectType,
-  stringArg
-} from 'nexus';
+import { IngredientLineWithParsed } from '@prisma/client';
+import { extendType, FieldResolver, idArg, objectType, stringArg } from 'nexus';
 
 import { getNotesMeta, getNotesContent, saveRecipes } from '../resolvers/note';
 import { resetDatabase } from '../resolvers/admin-tools';
@@ -28,7 +22,14 @@ export const Note = objectType({
     });
     t.string('image');
     t.string('content');
-    t.boolean('isParsed');
+    // t.boolean('isParsed');
+    // not really sure why this comes thru as undefined when just set to t.boolean
+    t.field('isParsed', {
+      type: 'Boolean',
+      resolve: async (root: IngredientLineWithParsed) => {
+        return !!root?.parsed;
+      }
+    });
     t.list.field('ingredients', {
       type: 'IngredientLine'
     });
@@ -55,7 +56,14 @@ export const NoteMeta = objectType({
     });
     t.string('image');
     t.string('content');
-    t.boolean('isParsed');
+    // t.boolean('isParsed');
+    // not really sure why this comes thru as undefined when just set to t.boolean
+    t.field('isParsed', {
+      type: 'Boolean',
+      resolve: async (root: IngredientLineWithParsed) => {
+        return !!root?.parsed;
+      }
+    });
   }
 });
 
