@@ -155,8 +155,8 @@ model Recipe {
   categories Category[]
   tags       Tag[]
 
-  IngredientLine  IngredientLine[]
-  InstructionLine InstructionLine[]
+  ingredientLine  IngredientLine[]
+  instructionLine InstructionLine[]
 
   @@map(name: "recipes")
 }
@@ -201,7 +201,7 @@ model IngredientLine {
   Note   Note?   @relation(fields: [noteId], references: [id])
   noteId String?
 
-  Ingredient   Ingredient? @relation(fields: [ingredientId], references: [id])
+  ingredient   Ingredient? @relation(fields: [ingredientId], references: [id])
   ingredientId String?
 
   @@map(name: "ingredient_lines")
@@ -218,7 +218,7 @@ model InstructionLine {
   note   Note?   @relation(fields: [noteId], references: [id])
   noteId String?
 
-  Recipe   Recipe? @relation(fields: [recipeId], references: [id])
+  recipe   Recipe? @relation(fields: [recipeId], references: [id])
   recipeId String?
 
   @@map(name: "instruction_lines")

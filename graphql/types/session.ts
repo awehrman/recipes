@@ -1,4 +1,4 @@
-import { enumType, extendType, objectType } from 'nexus';
+import { objectType } from 'nexus';
 
 export const Session = objectType({
   name: 'Session',

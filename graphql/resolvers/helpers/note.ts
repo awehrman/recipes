@@ -441,8 +441,7 @@ const saveNotes = async (
               value: true
             }
           },
-          // TODO go fix your schema capitalization
-          Ingredient: {
+          ingredient: {
             select: {
               id: true,
               isComposedIngredient: true,

@@ -117,11 +117,10 @@ const saveRecipe = async (
       tags: {
         connect: tags
       },
-      // TODO fix this capitalization
-      IngredientLine: {
+      ingredientLine: {
         connect: ingredients
       },
-      InstructionLine: {
+      instructionLine: {
         connect: instructions
       }
     }
