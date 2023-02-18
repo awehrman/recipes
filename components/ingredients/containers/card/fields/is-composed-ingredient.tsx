@@ -50,7 +50,6 @@ const Checkbox = styled.div`
     padding-left: 18px;
 
     input {
-      background: tomato;
       margin-right: 8px;
       position: absolute;
       top: 0;

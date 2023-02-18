@@ -23,7 +23,7 @@ import AlternateNames from './fields/alternate-names';
 
 type CardProps = {
   id: string;
-  cachedName: string;
+  cachedName: string | null;
   containerId: string;
 };
 
@@ -36,7 +36,7 @@ type FormStateProps = {
   isComposedIngredient?: boolean | undefined;
 };
 
-const Card = ({ id, cachedName, containerId }: CardProps) => {
+const Card = ({ id, cachedName = null, containerId }: CardProps) => {
   const { group, view } = useContext(ViewContext);
   const [isEditMode, setIsEditMode] = useState(view === 'new');
   const { getNextIngredient, onIngredientClick } = useContainers({
@@ -49,14 +49,14 @@ const Card = ({ id, cachedName, containerId }: CardProps) => {
   const defaultProperties = useMemo(() => {
     const props: any = {};
     PROPERTY_ENUMS.forEach((key) => {
-      props[`properties_${key}`] = properties.includes(key);
+      props[`properties_${key}`] = (properties ?? []).includes(key);
     });
     return props;
   }, [properties]);
 
   const getDefaultValues = useCallback(
     () => ({
-      name: !loading ? name : cachedName,
+      name: !loading ? name : cachedName ?? '',
       plural,
       isComposedIngredient,
       properties: defaultProperties

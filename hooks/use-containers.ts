@@ -58,13 +58,21 @@ function useContainers({ group = 'name', view = 'all' }) {
     name: string | null,
     shouldRefetch: boolean = false
   ) {
+    console.log('[use-containers] onIngredientClick', {
+      variables: {
+        id: `${containerId}`,
+        currentIngredientId: ingredientId,
+        currentIngredientName: name
+      }
+    });
     toggleContainerIngredient({
       variables: {
         id: `${containerId}`,
         currentIngredientId: ingredientId,
-        currentIngredientNam: name
+        currentIngredientName: name
       },
       update: (cache) => {
+        console.log('update', { shouldRefetch });
         if (shouldRefetch) {
           const res: ContainersQueryProps | null = cache.readQuery({
             query: GET_ALL_CONTAINERS_QUERY,
@@ -75,6 +83,7 @@ function useContainers({ group = 'name', view = 'all' }) {
             currentIngredientId: ingredientId,
             currentIngredientName: name
           }));
+          console.log({ updated });
           cache.writeQuery({
             query: GET_ALL_CONTAINERS_QUERY,
             variables: { group, view },

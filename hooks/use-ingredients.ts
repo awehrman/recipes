@@ -19,7 +19,7 @@ function useIngredients() {
 
   const ingredientsCount = !loading ? ingredients.length : 0;
   const newIngredientsCount = !loading
-    ? ingredients.filter((ing: Ingredient) => ing.isValidated).length
+    ? ingredients.filter((ing: Ingredient) => !ing.isValidated).length
     : 0;
 
   return {

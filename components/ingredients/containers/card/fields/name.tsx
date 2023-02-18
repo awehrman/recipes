@@ -17,14 +17,16 @@ const Name = () => {
   const { ingredient, loading } = useIngredient({ id });
   const { name } = ingredient;
 
-  const registerField = register('name', {
-    minLength: 1,
-    validate: {
-      validateLocalFields: (data: string) =>
-        localFields(data, 'name', formState, ingredient)
-      // validateAllIngredients,
-    }
-  });
+  const registerField = ingredient
+    ? register('name', {
+        minLength: 1,
+        validate: {
+          validateLocalFields: (data: string) =>
+            localFields(data, 'name', formState, ingredient)
+          // validateAllIngredients,
+        }
+      })
+    : null;
 
   return (
     <Wrapper aria-busy={loading} disabled={loading}>
@@ -46,7 +48,6 @@ export default Name;
 
 const Wrapper = styled.fieldset`
   order: 0;
-  background: yellow
   display: flex;
   flex-grow: 2;
   flex-basis: 50%;

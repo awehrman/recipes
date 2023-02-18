@@ -38,7 +38,7 @@ const CardList = ({ container, onIngredientClick }: CardListProps) => {
     if (index === 0) {
       // push text to the bottom
       style.display = 'flex';
-      style['align-items'] = 'flex-end';
+      // style['align-items'] = 'flex-end';
     }
 
     return (
@@ -85,7 +85,7 @@ const CardList = ({ container, onIngredientClick }: CardListProps) => {
       {/* Ingredient Card */}
       <Card
         id={`${currentIngredientId}`}
-        cachedName={`${currentIngredientName}`}
+        cachedName={currentIngredientName}
         containerId={`${container.id}`}
       />
     </Wrapper>

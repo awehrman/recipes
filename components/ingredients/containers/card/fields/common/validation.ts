@@ -20,6 +20,9 @@ export const localFields = (
   formState: DeepPartialSkipArrayKey<FormStateProps>,
   ingredient: IngredientWithRelations
 ): boolean => {
+  if (data === 'null' || !data) {
+    return true;
+  }
   // see if this string is used in any other form fields
   if (fieldName !== 'name') {
     const name = formState?.name ?? ingredient?.name ?? null;
@@ -36,18 +39,18 @@ export const localFields = (
     }
   }
 
-  if (fieldName !== 'alternateNames') {
-    // TODO
-    // const matchesOnEdits = !!(formState?.alternateNames ?? []).find(
-    //   (n: AlternateName) => n.name === data
-    // );
-    // const matchesOnIngredient = !!(ingredient?.alternateNames ?? []).find(
-    //   (n: AlternateName) => n.name === data
-    // );
-    // if (matchesOnEdits || matchesOnIngredient) {
-    return false;
-    // }
-  }
+  // if (fieldName !== 'alternateNames') {
+  //   // TODO
+  //   // const matchesOnEdits = !!(formState?.alternateNames ?? []).find(
+  //   //   (n: AlternateName) => n.name === data
+  //   // );
+  //   // const matchesOnIngredient = !!(ingredient?.alternateNames ?? []).find(
+  //   //   (n: AlternateName) => n.name === data
+  //   // );
+  //   // if (matchesOnEdits || matchesOnIngredient) {
+  //   return false;
+  //   // }
+  // }
 
   return true;
 };

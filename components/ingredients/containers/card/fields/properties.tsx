@@ -4,8 +4,31 @@ import styled from 'styled-components';
 import { PROPERTY_ENUMS } from 'constants/ingredient';
 import CardContext from 'contexts/card-context';
 
+const capitalize = (str: string) => {
+  return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : '';
+};
+
 type PropertyProps = {
-  property: string;
+  property: PropertyOptions;
+};
+
+type PropertyOptions = 'DAIRY' | 'FISH' | 'GLUTEN' | 'MEAT' | 'POULTRY' | 'SOY';
+
+type PropertyKeyNames =
+  | 'properties_DAIRY'
+  | 'properties_FISH'
+  | 'properties_GLUTEN'
+  | 'properties_MEAT'
+  | 'properties_POULTRY'
+  | 'properties_SOY';
+
+type PropertyChecks = {
+  properties_DAIRY?: boolean;
+  properties_FISH?: boolean;
+  properties_GLUTEN?: boolean;
+  properties_MEAT?: boolean;
+  properties_POULTRY?: boolean;
+  properties_SOY?: boolean;
 };
 
 const Property = ({ property }: PropertyProps) => {
@@ -16,7 +39,8 @@ const Property = ({ property }: PropertyProps) => {
   } = useContext(CardContext);
   const { properties } = formState;
   const registerField = register(`properties.properties_${property}`);
-  const defaultChecked = {}; // TODO properties && properties[`properties_${property}`];
+  const propertyKey: PropertyKeyNames = `properties_${property}`;
+  const defaultChecked = (properties as PropertyChecks)[propertyKey];
 
   return (
     <Checkbox className={isEditMode ? 'editable' : ''}>
@@ -28,8 +52,7 @@ const Property = ({ property }: PropertyProps) => {
           type="checkbox"
           {...registerField}
         />
-        {/* TODO capitalize */}
-        <span>{property}</span>
+        <span>{capitalize(property)}</span>
       </label>
     </Checkbox>
   );
@@ -41,13 +64,15 @@ const Properties = () => {
   function renderProperties() {
     let propertyKeys = PROPERTY_ENUMS;
     if (!isEditMode) {
-      // TODO
-      // propertyKeys = propertyKeys.filter(
-      //   (key) => properties && properties[`properties_${key}`]
-      // );
+      propertyKeys = propertyKeys.filter(
+        (key) =>
+          (properties as PropertyChecks)[
+            `properties_${key}` as PropertyKeyNames
+          ]
+      );
     }
     return propertyKeys.map((property) => (
-      <Property key={property} property={property} />
+      <Property key={property} property={property as PropertyOptions} />
     ));
   }
 
@@ -78,7 +103,6 @@ const Checkbox = styled.div`
     padding-left: 18px;
 
     input {
-      background: tomato;
       margin-right: 8px;
       position: absolute;
       top: 0;

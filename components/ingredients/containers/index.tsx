@@ -22,22 +22,26 @@ const Containers: React.FC = () => {
 
   useEffect(() => {
     if (query?.id && !loading) {
+      console.log('>>>>> useEffect', { query, loading });
       const container = containers.find((ctn) => {
         const found = ctn.ingredients.find((ing) => ing.id === query.id);
         return found;
       });
+      console.log({ container, query });
       if (
         container &&
         (!container?.currentIngredientId ||
           container.currentIngredientId !== query.id)
       ) {
+        console.log('calling again?');
         onIngredientClick(
-          `${container?.currentIngredientId}`,
-          `${query.id}`,
+          `${container?.id}`,
+          query?.id ? `${query.id}` : null,
           null,
           true
         );
       } else if (container?.currentIngredientId === query.id) {
+        console.log('close out containers');
         router.replace(
           '/ingredients',
           `/ingredients?group=${group}&view=${view}`,

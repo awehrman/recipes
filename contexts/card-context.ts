@@ -1,4 +1,4 @@
-import { AlternateName, Properties } from '@prisma/client';
+import { AlternateName } from '@prisma/client';
 import React from 'react';
 import {
   Control,
@@ -7,13 +7,24 @@ import {
   FieldValues
 } from 'react-hook-form';
 
+type PropertyChecks = {
+  properties_DAIRY: boolean;
+  properties_FISH: boolean;
+  properties_GLUTEN: boolean;
+  properties_MEAT: boolean;
+  properties_POULTRY: boolean;
+  properties_SOY: boolean;
+};
+
+type PropertyOptions = 'DAIRY' | 'FISH' | 'GLUTEN' | 'MEAT' | 'POULTRY' | 'SOY';
+
 type FormStateProps = {
   errors?: FieldErrors<FormStateProps>;
   id?: string | undefined;
   name?: string | undefined;
   plural?: string | undefined;
   alternateNames?: AlternateName[] | undefined;
-  properties?: Properties[] | undefined;
+  properties?: PropertyOptions[];
   isComposedIngredient?: boolean | undefined;
 };
 

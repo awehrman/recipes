@@ -39,23 +39,28 @@ const ListItem = ({
     event: React.MouseEvent<HTMLElement>,
     ingredientId: string
   ) {
+    console.log('handleIngredientClick');
     event.stopPropagation();
 
     // TODO consider passing the currentIngId to this mutation
     // and let the resolver do this logic
-    const showHideIngredientId =
+    const optionalId =
       `${container.currentIngredientId}` === `${ingredientId}`
         ? null
         : `${ingredientId}`;
-    const showHideIngredientName =
+    const optionalName =
       `${container.currentIngredientId}` === `${ingredientId}`
         ? null
         : `${ingredient.name}`;
+
+    const shouldRefetch =
+      `${container.currentIngredientId}` === `${ingredientId}`;
+    console.log(`${container.id}`, optionalId, optionalName, shouldRefetch);
     onIngredientClick(
       `${container.id}`,
-      showHideIngredientId,
-      showHideIngredientName,
-      false
+      optionalId,
+      optionalName,
+      shouldRefetch
     );
   }
 
@@ -71,19 +76,17 @@ const ListItem = ({
     return { pathname: '/ingredients', query };
   }
 
+  const href = getIngredientLink(ingredient.id);
   return (
     <Wrapper className={className}>
-      <IngredientLink href={getIngredientLink(ingredient.id)}>
-        {/* <a
-          onClick={(e: React.MouseEvent<HTMLElement>) =>
-            handleIngredientClick(e, ingredient.id)
-          }
-          // onKeyPress={handleIngredientClick}
-          role="link"
-          tabIndex={0}
-        > */}
+      <IngredientLink
+        passHref
+        href={href}
+        onClick={(e) => handleIngredientClick(e, ingredient.id)}
+        role="link"
+        tabIndex={0}
+      >
         {ingredient.name}
-        {/* </a> */}
       </IngredientLink>
     </Wrapper>
   );

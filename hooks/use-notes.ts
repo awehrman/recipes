@@ -45,7 +45,7 @@ function useNotes(
     optimisticResponse: {
       getNotesMeta: {
         notes: new Array(MAX_NOTES_LIMIT).fill(null).map((_empty, index) => ({
-          __typename: 'NoteMeta',
+          // __typename: 'NoteMeta',
           id: `${index}-optimistic-note`,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -69,15 +69,15 @@ function useNotes(
       const adjustedNotes = isOptimisticResponse
         ? returnedNotes.map((note: NoteWithRelations) => ({
             ...note,
-            __typename: 'Note',
+            // __typename: 'Note',
             ingredients: [],
             instructions: []
           }))
         : returnedNotes.map((note: NoteWithRelations) => ({
             ingredients: [],
             instructions: [],
-            ...note,
-            __typename: 'Note'
+            ...note
+            // __typename: 'Note'
           }));
       const existingNotes: NotesResponse | null = cache.readQuery({
         query: GET_ALL_NOTES_QUERY
