@@ -28,6 +28,16 @@ type Category {
   name: String
 }
 
+type Container {
+  count: Int
+  currentIngredientId: String
+  currentIngredientName: String
+  id: String
+  ingredients: [Ingredient]
+  isExpanded: Boolean
+  name: String
+}
+
 type EvernoteNotesMetaResponse {
   error: String
   notes: [NoteMeta]
@@ -59,6 +69,7 @@ type Ingredient {
   isComposedIngredient: Boolean
   isValidated: Boolean
   name: String
+  parent: Ingredient
   plural: String
   properties: [Properties]
   references: [IngredientLine]
@@ -94,6 +105,8 @@ type Mutation {
   getNotesMeta: EvernoteNotesMetaResponse
   resetDatabase(userId: String): EvernoteSession
   saveRecipes: EvernoteNotesResponse
+  toggleContainer(id: String): Container
+  toggleContainerIngredient(currentIngredientId: String, currentIngredientName: String, id: String): Container
 }
 
 type Note {
@@ -149,6 +162,8 @@ enum Properties {
 }
 
 type Query {
+  container(id: String): Container
+  containers(group: String, view: String): [Container]
   evernoteSession(userId: String): EvernoteSession
   ingredient(id: ID): Ingredient
   ingredients: [Ingredient]

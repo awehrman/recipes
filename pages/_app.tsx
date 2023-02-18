@@ -10,8 +10,22 @@ import { theme, GlobalStyle } from '../styles/theme';
 const sourceSansPro = Source_Sans_Pro({
   weight: ['300', '400', '600'],
   style: ['normal', 'italic'],
-  subsets: ['latin']
+  subsets: ['latin'],
+  preload: true,
+  display: 'fallback'
 });
+
+// type Metric = {
+//   id: string;
+//   name: string;
+//   startTime: string;
+//   value: string;
+//   label: string;
+// };
+
+// export function reportWebVitals(metric: Metric) {
+//   console.log(metric);
+// }
 
 export default function App({ Component, pageProps }: AppProps) {
   return (

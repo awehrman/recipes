@@ -10,14 +10,14 @@ export const TOGGLE_CONTAINER_MUTATION = gql`
 
 export const TOGGLE_CONTAINER_INGREDIENT_MUTATION = gql`
   mutation TOGGLE_CONTAINER_INGREDIENT_MUTATION(
-    $containerId: String
-    $ingredientId: String
-    $name: String
+    $id: String
+    $currentIngredientId: String
+    $currentIngredientName: String
   ) {
     toggleContainerIngredient(
-      containerId: $containerId
-      ingredientId: $ingredientId
-      name: $name
+      id: $id
+      currentIngredientId: $currentIngredientId
+      currentIngredientName: $currentIngredientName
     ) {
       id
       currentIngredientId

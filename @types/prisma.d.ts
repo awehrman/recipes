@@ -42,6 +42,20 @@ declare module '@prisma/client' {
     typeof ingredientLineWithParsed
   >;
 
+  const ingredientWithRelations = Prisma.validator<Prisma.IngredientArgs>()({
+    include: {
+      alternateNames: true,
+      substitutes: true,
+      relatedIngredients: true,
+      references: true,
+      properties: true // TODO
+    }
+  });
+
+  type IngredientWithRelations = Prisma.IngredientGetPayload<
+    typeof ingredientWithRelations
+  >;
+
   type EvernoteNotesMetaResponse = {
     error?: string;
     notes: NoteMeta[];
@@ -50,6 +64,16 @@ declare module '@prisma/client' {
   type EvernoteNotesResponse = {
     error?: string;
     notes: NoteWithRelations[];
+  };
+
+  type Container = {
+    id: string;
+    count: number;
+    currentIngredientId?: string | null;
+    currentIngredientName?: string | null;
+    ingredients: IngredientWithRelations[];
+    isExpanded: boolean;
+    name: string;
   };
 
   type StatusProps = {

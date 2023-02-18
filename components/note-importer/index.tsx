@@ -38,7 +38,7 @@ const NoteImporter: React.FC<NoteImporterProps> = () => {
       {loading ? <Loading>Loading ...</Loading> : null}
 
       {!loading && !notes.length ? (
-        <NoNotesFound>Nothing new! Import some notes.</NoNotesFound>
+        <NoNotesFound>No notes found. Import some notes.</NoNotesFound>
       ) : null}
 
       {isAuthenticated ? <Notes notes={notes} status={status} /> : null}
@@ -48,18 +48,16 @@ const NoteImporter: React.FC<NoteImporterProps> = () => {
 
 export default NoteImporter;
 
-const Wrapper = styled.div`
-  margin-top: -10px;
-`;
+const Wrapper = styled.div``;
 
 const Loading = styled.div`
-  font-size: 12px;
-  margin: 10px 0;
-  color: rgba(144, 144, 144, 1);
+  font-size: 13px;
+  margin: 20px 0;
+  color: #222;
 `;
 
 const NoNotesFound = styled.div`
-  font-size: 12px;
-  margin: 10px 0;
+  font-size: 13px;
+  margin: 20px 0;
   color: #222;
 `;

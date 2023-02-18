@@ -111,7 +111,6 @@ function useNotes(
 
   const [saveRecipes] = useMutation(SAVE_RECIPES_MUTATION, {
     update: (cache) => {
-      console.log('save recipes update');
       cache.writeQuery({
         query: GET_ALL_NOTES_QUERY,
         data: { notes: [] }

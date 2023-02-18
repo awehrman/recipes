@@ -23,7 +23,7 @@ export const GET_ALL_CONTAINERS_QUERY = gql`
 `;
 
 export const GET_CONTAINER_QUERY = gql`
-  query GET_CONTAINER_QUERY($id: ID) {
+  query GET_CONTAINER_QUERY($id: String) {
     container(id: $id) {
       id
       name

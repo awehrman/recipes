@@ -36,12 +36,13 @@ export const Ingredient = objectType({
         return response?.properties ?? [];
       }
     });
-    // t.field('parent', {
-    //   type: Ingredient,
-    //   resolve: async (root, _args, ctx) => {
-    //     return root?.parent || null;
-    //   }
-    // });
+    t.field('parent', {
+      type: Ingredient,
+      resolve: async (root, _args) => {
+        // TODO
+        return null;
+      }
+    });
     t.list.field('relatedIngredients', {
       type: Ingredient,
       resolve: async (root, _args, ctx) => {
@@ -160,12 +161,12 @@ export const IngredientQuery = extendType({
             plural: true,
             isComposedIngredient: true,
             properties: true,
-            // parent: {
-            //   select: {
-            //     id: true,
-            //     name: true
-            //   }
-            // },
+            parent: {
+              select: {
+                id: true,
+                name: true
+              }
+            },
             // alternateNames: {
             //   select: {
             //     name: true

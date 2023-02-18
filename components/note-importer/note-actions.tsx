@@ -64,7 +64,7 @@ const NoteActions: React.FC<NoteActionsProps> = ({
       <NotesFound>
         {loading
           ? ''
-          : `${noteSize} note${noteSize > 1 || !noteSize ? 's' : ''} synced`}
+          : `${noteSize} note${noteSize > 1 || !noteSize ? 's' : ''}`}
       </NotesFound>
     </Wrapper>
   );
@@ -75,7 +75,7 @@ export default NoteActions;
 const NotesFound = styled.div`
   float: right;
   text-align: right;
-  font-size: 12px;
+  font-size: 13px;
   margin-top: 4px;
 `;
 
@@ -83,37 +83,23 @@ const Wrapper = styled.div``;
 
 const StyledButton = styled(Button)`
   border: 0;
-  background: transparent;
-  font-size: 12px;
-  border-bottom: 2px solid #fff;
-  font-weight: bold;
-  margin: 0;
-  margin-right: 10px;
-  padding: 2px 4px;
-  color: ${({ theme }) => theme.colors.highlight};
+  background: #fff;
+  margin-right: 20px;
+  color: #222;
+  font-weight: 600;
+  padding: 0;
 
   &:hover {
     cursor: pointer;
-    border-bottom: 2px solid ${({ theme }) => theme.colors.highlight};
   }
 `;
 
-const SyncNotes = styled(StyledButton)`
-  margin-left: -3px;
-`;
+const SyncNotes = styled(StyledButton)``;
 
 const SaveNotes = styled(StyledButton)`
-  color: ${({ theme }) => theme.colors.altGreen};
-
-  &:hover {
-    border-bottom: 2px solid ${({ theme }) => theme.colors.altGreen};
-  }
+  color: #222;
 `;
 
 const ResetNotes = styled(StyledButton)`
   color: tomato;
-
-  &:hover {
-    border-bottom: 2px solid tomato;
-  }
 `;
