@@ -65,8 +65,6 @@ const getContainers = async (
   args: ContainerArgs,
   ctx: PartialAppContext | AppContext
 ) => {
-  console.log('containers resolver');
-
   const { prisma } = ctx;
   const where = args?.view === 'new' ? { isValidated: false } : {};
   const ingredients = await prisma.ingredient.findMany({

@@ -64,7 +64,8 @@ function useNotes(
     update: (cache, response: FetchResult<any>) => {
       const returnedNotes = response?.data?.getNotesMeta?.notes ?? [];
       const isOptimisticResponse = returnedNotes.some(
-        (note: NoteWithRelations) => !!note.id.includes('optimistic-note')
+        (note: NoteWithRelations) =>
+          !!(note?.id ?? '').includes('optimistic-note')
       );
       const adjustedNotes = isOptimisticResponse
         ? returnedNotes.map((note: NoteWithRelations) => ({

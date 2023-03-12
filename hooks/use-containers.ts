@@ -17,9 +17,10 @@ function useContainers({ group = 'name', view = 'all' }) {
     loading,
     refetch
   } = useQuery(GET_ALL_CONTAINERS_QUERY, {
-    // fetchPolicy: 'cache-and-network', // we'll want to refetch on page transition; this screws up our toggle
+    // fetchPolicy: 'cache-and-network',
     variables: { group, view }
   });
+
   const containers: Container[] = data?.containers ?? [];
 
   const [toggleContainer] = useMutation(TOGGLE_CONTAINER_MUTATION, {
@@ -55,16 +56,8 @@ function useContainers({ group = 'name', view = 'all' }) {
   function onIngredientClick(
     containerId: string,
     ingredientId: string | null,
-    name: string | null,
-    shouldRefetch: boolean = false
+    name: string | null
   ) {
-    console.log('[use-containers] onIngredientClick', {
-      variables: {
-        id: `${containerId}`,
-        currentIngredientId: ingredientId,
-        currentIngredientName: name
-      }
-    });
     toggleContainerIngredient({
       variables: {
         id: `${containerId}`,
@@ -72,24 +65,20 @@ function useContainers({ group = 'name', view = 'all' }) {
         currentIngredientName: name
       },
       update: (cache) => {
-        console.log('update', { shouldRefetch });
-        if (shouldRefetch) {
-          const res: ContainersQueryProps | null = cache.readQuery({
-            query: GET_ALL_CONTAINERS_QUERY,
-            variables: { group, view }
-          });
-          const updated = (res?.containers ?? []).map((ctn) => ({
-            ...ctn,
-            currentIngredientId: ingredientId,
-            currentIngredientName: name
-          }));
-          console.log({ updated });
-          cache.writeQuery({
-            query: GET_ALL_CONTAINERS_QUERY,
-            variables: { group, view },
-            data: { containers: updated }
-          });
-        }
+        const res: ContainersQueryProps | null = cache.readQuery({
+          query: GET_ALL_CONTAINERS_QUERY,
+          variables: { group, view }
+        });
+        const updated = (res?.containers ?? []).map((ctn) => ({
+          ...ctn,
+          currentIngredientId: ingredientId,
+          currentIngredientName: name
+        }));
+        cache.writeQuery({
+          query: GET_ALL_CONTAINERS_QUERY,
+          variables: { group, view },
+          data: { containers: updated }
+        });
       }
     });
   }

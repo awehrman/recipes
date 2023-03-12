@@ -11,42 +11,20 @@ const Containers: React.FC = () => {
   const router: NextRouter = useRouter();
   const { query } = router;
   const { group, view } = useContext(ViewContext);
-  const { containers, onContainerClick, onIngredientClick, loading, refetch } =
+  const { containers, onContainerClick, onIngredientClick, loading } =
     useContainers({
       group,
       view
     });
 
-  // TODO come back to this
-  // useEffect(() => refetch(), [refetch]);
-
   useEffect(() => {
     if (query?.id && !loading) {
-      console.log('>>>>> useEffect', { query, loading });
       const container = containers.find((ctn) => {
         const found = ctn.ingredients.find((ing) => ing.id === query.id);
         return found;
       });
-      console.log({ container, query });
-      if (
-        container &&
-        (!container?.currentIngredientId ||
-          container.currentIngredientId !== query.id)
-      ) {
-        console.log('calling again?');
-        onIngredientClick(
-          `${container?.id}`,
-          query?.id ? `${query.id}` : null,
-          null,
-          true
-        );
-      } else if (container?.currentIngredientId === query.id) {
-        console.log('close out containers');
-        router.replace(
-          '/ingredients',
-          `/ingredients?group=${group}&view=${view}`,
-          { shallow: true }
-        );
+      if (query?.id && query.id !== container?.currentIngredientId) {
+        onIngredientClick(`${container?.id}`, `${query.id}`, null);
       }
     }
   }, [query, loading, containers, onIngredientClick, router, group, view]);

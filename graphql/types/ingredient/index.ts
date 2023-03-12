@@ -61,7 +61,6 @@ export const Ingredient = objectType({
             }
           }
         });
-        console.log('related - what type am i', { response });
         return [];
         // const related = response.flatMap((s) => s.relatedIngredients);
         // return related;
@@ -87,7 +86,6 @@ export const Ingredient = objectType({
         });
         // const substitutes = response.flatMap((s) => s.substitutes);
         // return substitutes;
-        console.log('substitutes - what type am i', { response });
         return [];
       }
     });
@@ -110,7 +108,6 @@ export const Ingredient = objectType({
         });
         // const references = response.flatMap((r) => r.references);
         // return references;
-        console.log('references - what type am i', { response });
         return [];
       }
     });

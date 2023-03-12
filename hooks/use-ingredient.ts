@@ -19,7 +19,10 @@ function useIngredient({ id }: UseIngredientProps) {
     data = {},
     loading,
     refetch
-  } = useQuery(GET_INGREDIENT_QUERY, { variables: { id } });
+  } = useQuery(GET_INGREDIENT_QUERY, {
+    fetchPolicy: 'cache-and-network',
+    variables: { id }
+  });
   const ingredient = data?.ingredient ?? [];
 
   const [saveIngredient] = useMutation(SAVE_INGREDIENT_MUTATION);

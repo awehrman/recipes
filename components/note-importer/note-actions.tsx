@@ -86,11 +86,11 @@ const StyledButton = styled(Button)`
   background: #fff;
   margin-right: 20px;
   color: #222;
-  font-weight: 600;
   padding: 0;
 
   &:hover {
     cursor: pointer;
+    font-weight: 600;
   }
 `;
 

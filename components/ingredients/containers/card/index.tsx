@@ -19,7 +19,7 @@ import BaseFields from './base-fields';
 import RelationalFields from './relational-fields';
 import ValidationsAndActions from './validations-and-actions';
 import { IngredientWithRelations } from '@prisma/client';
-import AlternateNames from './fields/alternate-names';
+// import AlternateNames from './fields/alternate-names';
 
 type CardProps = {
   id: string;
@@ -104,8 +104,7 @@ const Card = ({ id, cachedName = null, containerId }: CardProps) => {
       onIngredientClick(
         `${containerId}`,
         `${nextIngredient.id}`,
-        nextIngredient.name,
-        true
+        nextIngredient.name
       );
     } else {
       // adjust input properties

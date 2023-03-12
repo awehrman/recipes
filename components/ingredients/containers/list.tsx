@@ -9,8 +9,7 @@ type ListProps = {
   onIngredientClick: (
     containerId: string,
     ingredientId: string | null,
-    name: string | null,
-    shouldRefetch: boolean
+    name: string | null
   ) => void;
 };
 

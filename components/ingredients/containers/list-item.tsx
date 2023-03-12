@@ -11,8 +11,7 @@ type ListItemProps = {
   onIngredientClick: (
     containerId: string,
     ingredientId: string | null,
-    name: string | null,
-    shouldRefetch: boolean
+    name: string | null
   ) => void;
 };
 
@@ -39,7 +38,6 @@ const ListItem = ({
     event: React.MouseEvent<HTMLElement>,
     ingredientId: string
   ) {
-    console.log('handleIngredientClick');
     event.stopPropagation();
 
     // TODO consider passing the currentIngId to this mutation
@@ -53,15 +51,7 @@ const ListItem = ({
         ? null
         : `${ingredient.name}`;
 
-    const shouldRefetch =
-      `${container.currentIngredientId}` === `${ingredientId}`;
-    console.log(`${container.id}`, optionalId, optionalName, shouldRefetch);
-    onIngredientClick(
-      `${container.id}`,
-      optionalId,
-      optionalName,
-      shouldRefetch
-    );
+    onIngredientClick(`${container.id}`, optionalId, optionalName);
   }
 
   function getIngredientLink(_id: string) {

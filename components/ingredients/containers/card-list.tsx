@@ -1,7 +1,7 @@
-import { Container, Ingredient } from '@prisma/client';
+import { Container, IngredientWithRelations } from '@prisma/client';
 // import { useRouter, NextRouter } from 'next/router';
 import React, { useEffect, useRef } from 'react';
-import { VariableSizeList } from 'react-window';
+import { ListChildComponentProps, VariableSizeList } from 'react-window';
 import styled from 'styled-components';
 
 import ListItem from './list-item';
@@ -13,33 +13,42 @@ type CardListProps = {
   onIngredientClick: (
     containerId: string,
     ingredientId: string | null,
-    name: string | null,
-    shouldRefetch: boolean
+    name: string | null
   ) => void;
 };
 
 const CardList = ({ container, onIngredientClick }: CardListProps) => {
   // const router: NextRouter = useRouter();
   // const { query: { id = null } } = router;
-  const listRef = useRef<null | VariableSizeList>(null);
   const {
     currentIngredientId = null,
     currentIngredientName = null,
     ingredients = []
   } = container;
-  const currentIngredientIndex = ingredients.findIndex(
-    (ing: Ingredient) => ing.id === currentIngredientId
+  const ingredientsWithPaddingRows = [null, ...ingredients, null];
+  const currentIngredientIndex = ingredientsWithPaddingRows.findIndex(
+    (ing: IngredientWithRelations | null) =>
+      ing && ing.id === currentIngredientId
   );
 
-  // TODO fix this type
-  function rowRenderer({ data, index, style }: any) {
-    const ingredient = data[index];
-    const { id } = ingredient;
-    if (index === 0) {
-      // push text to the bottom
-      style.display = 'flex';
-      // style['align-items'] = 'flex-end';
+  const listRef = useRef<null | VariableSizeList<IngredientWithRelations>>(
+    null
+  );
+
+  function rowRenderer({ data, index, style }: ListChildComponentProps) {
+    const ingredient = data[index] as IngredientWithRelations;
+    const firstRow = index === 0;
+    const lastRow = index === ingredientsWithPaddingRows.length - 1;
+    if (firstRow || lastRow) {
+      return (
+        <Row
+          key={`ctn_${container.id}_${firstRow ? 'first' : 'last'}`}
+          style={style}
+        />
+      );
     }
+
+    const { id } = ingredient;
 
     return (
       <Row key={`card-list_${id}_${id}`} style={style}>
@@ -52,20 +61,13 @@ const CardList = ({ container, onIngredientClick }: CardListProps) => {
     );
   }
 
-  function getItemSize(index: number) {
-    if (index < 1 && index === currentIngredientIndex) {
-      return 44;
-    }
-    return 22;
-  }
-
   // useEffect to watch for currentId changes and then try to scroll from there?
   useEffect(() => {
     if (listRef?.current) {
       // listRef.current.resetAfterIndex(index - 1);
       listRef.current.scrollToItem(currentIngredientIndex - 1, 'start');
     }
-  }, [currentIngredientId, currentIngredientIndex]);
+  }, [currentIngredientId, currentIngredientIndex, ingredients.length]);
 
   return (
     <Wrapper>
@@ -74,9 +76,9 @@ const CardList = ({ container, onIngredientClick }: CardListProps) => {
         className={currentIngredientId ? 'expanded' : ''}
         ref={listRef}
         height={500} // TODO 235px - 500 based on screen
-        itemCount={ingredients.length}
-        itemData={ingredients}
-        itemSize={getItemSize}
+        itemCount={ingredientsWithPaddingRows.length}
+        itemData={ingredientsWithPaddingRows}
+        itemSize={() => 22}
         width={180} // TODO
       >
         {rowRenderer}
@@ -99,6 +101,7 @@ const Wrapper = styled.div`
   display: flex;
   flex-wrap: wrap;
 `;
+
 const Row = styled.div``;
 
 const SideList = styled(VariableSizeList)`

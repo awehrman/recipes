@@ -121,8 +121,7 @@ export const NotesQuery = extendType({
                     value: true
                   }
                 },
-                // TODO go fix your schema capitalization
-                Ingredient: {
+                ingredient: {
                   select: {
                     id: true,
                     isComposedIngredient: true,

@@ -106,6 +106,10 @@ const buildContainersByName = (
   }
 };
 
+const capitalize = (str: string) => {
+  return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : '';
+};
+
 const buildContainersByProperty = (
   containersByProperty: ContainersHash = {},
   ingHash: IngredientHash = {}
@@ -127,7 +131,7 @@ const buildContainersByProperty = (
   ingHash.properties.map((property: string) => {
     if (property && !containersByProperty?.[property]) {
       containersByProperty[property] = {
-        name: property, // TODO capitalize
+        name: capitalize(property),
         ingredients: [ingHash],
         sortOrder: PROPERTY_ENUMS.findIndex(
           (propertyEnum) => propertyEnum === property
