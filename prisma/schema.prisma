@@ -264,3 +264,31 @@ model Note {
 
   @@map(name: "notes")
 }
+
+model ParserRule {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name  String
+  label String
+
+  definitions ParserRuleDefinition[]
+
+  @@map(name: "parser_rules")
+}
+
+model ParserRuleDefinition {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  example    String
+  definition String
+  formatter  String?
+
+  parserRule   ParserRule? @relation(fields: [parserRuleId], references: [id])
+  parserRuleId String?
+
+  @@map(name: "parser_rule_definition")
+}

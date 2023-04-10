@@ -29,11 +29,11 @@ const useNavigationButton = ({
     sizes: { tablet }
   } = themeContext;
   const tabletSize = parseInt(tablet, 10);
-
-  const navRefCurrent = navRef.current;
+  const navRefCurrent = navRef?.current;
 
   const handleMouseOver = useCallback(
     (e: MouseEvent) => {
+      // console.log('handleMouseOver');
       // enable event listeners if we're in at least tablet size
       if (window.innerWidth > tabletSize) {
         const yPosition = e.clientY - 20 < 0 ? 20 : e.clientY - 10;
@@ -53,6 +53,7 @@ const useNavigationButton = ({
   );
 
   const handleMouseLeave = useCallback(() => {
+    // console.log('handleMouseLeave');
     // cleanup this event if we're not in the nav
     if (navRefCurrent) {
       navRefCurrent.removeEventListener('mousemove', handleMouseOver);
@@ -65,13 +66,16 @@ const useNavigationButton = ({
   }, [handleMouseOver, navRefCurrent, navIconRef, tabletSize]);
 
   useLayoutEffect(() => {
+    // console.log('useLayoutEffect', { navRefCurrent });
     if (navRefCurrent) {
+      // console.timeLog('with a navRefCurrent', { navRefCurrent });
       navRefCurrent.addEventListener('mouseover', handleMouseOver);
       navRefCurrent.addEventListener('mouseleave', handleMouseLeave);
     }
 
     return () => {
       if (navRefCurrent) {
+        // console.log('CLEANUP');
         navRefCurrent.removeEventListener('mouseover', handleMouseOver);
         navRefCurrent.removeEventListener('mouseleave', handleMouseLeave);
       }

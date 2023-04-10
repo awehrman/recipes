@@ -99,14 +99,17 @@ type InstructionLine {
 }
 
 type Mutation {
+  addParserRule(input: ParserRuleInput): ParserRule
   authenticateEvernote(oauthVerifier: String, userId: String): EvernoteSession
   clearEvernoteSession(userId: String): EvernoteSession
+  deleteParserRule(id: ID): ParserRule
   getNotesContent: EvernoteNotesResponse
   getNotesMeta: EvernoteNotesMetaResponse
   resetDatabase(userId: String): EvernoteSession
   saveRecipes: EvernoteNotesResponse
   toggleContainer(id: String): Container
   toggleContainerIngredient(currentIngredientId: String, currentIngredientName: String, id: String): Container
+  updateParserRule(input: ParserRuleInput): ParserRule
 }
 
 type Note {
@@ -152,6 +155,34 @@ type ParsedSegment {
   value: String
 }
 
+type ParserRule {
+  definitions: [ParserRuleDefinition]
+  id: String
+  label: String
+  name: String
+}
+
+type ParserRuleDefinition {
+  definition: String
+  example: String
+  formatter: String
+  id: String
+}
+
+input ParserRuleDefinitionInput {
+  definition: String!
+  example: String
+  formatter: String
+  id: String
+}
+
+input ParserRuleInput {
+  definitions: [ParserRuleDefinitionInput]
+  id: String
+  label: String
+  name: String!
+}
+
 enum Properties {
   DAIRY
   FISH
@@ -169,6 +200,7 @@ type Query {
   ingredients: [Ingredient]
   note(id: ID): Note
   notes: [Note]!
+  parserRules: [ParserRule]
   users: [User]!
 }
 

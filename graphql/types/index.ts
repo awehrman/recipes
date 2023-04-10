@@ -10,6 +10,7 @@ export * from './evernote-session';
 export * from './ingredient-line';
 export * from './instruction-line';
 export * from './note';
+export * from './parser';
 export * from './session';
 export * from './tag';
 export * from './user';

@@ -10,6 +10,7 @@ import HomeIcon from 'public/icons/home-solid.svg';
 import CloudDownloadIcon from 'public/icons/cloud-download-alt-solid.svg';
 import LemonIcon from 'public/icons/lemon-solid.svg';
 import FolderIcon from 'public/icons/folder-open-solid.svg';
+import GearsIcon from 'public/icons/parser.svg';
 import useNavigationButton from '../hooks/use-navigation-button';
 
 type NavProps = {
@@ -26,7 +27,8 @@ const links = [
   { href: '/', label: 'Home', icon: <HomeIcon /> },
   { href: '/import', label: 'Import', icon: <CloudDownloadIcon /> },
   { href: '/ingredients', label: 'Ingredients', icon: <LemonIcon /> },
-  { href: '/recipes', label: 'Recipes', icon: <FolderIcon /> }
+  { href: '/recipes', label: 'Recipes', icon: <FolderIcon /> },
+  { href: '/parser', label: 'Parser', icon: <GearsIcon /> }
 ];
 
 const Navigation: React.FC<NavProps> = ({ isExpanded, setIsExpanded }) => {
@@ -40,6 +42,7 @@ const Navigation: React.FC<NavProps> = ({ isExpanded, setIsExpanded }) => {
     setIsExpanded,
     themeContext
   });
+  // console.log('[nav] render calling use-nav-button hook', { navIconRef });
 
   const IconAndLabel = ({ icon, label }: IconProps): JSX.Element => (
     <>

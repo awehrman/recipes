@@ -2,8 +2,6 @@ import { Container, IngredientWithRelations } from '@prisma/client';
 import { v4 } from 'uuid';
 
 import { PROPERTY_ENUMS } from 'constants/ingredient';
-import { Group } from 'next/dist/shared/lib/router/utils/route-regex';
-import ingredient from 'graphql/inputs/ingredient';
 
 type ContainerWithSortOrder = Container & {
   sortOrder: number | string;
