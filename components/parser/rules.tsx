@@ -1,49 +1,28 @@
+import { ParserRuleWithRelations, ParserRuleDefinition } from '@prisma/client';
 import { debounce } from 'lodash';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 
-import Rule from './rule';
+import usePEGParser from 'hooks/use-peg-parser';
+import Rule from './rule/index';
 import AddNewRule from './add-new-rule';
 
-type DefinitionProps = {
-  id: string;
-  example: string;
-  definition: string;
-  formatter?: string;
-};
+type RulesProps = {};
+const regex = /"(.*?)"/;
 
-type RuleProps = {
-  id: string;
-  name: string;
-  label: string;
-  definitions: DefinitionProps[];
-};
-
-type RulesProps = {
-  deleteRule: any;
-  addRule: (rule: RuleProps, reset: any, setShowNewRuleForm: any) => void;
-  rules: RuleProps[];
-  updateRule: any;
-};
-
-const Rules: React.FC<RulesProps> = ({
-  addRule,
-  deleteRule,
-  rules = [],
-  updateRule
-}) => {
+const Rules: React.FC<RulesProps> = () => {
+  const { addRule, deleteRule, grammarErrors, loading, rules } = usePEGParser();
   const [showNewRuleForm, setShowNewRuleForm] = useState(false);
   const {
-    reset,
-    register,
+    control,
     handleSubmit,
     formState: { isDirty, isValid, errors },
-    control,
-    setValue,
-    trigger
+    register,
+    reset
   } = useForm();
 
+  // TODO move this
   const onSubmit = useCallback(
     (data: any) => {
       // only our new fields
@@ -56,11 +35,10 @@ const Rules: React.FC<RulesProps> = ({
           }
         }
       });
+      console.log({ data });
       if (Object.keys(rule).length > 0) {
-        console.log('addRule', rule);
         addRule(rule, reset, setShowNewRuleForm);
       }
-      console.log('updateRule', { data });
       const rules: any[] = [];
       Object.entries(data).forEach(([key, value]) => {
         const split = key.split('-');
@@ -120,36 +98,90 @@ const Rules: React.FC<RulesProps> = ({
     }
     // eslint-disable-next-line
   }, [watchedData, isDirty, isValid]);
+  const undefinedRules = useCallback(
+    () =>
+      new Set([
+        ...(grammarErrors ?? [])
+          .filter((error) => error.message.includes('Rule'))
+          .map((error) => {
+            const match = error.message.match(regex);
+            if (match && match.length > 1) {
+              return match[1];
+            }
+            return null;
+          })
+      ]),
+    [grammarErrors]
+  );
+
+  function renderWarnings() {
+    const containsStartRule = rules.find(
+      (r: ParserRuleWithRelations) => r.name === 'ingredientLine'
+    );
+    if (!containsStartRule) {
+      return <Message>{'No rule found for "ingredientLine".'}</Message>;
+    }
+    return null;
+  }
+
+  const findRuleViolations = useCallback(
+    (definitions: ParserRuleDefinition[] = []): string[] => {
+      const rules = definitions.filter((d: ParserRuleDefinition) => d.rule);
+      const undefinedItems = undefinedRules();
+      const violations: string[] = Array.from(undefinedItems).filter((r) =>
+        rules.find((rule: ParserRuleWithRelations) => rule.rule.includes(r))
+      );
+      return violations;
+    },
+    [undefinedRules]
+  );
 
   function renderRules() {
-    return rules.map((rule: RuleProps) => (
-      <Rule
-        key={rule.id}
-        deleteRule={deleteRule}
-        register={register}
-        rule={rule}
-      />
-    ));
+    return rules.map((rule: ParserRuleWithRelations) => {
+      const { definitions } = rule;
+      const violations: string[] = findRuleViolations(definitions);
+      return <Rule key={rule.id} rule={rule} violations={violations} />;
+    });
+  }
+
+  if (loading) {
+    return <Loading>Loading... </Loading>;
   }
 
   return (
-    <FormWrapper onSubmit={handleSubmit(onSubmit)}>
-      <Header>Rules</Header>
-      {renderRules()}
+    <RulesWrapper>
+      <FormWrapper onSubmit={handleSubmit(onSubmit)}>
+        <Header>Rules</Header>
+        {renderWarnings()}
+        {renderRules()}
+      </FormWrapper>
       <AddNewRule
-        register={register}
         showNewRuleForm={showNewRuleForm}
         setShowNewRuleForm={setShowNewRuleForm}
-        control={control}
-        errors={errors}
-        trigger={trigger}
-        setValue={setValue}
       />
-    </FormWrapper>
+    </RulesWrapper>
   );
 };
 
 export default Rules;
+
+const RulesWrapper = styled.div`
+  flex-grow: 1;
+`;
+
+const Loading = styled.div`
+  font-size: 13px;
+  margin: 20px 0;
+  color: #222;
+  width: 70%;
+`;
+
+const Message = styled.div`
+  font-size: 13px;
+  margin: 20px 0;
+  color: tomato;
+  width: 70%;
+`;
 
 const FormWrapper = styled.form`
   width: 100%;

@@ -9,8 +9,9 @@ export const GET_ALL_PARSER_RULES_QUERY = gql`
       definitions {
         id
         example
-        definition
         formatter
+        rule
+        order
       }
     }
   }

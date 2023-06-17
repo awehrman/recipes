@@ -39,21 +39,11 @@ type TestWrapperProps = {
 const options: HTMLBeautifyOptions = {
   indent_size: 2,
   indent_char: ' ',
-  max_preserve_newlines: 5,
+  max_preserve_newlines: 1,
   preserve_newlines: true,
-  // keep_array_indentation: false,
-  // break_chained_methods: false,
   indent_scripts: 'normal',
-  // brace_style: 'collapse',
-  // space_before_conditional: false,
-  // unescape_strings: false,
-  // jslint_happy: false,
   end_with_newline: false,
-  wrap_line_length: 0,
-  indent_inner_html: false,
-  // comma_first: false,
-  // e4x: false,
-  indent_empty_lines: false
+  wrap_line_length: 110
 };
 
 const Test: React.FC<TestComponentProps> = ({ test }) => {
@@ -89,7 +79,7 @@ const Test: React.FC<TestComponentProps> = ({ test }) => {
                 </NestedDetailsLine>
                 <NestedDetailsLine>
                   <Label>values: </Label>
-                  {js_beautify(JSON.stringify(value.values), options)}
+                  {js_beautify(`${value.values}`, options)}
                 </NestedDetailsLine>
               </div>
             ))}

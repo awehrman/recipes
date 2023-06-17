@@ -21,6 +21,16 @@ declare module '@prisma/client' {
 
   type NoteWithRelations = Prisma.NoteGetPayload<typeof noteWithRelations>;
 
+  const parserRuleWithRelations = Prisma.validator<Prisma.ParserRuleArgs>()({
+    include: {
+      definitions: true
+    }
+  });
+
+  type ParserRuleWithRelations = Prisma.ParserRuleGetPayload<
+    typeof parserRuleWithRelations
+  >;
+
   const ingredientWithAltNames = Prisma.validator<Prisma.IngredientArgs>()({
     include: {
       alternateNames: true

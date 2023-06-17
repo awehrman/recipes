@@ -1,71 +1,140 @@
-// @ts-nocheck
-// TODO come back and clean up ur types
-import React, { useEffect } from 'react';
-import { useWatch } from 'react-hook-form';
-import styled from 'styled-components';
+// TODO deprecate and move to /rule/add
 
-import { Button } from 'components/common';
-import HighlightedInput from 'components/parser/highlighted-input';
+import js_beautify from 'js-beautify';
 import { capitalize } from 'lodash';
+import React, { useCallback, useEffect } from 'react';
+import { useForm, useFieldArray, useWatch } from 'react-hook-form';
+import styled from 'styled-components';
 import { v4 } from 'uuid';
 
-type DefinitionProps = {
-  example: string;
-  definition: string;
-  formatter?: string;
-};
+import { Button } from 'components/common';
+import usePEGParser from 'hooks/use-peg-parser';
+import { text } from 'micro';
 
-type RuleProps = {
-  name: string;
-  label: string;
-  definitions: DefinitionProps[];
+const defaultValues = {
+  id: v4(),
+  name: '',
+  label: '',
+  definitions: [
+    {
+      id: v4(),
+      example: '',
+      formatter: '',
+      order: 0,
+      rule: ''
+    }
+  ]
 };
 
 type RulesProps = {
   showNewRuleForm: boolean;
   setShowNewRuleForm: any;
-  register: any;
-  control: any;
-  errors: any;
-  trigger: any;
-  setValue: any;
 };
+
+type Definition = {
+  id: string;
+  example: string;
+  formatter: string;
+  order: number;
+  rule: string;
+};
+
+type Rule = {
+  id: string;
+  name: string;
+  label: string;
+  definitions: Definition[];
+};
+
+const formatterPlaceholder = `{
+  return {
+    rule: '#1_rule_name',
+    type: 'rule_type',
+    values
+  };
+}`;
+
+function createLabel(value: string) {
+  const words = value.split(/(?=[A-Z])/);
+  return words.map((v: string) => capitalize(v)).join(' ');
+}
 
 const AddNewRule: React.FC<RulesProps> = ({
   showNewRuleForm,
-  setShowNewRuleForm,
-  register,
-  control,
-  setValue
+  setShowNewRuleForm
 }) => {
-  const watchName = useWatch({ control, name: 'new-name', defaultValue: '' });
-  const watchDefinitions = useWatch({
+  // const inputRef = useRef<HTMLInputElement>(null);
+  const { addRule } = usePEGParser();
+  const { control, handleSubmit, register, reset, setValue, watch } =
+    useForm<Rule>({ defaultValues });
+  const ruleName = watch('name');
+  const ruleDefinitions = useWatch({
     control,
-    name: 'new-definitions',
-    defaultValue: [
-      {
-        id: v4(),
-        example: '',
-        definition: '',
-        formatter: ''
-      }
-    ]
+    name: 'definitions',
+    defaultValue: []
   });
-  const labelDefaultValue = (watchName: string) =>
-    `"${watchName.length ? watchName : 'Rule Name'}"`;
+
+  const { fields, append } = useFieldArray({
+    control,
+    name: 'definitions'
+  });
+
+  // TODO move into a hook
+  const adjustTextAreaHeight = useCallback(() => {
+    ruleDefinitions.forEach((_field, index) => {
+      const textarea = document.getElementById(
+        `definitions.${index}.formatter`
+      );
+      if (textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = `${textarea.scrollHeight}px`;
+      }
+    });
+  }, [ruleDefinitions]);
+
+  useEffect(() => {
+    adjustInputWidth();
+  }, [ruleName]);
+
+  useEffect(() => {
+    adjustTextAreaHeight();
+  }, [adjustTextAreaHeight, ruleDefinitions]);
+
+  useEffect(() => {
+    const label = createLabel(ruleName);
+    setValue('label', label);
+  }, [ruleName, setValue]);
+
+  function adjustInputWidth() {
+    const inputElement = document.getElementById('name');
+    const value = (inputElement as HTMLInputElement)?.value?.length ?? 0;
+    const wrapperElement = document.getElementById('new-rule-name-wrapper');
+
+    if (inputElement && wrapperElement) {
+      inputElement.style.width = `${value}ch`;
+      wrapperElement.style.width = `${value}ch`;
+    }
+  }
+
   function handleNewRuleButtonClick() {
     setShowNewRuleForm(true);
   }
 
-  function createLabel(value: string) {
-    const words = value.split(/(?=[A-Z])/);
-    return words.map((v: string) => capitalize(v)).join(' ');
+  function handleAddNewDefinitionClick() {
+    append(defaultValues.definitions);
   }
 
-  useEffect(() => {
-    const label = createLabel(watchName);
-    setValue('new-label', label);
-  }, [setValue, watchName]);
+  function onSubmit(data: Rule) {
+    addRule(data, reset, setShowNewRuleForm);
+  }
+
+  function trimInput(event: React.ChangeEvent<HTMLInputElement>) {
+    event.target.value = event.target.value.trim();
+  }
+
+  function formatTextArea(event: React.ChangeEvent<HTMLTextAreaElement>) {
+    event.target.value = js_beautify(event.target.value, { indent_size: 2 });
+  }
 
   if (!showNewRuleForm) {
     return (
@@ -78,183 +147,111 @@ const AddNewRule: React.FC<RulesProps> = ({
 
   return (
     <Wrapper>
-      <Header>Add Rule</Header>
-      <FieldSet>
-        <HighlightedInput
-          autoFocus
-          autoComplete={false}
-          defaultValue=""
-          fieldName="new-name"
-          isRequired
-          loading={false}
-          placeholder="ruleName"
-          registerField={register}
-          control={control}
-        />
-      </FieldSet>
-      <FieldSet>
-        <BlockQuote>
-          <HighlightedInput
-            defaultValue={labelDefaultValue(watchName)}
-            autoComplete={false}
-            fieldName="new-label"
-            isRequired
-            loading={false}
-            placeholder="Rule Name"
-            registerField={register}
-            control={control}
+      <Header>Add New Rule</Header>
+      <Form onSubmit={handleSubmit(onSubmit)}>
+        <Top>
+          <RuleName id="new-rule-name-wrapper" htmlFor="name">
+            <Input
+              {...register('name')}
+              id="name"
+              defaultValue={defaultValues.name}
+              name="name"
+              onBlur={trimInput}
+              placeholder="name"
+              type="text"
+            />
+          </RuleName>
+
+          <RuleLabel htmlFor="label">
+            <Input
+              {...register('label')}
+              id="label"
+              defaultValue={defaultValues.label}
+              name="label"
+              onBlur={trimInput}
+              placeholder="Rule Name"
+              type="text"
+            />
+          </RuleLabel>
+        </Top>
+
+        <Definitions>
+          {fields.map((field, index) => (
+            <Definition key={field.id}>
+              <Order htmlFor={`definitions.${index}.order`}>
+                <Input
+                  {...register(`definitions.${index}.order`)}
+                  key={field.id}
+                  id={`definitions.${index}.order`}
+                  name={`definitions.${index}.order`}
+                  defaultValue={field.order}
+                  type="number"
+                />
+              </Order>
+
+              <Example htmlFor={`definitions.${index}.example`}>
+                <Input
+                  {...register(`definitions.${index}.example`)}
+                  key={field.id}
+                  id={`definitions.${index}.example`}
+                  defaultValue={field.example}
+                  name={`definitions.${index}.example`}
+                  onBlur={trimInput}
+                  placeholder="example"
+                  type="text"
+                />
+              </Example>
+
+              <Rule htmlFor={`definitions.${index}.rule`}>
+                <Input
+                  {...register(`definitions.${index}.rule`)}
+                  id={`definitions.${index}.rule`}
+                  defaultValue={field.rule}
+                  name={`definitions.${index}.rule`}
+                  onBlur={trimInput}
+                  placeholder="rule definition"
+                  type="text"
+                />
+              </Rule>
+
+              <Formatter htmlFor={`definitions.${index}.formatter`}>
+                <TextArea
+                  {...register(`definitions.${index}.formatter`)}
+                  id={`definitions.${index}.formatter`}
+                  defaultValue={field.formatter}
+                  name={`definitions.${index}.formatter`}
+                  onBlur={formatTextArea}
+                  placeholder={formatterPlaceholder}
+                />
+              </Formatter>
+            </Definition>
+          ))}
+        </Definitions>
+        <Buttons>
+          <AddNewDefinitionButton
+            label="Add Definition"
+            onClick={handleAddNewDefinitionClick}
+            type="button"
           />
-        </BlockQuote>
-        <Equals />
-      </FieldSet>
-      <Break />
-      {watchDefinitions.map((definition: any, index: number) => {
-        return (
-          <Definition key={`new-definition-${definition.id}`}>
-            <Comment />
-            <ExampleInput
-              autoComplete={false}
-              defaultValue=""
-              placeholder="example"
-              fieldName={`new-definition-${definition.id}-example`}
-              loading={false}
-              registerField={register}
-              control={control}
-            />
-            <DefinitionInput
-              autoComplete={false}
-              defaultValue=""
-              placeholder="rule definition"
-              isRequired={index === 0}
-              fieldName={`new-definition-${definition.id}-definition`}
-              loading={false}
-              registerField={register}
-              control={control}
-            />
-            <FormatterTextArea
-              defaultValue=""
-              placeholder="formatter (optional)"
-              fieldName={`new-definition-${definition.id}-formatter`}
-              loading={false}
-              {...register(`new-definition-${definition.id}-formatter`)}
-            />
-          </Definition>
-        );
-      })}
-      <Break />
-      <SubmitButton value="Submit" type="submit" />
+          <SubmitButton type="submit" value="Submit" />
+        </Buttons>
+      </Form>
     </Wrapper>
   );
 };
 
 export default AddNewRule;
 
-const FieldSet = styled.fieldset`
-  order: 0;
+const Top = styled.div`
   display: flex;
-  flex-wrap: wrap;
-  border: 0;
-  position: relative;
-  border: 0;
-  padding: 0;
-  margin: 0;
-  margin-right: 20px;
-  margin-bottom: 8px;
-  height: 1em;
-`;
-
-const Equals = styled.span`
-  display: flex;
-  color: #ccc;
-  font-size: 18px;
-  margin-left: 20px;
-
-  &:before {
-    content: '=';
-    top: -2px;
-    position: relative;
-  }
+  flex-basis: 100%;
 `;
 
 const Definition = styled.div`
-  margin-left: 20px;
-  padding: 1px;
-  width: 100%;
-`;
-
-const BlockQuote = styled.blockquote`
-  display: flex;
-  margin: 0;
-  padding: 0;
-
-  &:before {
-    content: open-quote;
+  :not(:first-child) {
+    border-top: 1px solid #ccc;
+    padding-top: 10px;
   }
-
-  &:after {
-    content: close-quote;
-  }
-
-  &:before,
-  &:after {
-    display: inline-block;
-    vertical-align: bottom;
-    color: #ccc;
-    font-size: 22px;
-    top: -4px;
-    position: relative;
-  }
-
-  &:before {
-    margin-right: 3px;
-  }
-`;
-
-const Break = styled.div`
-  flex-basis: 100%;
-`;
-
-const ExampleInput = styled(HighlightedInput)`
-  padding-left: 20px;
-  color: #ccc;
-`;
-
-const Comment = styled.div`
-  height: 0;
-
-  &:after {
-    color: #ccc;
-    content: '//';
-    font-size: 14px;
-    top: -4px;
-    position: relative;
-    display: inline-block;
-  }
-`;
-
-const DefinitionInput = styled(HighlightedInput)`
-  flex-basis: 100%;
-  margin-bottom: 8px;
-  border: 0;
-  background: transparent;
-`;
-
-const FormatterTextArea = styled.textarea`
-  width: 100%;
-  height: 100px;
-  margin-bottom: 8px;
-  border: 0;
-  background: transparent;
-`;
-
-const SubmitButton = styled.input`
-  border: 0;
-  background: ${({ theme }) => theme.colors.altGreen};
-  font-weight: 600;
-  color: #fff;
-  padding: 4px 6px;
-  border-radius: 5px;
-  cursor: pointer;
 `;
 
 const AddNewRuleButton = styled(Button)`
@@ -265,19 +262,132 @@ const AddNewRuleButton = styled(Button)`
   padding: 4px 6px;
   border-radius: 5px;
   cursor: pointer;
+  margin-right: 10px;
+`;
+
+const AddNewDefinitionButton = styled(Button)`
+  border: 0;
+  background: ${({ theme }) => theme.colors.highlight};
+  font-weight: 600;
+  color: #fff;
+  padding: 4px 6px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-right: 10px;
 `;
 
 const Wrapper = styled.div`
-  display: flex;
-  flex-wrap: wrap;
   background: ${({ theme }) => theme.colors.headerBackground};
   padding: 20px;
+  max-width: 600px;
 `;
 
 const Header = styled.h1`
   margin: 0;
   font-weight: 600;
-  font-size: 12px;
+  font-size: 14px;
   flex-basis: 100%;
   margin-bottom: 10px;
+  font-color: #222;
+`;
+
+const Form = styled.form`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+`;
+
+const Input = styled.input`
+  padding: 0;
+  color: #333;
+  border: 0;
+  background: transparent;
+  margin-bottom: 8px;
+  padding: 4px 6px;
+  min-width: 50px;
+
+  :-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 30px
+      ${({ theme }) => theme.colors.headerBackground} inset;
+    -webkit-text-fill-color: #333;
+  }
+`;
+
+const TextArea = styled.textarea`
+  padding: 0;
+  color: #333;
+  border: 0;
+  background: transparent;
+  margin-bottom: 8px;
+  padding: 4px 6px;
+  width: 100%;
+  height: 200px;
+`;
+
+const LabelWrapper = styled.label`
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  font-weight: 600;
+  min-width: 50px;
+`;
+
+const RuleName = styled(LabelWrapper)`
+  margin-right: 10px;
+`;
+
+const RuleLabel = styled(LabelWrapper)`
+  flex-grow: 2;
+`;
+
+const Buttons = styled.div`
+  display: flex;
+  flex-basis: 100%;
+  justify-content: space-between;
+`;
+
+const Definitions = styled.div`
+  padding-left: 20px;
+  margin-bottom: 20px;
+  flex-basis: 100%;
+`;
+
+const Order = styled(LabelWrapper)`
+  display: none;
+`;
+
+const Example = styled(LabelWrapper)`
+  position: relative;
+  margin-left: 6px;
+  padding-left: 10px;
+
+  input {
+    color: #ccc;
+  }
+
+  &:before {
+    color: #ccc;
+    content: '//';
+    font-size: 14px;
+    height: 0;
+    margin-left: -10px;
+  }
+`;
+
+const Rule = styled(LabelWrapper)`
+  flex-basis: 100%;
+`;
+
+const Formatter = styled(LabelWrapper)`
+  flex-basis: 100%;
+`;
+
+const SubmitButton = styled.input`
+  border: 0;
+  background: ${({ theme }) => theme.colors.altGreen};
+  font-weight: 600;
+  color: #fff;
+  padding: 4px 6px;
+  border-radius: 5px;
+  cursor: pointer;
 `;

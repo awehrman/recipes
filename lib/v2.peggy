@@ -31,10 +31,10 @@ start =
 // RULES
 
 ingredientLine "Ingredient Line" =
-  // '  apple'
+  // '1 apple'
   amt:amount* _* ing:ingredient
   {
-  	// strip out any empty values
+  	/* strip out any empty values */
   	const values = [amt, ing].flatMap(value => value);
   	return {
     	rule: '#1_ingredient_line',

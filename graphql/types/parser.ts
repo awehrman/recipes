@@ -22,8 +22,9 @@ export const ParserRuleDefinition = objectType({
   definition(t) {
     t.nullable.string('id');
     t.string('example');
-    t.string('definition');
     t.nullable.string('formatter');
+    t.nonNull.int('order');
+    t.string('rule');
   }
 });
 
@@ -68,8 +69,9 @@ const getRules = async (
         select: {
           id: true,
           example: true,
-          definition: true,
-          formatter: true
+          formatter: true,
+          order: true,
+          rule: true
         }
       }
     }
@@ -107,9 +109,10 @@ const addParserRule = async (
 
   const definitionsCreateMany = {
     createMany: {
-      data: (definitions ?? []).map((def) => ({
+      data: (definitions ?? []).map((def, index) => ({
         example: def?.example ?? '',
-        definition: def?.definition ?? '',
+        rule: def?.rule ?? '',
+        order: def?.order ?? index,
         formatter: def?.formatter ?? null
       }))
     }
@@ -124,7 +127,7 @@ const addParserRule = async (
     data.definitions = definitionsCreateMany;
   }
 
-  console.log({ data });
+  console.log(JSON.stringify({ data }, null, 2));
   const response = { id };
   try {
     const result = await prisma.parserRule.create({
@@ -158,16 +161,18 @@ const updateParserRule = async (
     label = capitalize(name);
   }
   const upsert: Prisma.ParserRuleDefinitionUpsertWithWhereUniqueWithoutParserRuleInput[] =
-    (definitions ?? []).map((def) => ({
+    (definitions ?? []).map((def, index) => ({
       where: { id: def?.id ?? undefined },
       create: {
         example: def?.example ?? '',
-        definition: def?.definition ?? '',
+        rule: def?.rule ?? '',
+        order: parseInt(`${def?.example ?? index}`, 10),
         formatter: def?.formatter ?? null
       },
       update: {
         example: def?.example ?? '',
-        definition: def?.definition ?? '',
+        rule: def?.rule ?? '',
+        order: parseInt(`${def?.example ?? index}`, 10),
         formatter: def?.formatter ?? null
       }
     }));
@@ -278,7 +283,8 @@ export const ParserRuleDefinitionInput = inputObjectType({
   name: 'ParserRuleDefinitionInput',
   definition(t) {
     t.nullable.string('id');
-    t.nonNull.string('definition');
+    t.nonNull.string('rule');
+    t.nonNull.int('order');
     t.string('example');
     t.string('formatter');
   }

@@ -8,8 +8,9 @@ export default gql`
     definitions {
       id
       example
-      definition
       formatter
+      order
+      rule
     }
   }
 `;

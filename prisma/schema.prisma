@@ -283,9 +283,10 @@ model ParserRuleDefinition {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  example    String
-  definition String
-  formatter  String?
+  example   String
+  formatter String?
+  order     Int
+  rule      String
 
   parserRule   ParserRule? @relation(fields: [parserRuleId], references: [id])
   parserRuleId String?

@@ -37,7 +37,7 @@
     "evernote": "^2.0.5",
     "graphql": "^16.6.0",
     "graphql-iso-date": "^3.6.1",
-    "js-beautify": "^1.14.7",
+    "js-beautify": "^1.14.8",
     "lint-staged": "^13.1.0",
     "lodash": "^4.17.21",
     "micro": "^10.0.1",

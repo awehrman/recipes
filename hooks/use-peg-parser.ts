@@ -9,18 +9,19 @@ import {
   UPDATE_PARSER_RULE_MUTATION
 } from '../graphql/mutations/parser';
 
-type DefinitionProps = {
-  id?: string;
-  example?: string;
-  definition?: string;
-  formatter?: string;
+type Definition = {
+  id: string;
+  example: string;
+  formatter: string;
+  order: number;
+  rule: string;
 };
 
-type RuleProps = {
+type Rule = {
   id: string;
   name: string;
   label: string;
-  definitions: DefinitionProps[];
+  definitions: Definition[];
 };
 
 // const defaultRules: RuleProps[] = [
@@ -84,7 +85,7 @@ type TestProps = {
 type RuleInputProps = {
   id?: string;
   name: string;
-  definitions?: DefinitionProps[];
+  definitions?: Definition[];
 };
 
 type DetailsProps = {
@@ -98,6 +99,7 @@ type ExpectedProps = {
   value: string;
 };
 
+// TODO move this to a constants file
 const defaultTests = [
   {
     reference: 'apple',
@@ -162,7 +164,7 @@ function usePEGParser() {
     refetch
   } = useQuery(GET_ALL_PARSER_RULES_QUERY, {});
   const { parserRules = [] } = data;
-  parserRules && compileGrammar();
+  const grammarErrors = parserRules ? compileGrammar() : [];
 
   const [addParserRule] = useMutation(ADD_PARSER_RULE_MUTATION);
   const [updateParserRule] = useMutation(UPDATE_PARSER_RULE_MUTATION);
@@ -170,39 +172,38 @@ function usePEGParser() {
   // const [saveParserRules] = useMutation(SAVE_PARSER_RULES_MUTATION);
 
   function compileGrammar() {
+    if (!parserRules.length) {
+      return;
+    }
     const starter = `start = ingredientLine \n`;
     const grammar =
       starter +
       parserRules.map(
-        (rule: RuleProps) =>
+        (rule: Rule) =>
           `${rule.name} "${rule.label}" =
         ${rule.definitions.map(
           (def) =>
-            `// ${def.example}
-  ${def.definition}
+            `// '${def.example}'
+  ${def.rule}
     ${def?.formatter ?? ''}`
         )}`
       ).join(`
 `);
+    const errors: any[] = [];
     try {
       parserSource = peggy.generate(grammar, {
         cache: true,
         output: 'source',
         error: function (_stage, message, location) {
-          // console.log({
-          //   severity: 'error',
-          //   message: message,
-          //   from: location?.start,
-          //   to: location?.end
-          // });
+          errors.push({ message, location });
         }
       });
       parser = eval(parserSource.toString());
-
       parseTests();
     } catch (e) {
-      // console.log('fuck', { e });
+      // TODO we might want to log the parsing error
     }
+    return errors;
   }
 
   function parseTests() {
@@ -222,42 +223,11 @@ function usePEGParser() {
     }
   }
 
-  function addRule(rule: any, reset: any, setShowNewRuleForm: any) {
-    const definitions = [];
-
-    if (rule?.example || rule?.definition || rule?.formatter) {
-      const definition: DefinitionProps = {};
-      if (rule?.example) {
-        definition.example = rule.example;
-      }
-      if (rule?.definition) {
-        definition.definition = rule.definition;
-      }
-      if (rule?.formatter) {
-        definition.formatter = rule.formatter;
-      }
-      if (Object.keys(definition).length > 0) {
-        definitions.push(definition);
-      }
-    }
-    console.log({
-      input: {
-        name: rule.name,
-        label: rule.label,
-        // TODO our inputs need to catch up to the schema
-        definitions
-      }
-    });
+  function addRule(input: Rule, reset: any, setShowNewRuleForm: any): void {
+    console.log('addRule', { input });
     try {
       addParserRule({
-        variables: {
-          input: {
-            name: rule.name,
-            label: rule.label,
-            // TODO our inputs need to catch up to the schema
-            definitions
-          }
-        },
+        variables: { input },
         update: (_cache, data) => {
           console.log('update', { data });
           refetch();
@@ -308,6 +278,7 @@ function usePEGParser() {
     addRule,
     deleteRule,
     compileGrammar,
+    grammarErrors,
     loading,
     rules: parserRules,
     parser,

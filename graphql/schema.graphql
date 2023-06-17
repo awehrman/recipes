@@ -163,17 +163,19 @@ type ParserRule {
 }
 
 type ParserRuleDefinition {
-  definition: String
   example: String
   formatter: String
   id: String
+  order: Int!
+  rule: String
 }
 
 input ParserRuleDefinitionInput {
-  definition: String!
   example: String
   formatter: String
   id: String
+  order: Int!
+  rule: String!
 }
 
 input ParserRuleInput {
