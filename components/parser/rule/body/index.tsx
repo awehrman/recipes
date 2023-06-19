@@ -1,24 +1,21 @@
-import { ParserRuleWithRelations, ParserRuleDefinition } from '@prisma/client';
-import React from 'react';
+import { ParserRuleDefinition } from '@prisma/client';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
 
+import RuleContext from 'contexts/rule-context';
 import Definition from './definition';
 
-type RuleComponentProps = {
-  rule: ParserRuleWithRelations;
-  violations: string[];
-};
+type RuleComponentProps = {};
 
-const RuleBody: React.FC<RuleComponentProps> = ({ rule, violations }) => {
+const RuleBody: React.FC<RuleComponentProps> = () => {
+  const { rule, violations } = useContext(RuleContext);
   const { definitions = [] } = rule;
 
   function renderDefinitions() {
     return definitions.map((definition: ParserRuleDefinition) => (
       <Definition
-        key={definition.id}
+        key={`${rule.id}-def-${definition.id}`}
         definition={definition}
-        ruleId={rule.id}
-        violations={violations}
       />
     ));
   }

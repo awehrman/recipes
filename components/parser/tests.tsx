@@ -113,7 +113,6 @@ export default Tests;
 const TestWrapper = styled.div<TestWrapperProps>`
   font-size: 14px;
   color: ${({ parsed }) => (parsed ? 'MediumSeaGreen' : 'tomato')};
-
   &:hover {
     cursor: pointer;
   }

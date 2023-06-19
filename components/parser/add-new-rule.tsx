@@ -3,13 +3,12 @@
 import js_beautify from 'js-beautify';
 import { capitalize } from 'lodash';
 import React, { useCallback, useEffect } from 'react';
-import { useForm, useFieldArray, useWatch } from 'react-hook-form';
+import { useForm, useWatch, useFieldArray } from 'react-hook-form';
 import styled from 'styled-components';
 import { v4 } from 'uuid';
 
 import { Button } from 'components/common';
 import usePEGParser from 'hooks/use-peg-parser';
-import { text } from 'micro';
 
 const defaultValues = {
   id: v4(),

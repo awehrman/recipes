@@ -1,6 +1,8 @@
 import { ParserRuleDefinition } from '@prisma/client';
-import React from 'react';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
+
+import RuleContext from 'contexts/rule-context';
 
 import Comment from './comment';
 import Formatter from './formatter';
@@ -8,21 +10,17 @@ import RuleDefinition from './rule-definition';
 
 type DefinitionProps = {
   definition: ParserRuleDefinition;
-  ruleId: string;
-  violations: string[];
 };
 
-const Definition: React.FC<DefinitionProps> = ({
-  definition,
-  ruleId,
-  violations
-}) => {
-  const { id, example, rule, formatter } = definition;
-  const formatterId = `${ruleId}-${id}-formatter`;
+const Definition: React.FC<DefinitionProps> = ({ definition }) => {
+  const { rule } = useContext(RuleContext);
+  const { id, example, rule: ruleDefinition, formatter } = definition;
+  const formatterId = `${rule.id}-${id}-formatter`;
+
   return (
     <Wrapper>
       <Comment comment={example} />
-      <RuleDefinition definition={rule} violations={violations} />
+      <RuleDefinition definition={ruleDefinition} />
       {formatter?.length ? (
         <Formatter id={formatterId} formatter={formatter} />
       ) : null}

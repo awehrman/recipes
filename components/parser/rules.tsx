@@ -165,9 +165,7 @@ const Rules: React.FC<RulesProps> = () => {
 
 export default Rules;
 
-const RulesWrapper = styled.div`
-  flex-grow: 1;
-`;
+const RulesWrapper = styled.div``;
 
 const Loading = styled.div`
   font-size: 13px;

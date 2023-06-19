@@ -1,22 +1,25 @@
-import React, { ReactElement, useCallback } from 'react';
+import React, { ReactElement, useCallback, useContext } from 'react';
 import styled from 'styled-components';
+import { v4 } from 'uuid';
+
+import RuleContext from 'contexts/rule-context';
 
 type RuleComponentProps = {
   definition: string;
-  violations: string[];
 };
 
-const RuleDefinition: React.FC<RuleComponentProps> = ({
-  definition,
-  violations = []
-}) => {
+const RuleDefinition: React.FC<RuleComponentProps> = ({ definition }) => {
+  const { isEditMode, violations, ruleForm } = useContext(RuleContext);
+  const { register } = ruleForm;
+
   const formatRules = useCallback(
     (definition: string): ReactElement[] => {
       const components: ReactElement[] = [];
       // handle keyword lists
       if (definition.startsWith('[') && definition.endsWith(']')) {
         const keywords = definition.slice(1, definition.length - 1).split(',');
-        components.push(<RuleList>[{keywords.join(', ')}]</RuleList>);
+        const key = v4();
+        components.push(<RuleList key={key}>[{keywords.join(', ')}]</RuleList>);
         return components;
       }
 
@@ -29,8 +32,9 @@ const RuleDefinition: React.FC<RuleComponentProps> = ({
           // TODO idk this might not be enough when we get to more complicated expressions...
           // its like i need a fucking peg parser for this itself
           const splitArray = piece.split(/([*!+|()[\]])/).filter(Boolean);
+          const key = v4();
           return components.push(
-            <Rule>
+            <Rule key={key}>
               {splitArray.map((splitPiece, index) => {
                 if (violations.includes(splitPiece)) {
                   return (
@@ -39,7 +43,9 @@ const RuleDefinition: React.FC<RuleComponentProps> = ({
                     </MissingRule>
                   );
                 }
-                return <>{splitPiece}</>;
+                return (
+                  <span key={`piece-${index}-${splitPiece}`}>{splitPiece}</span>
+                );
               })}
             </Rule>
           );
@@ -48,9 +54,10 @@ const RuleDefinition: React.FC<RuleComponentProps> = ({
         // TODO dry this up
         const [label, rule] = piece.split(':');
         const splitArray = rule.split(/([*!+|()[\]])/).filter(Boolean);
-        components.push(<Label>{label}:</Label>);
+        const key = v4();
+        components.push(<Label key={`label-${key}`}>{label}:</Label>);
         components.push(
-          <Rule>
+          <Rule key={key}>
             {splitArray.map((splitPiece, index) => {
               if (violations.includes(splitPiece)) {
                 return (
@@ -59,7 +66,9 @@ const RuleDefinition: React.FC<RuleComponentProps> = ({
                   </MissingRule>
                 );
               }
-              return <>{splitPiece}</>;
+              return (
+                <span key={`piece-${index}-${splitPiece}`}>{splitPiece}</span>
+              );
             })}
           </Rule>
         );
@@ -73,7 +82,28 @@ const RuleDefinition: React.FC<RuleComponentProps> = ({
     const components: ReactElement[] = formatRules(definition);
     return <>{components.map((component) => component)}</>;
   }
-  return <Definition>{renderRule()}</Definition>;
+
+  if (!isEditMode) {
+    return <Definition>{renderRule()}</Definition>;
+  }
+
+  function trimInput(event: React.ChangeEvent<HTMLInputElement>) {
+    event.target.value = event.target.value.trim();
+  }
+
+  return (
+    <EditRule id="rule-rule-wrapper" htmlFor="rule">
+      <Input
+        {...register('rule')}
+        id="rule"
+        defaultValue={definition}
+        name="rule"
+        onBlur={trimInput}
+        placeholder="rule"
+        type="text"
+      />
+    </EditRule>
+  );
 };
 
 export default RuleDefinition;
@@ -97,3 +127,32 @@ const MissingRule = styled.span`
 `;
 
 const RuleList = styled.span``;
+
+// TODO move these into a common place
+const LabelWrapper = styled.label`
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  font-weight: 600;
+  min-width: 50px;
+`;
+
+const Input = styled.input`
+  padding: 0;
+  color: #333;
+  border: 0;
+  background: transparent;
+  margin-bottom: 8px;
+  padding: 4px 6px;
+  min-width: 50px;
+
+  :-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 30px
+      ${({ theme }) => theme.colors.headerBackground} inset;
+    -webkit-text-fill-color: #333;
+  }
+`;
+
+const EditRule = styled(LabelWrapper)`
+  margin-right: 10px;
+`;
