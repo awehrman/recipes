@@ -25,17 +25,19 @@ const RuleComment: React.FC<RuleComponentProps> = ({ comment }) => {
   }
 
   return (
-    <EditComment id="rule-comment-wrapper" htmlFor="comment">
-      <Input
-        {...register('comment')}
-        id="comment"
-        defaultValue={comment}
-        name="comment"
-        onBlur={trimInput}
-        placeholder="comment"
-        type="text"
-      />
-    </EditComment>
+    <Wrapper>
+      <EditComment htmlFor="comment">
+        <Input
+          {...register('comment')}
+          id="comment"
+          defaultValue={comment}
+          name="comment"
+          onBlur={trimInput}
+          placeholder="comment"
+          type="text"
+        />
+      </EditComment>
+    </Wrapper>
   );
 };
 
@@ -46,30 +48,44 @@ const Comment = styled.div`
   margin-bottom: 6px;
 `;
 
+const Wrapper = styled.fieldset`
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  color: #ccc;
+`;
+
 const LabelWrapper = styled.label`
   display: flex;
   flex-direction: column;
   font-size: 14px;
   font-weight: 600;
-  min-width: 50px;
 `;
 
 const Input = styled.input`
   padding: 0;
-  color: #333;
+  color: #ccc;
   border: 0;
   background: transparent;
   margin-bottom: 8px;
-  padding: 4px 6px;
-  min-width: 50px;
+  margin-left: 15px;
+  width: 100%;
 
   :-webkit-autofill {
     -webkit-box-shadow: 0 0 0 30px
       ${({ theme }) => theme.colors.headerBackground} inset;
-    -webkit-text-fill-color: #333;
+    -webkit-text-fill-color: #ccc;
   }
 `;
 
 const EditComment = styled(LabelWrapper)`
-  margin-right: 10px;
+  position: relative;
+  width: 100%;
+
+  :before {
+    content: '//';
+    top: -2px;
+    position: absolute;
+  }
 `;

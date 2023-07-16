@@ -35,7 +35,6 @@ const Rules: React.FC<RulesProps> = () => {
           }
         }
       });
-      console.log({ data });
       if (Object.keys(rule).length > 0) {
         addRule(rule, reset, setShowNewRuleForm);
       }
@@ -71,7 +70,6 @@ const Rules: React.FC<RulesProps> = () => {
           });
         }
       });
-      console.log({ rules });
       //Promise.all(rules.map((rule) => updateRule(rule)));
     },
     // [addRule, reset, updateRule]
@@ -98,6 +96,7 @@ const Rules: React.FC<RulesProps> = () => {
     }
     // eslint-disable-next-line
   }, [watchedData, isDirty, isValid]);
+
   const undefinedRules = useCallback(
     () =>
       new Set([

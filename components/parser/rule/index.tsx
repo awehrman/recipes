@@ -1,5 +1,5 @@
 import { ParserRuleWithRelations } from '@prisma/client';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import styled from 'styled-components';
 
@@ -32,8 +32,8 @@ const Rule: React.FC<RuleComponentProps> = ({ rule, violations }) => {
   };
 
   const handleClickOutside = () => {
-    setIsEditMode(false);
-    reset();
+    // setIsEditMode(false);
+    // reset();
   };
 
   const ruleRef = useClickOutside(handleClickOutside);
@@ -47,6 +47,11 @@ const Rule: React.FC<RuleComponentProps> = ({ rule, violations }) => {
     setIsHovered(false);
   }
 
+  const containerHeight = useCallback(
+    () => `${ruleRef.current?.clientHeight}px`,
+    [ruleRef]
+  );
+
   return (
     <RuleContext.Provider value={{ ...contextValues }}>
       <Wrapper
@@ -55,7 +60,7 @@ const Rule: React.FC<RuleComponentProps> = ({ rule, violations }) => {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <RuleHeader />
+        <RuleHeader containerHeight={containerHeight()} />
         {isExpanded ? <RuleBody /> : null}
       </Wrapper>
     </RuleContext.Provider>
@@ -68,11 +73,14 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
-  margin-bottom: 20px;
-  max-width: 600px;
-  padding: 10px;
+  width: 600px;
+  position: relative;
 
   &.edit {
-    background: ${({ theme }) => theme.colors.headerBackground};
+    left: -40px;
+    padding: 10px 0 10px 40px;
+    width: 640px;
+    background: ${({ theme }) => theme.colors.lightBlue};
+    margin-bottom: 10px;
   }
 `;

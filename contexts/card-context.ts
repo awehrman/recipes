@@ -48,7 +48,7 @@ const defaultCard = {
   isEditMode: false,
   setIsEditMode: (value: boolean) => {},
   formState: {} as DeepPartialSkipArrayKey<FormStateProps>,
-  methods: {} as any
+  methods: {} as any // TODO maybe look at how its done in rule-context
 };
 
 const CardContext = React.createContext(defaultCard);

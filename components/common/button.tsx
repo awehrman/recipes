@@ -5,6 +5,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   ref?: MutableRefObject<HTMLButtonElement> | null;
   icon?: React.ReactNode;
   label?: string;
+  height?: string;
 }
 
 type Ref = HTMLButtonElement | null;
@@ -18,9 +19,14 @@ const Button = forwardRef<Ref, ButtonProps>(
   )
 );
 
-const StyledButton = styled.button`
+type StyledButtonProps = {
+  height?: string;
+};
+
+const StyledButton = styled.button<StyledButtonProps>`
   pointer: cursor;
   text-decoration: none;
+  height: ${({ height }) => height || 'auto'};
 `;
 
 Button.defaultProps = {

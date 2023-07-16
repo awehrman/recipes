@@ -8,7 +8,7 @@ import Definition from './definition';
 type RuleComponentProps = {};
 
 const RuleBody: React.FC<RuleComponentProps> = () => {
-  const { rule, violations } = useContext(RuleContext);
+  const { rule } = useContext(RuleContext);
   const { definitions = [] } = rule;
 
   function renderDefinitions() {

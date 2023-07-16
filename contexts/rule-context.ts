@@ -1,8 +1,4 @@
-import {
-  Prisma,
-  ParserRuleDefinition,
-  ParserRuleWithRelations
-} from '@prisma/client';
+import { ParserRuleDefinition, ParserRuleWithRelations } from '@prisma/client';
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 

@@ -1,5 +1,5 @@
 import { js_beautify, HTMLBeautifyOptions } from 'js-beautify';
-import React, { useContext, useEffect } from 'react';
+import React, { useCallback, useContext, useEffect } from 'react';
 import styled from 'styled-components';
 
 import RuleContext from 'contexts/rule-context';
@@ -34,28 +34,40 @@ const RuleFormatter: React.FC<RuleComponentProps> = ({ id, formatter }) => {
   const { isEditMode, ruleForm } = useContext(RuleContext);
   const { register } = ruleForm;
 
+  // TODO move into a hook
+  const adjustTextAreaHeight = useCallback(() => {
+    const textarea = document.getElementById(id);
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  }, [id]);
+
   useEffect(() => {
     adjustElementHeight(id);
-  }, [formatted, id]);
+  }, [formatted, id, isEditMode]);
+
+  useEffect(() => {
+    adjustTextAreaHeight();
+  }, [adjustTextAreaHeight, formatter, isEditMode]);
 
   if (!isEditMode) {
     return <Formatter id={id}>{formatted}</Formatter>;
   }
 
-  function trimInput(event: React.ChangeEvent<HTMLInputElement>) {
-    event.target.value = event.target.value.trim();
+  function formatTextArea(event: React.ChangeEvent<HTMLTextAreaElement>) {
+    event.target.value = js_beautify(event.target.value, { indent_size: 2 });
   }
 
   return (
-    <EditFormatter id="rule-formatter-wrapper" htmlFor="formatter">
-      <Input
+    <EditFormatter htmlFor="formatter">
+      <TextArea
         {...register('formatter')}
-        id="formatter"
-        defaultValue={formatter}
+        id={id}
+        defaultValue={formatted}
         name="formatter"
-        onBlur={trimInput}
+        onBlur={formatTextArea}
         placeholder="formatter"
-        type="text"
       />
     </EditFormatter>
   );
@@ -77,20 +89,15 @@ const LabelWrapper = styled.label`
   min-width: 50px;
 `;
 
-const Input = styled.input`
+const TextArea = styled.textarea`
   padding: 0;
   color: #333;
   border: 0;
   background: transparent;
   margin-bottom: 8px;
   padding: 4px 6px;
-  min-width: 50px;
-
-  :-webkit-autofill {
-    -webkit-box-shadow: 0 0 0 30px
-      ${({ theme }) => theme.colors.headerBackground} inset;
-    -webkit-text-fill-color: #333;
-  }
+  width: 100%;
+  height: 200px;
 `;
 
 const EditFormatter = styled(LabelWrapper)`

@@ -33,6 +33,7 @@ const RuleDefinition: React.FC<RuleComponentProps> = ({ definition }) => {
           // its like i need a fucking peg parser for this itself
           const splitArray = piece.split(/([*!+|()[\]])/).filter(Boolean);
           const key = v4();
+
           return components.push(
             <Rule key={key}>
               {splitArray.map((splitPiece, index) => {
@@ -43,8 +44,19 @@ const RuleDefinition: React.FC<RuleComponentProps> = ({ definition }) => {
                     </MissingRule>
                   );
                 }
+
+                if (['*', '+', '!', '(', ')', '[', ']'].includes(splitPiece)) {
+                  return (
+                    <SplitPiece key={`piece-${index}-${splitPiece}`}>
+                      {splitPiece}
+                    </SplitPiece>
+                  );
+                }
+
                 return (
-                  <span key={`piece-${index}-${splitPiece}`}>{splitPiece}</span>
+                  <DefinedRule key={`piece-${index}-${splitPiece}`}>
+                    {splitPiece}
+                  </DefinedRule>
                 );
               })}
             </Rule>
@@ -66,8 +78,19 @@ const RuleDefinition: React.FC<RuleComponentProps> = ({ definition }) => {
                   </MissingRule>
                 );
               }
+
+              if (['*', '+', '!', '(', ')', '[', ']'].includes(splitPiece)) {
+                return (
+                  <SplitPiece key={`piece-${index}-${splitPiece}`}>
+                    {splitPiece}
+                  </SplitPiece>
+                );
+              }
+
               return (
-                <span key={`piece-${index}-${splitPiece}`}>{splitPiece}</span>
+                <DefinedRule key={`piece-${index}-${splitPiece}`}>
+                  {splitPiece}
+                </DefinedRule>
               );
             })}
           </Rule>
@@ -92,17 +115,19 @@ const RuleDefinition: React.FC<RuleComponentProps> = ({ definition }) => {
   }
 
   return (
-    <EditRule id="rule-rule-wrapper" htmlFor="rule">
-      <Input
-        {...register('rule')}
-        id="rule"
-        defaultValue={definition}
-        name="rule"
-        onBlur={trimInput}
-        placeholder="rule"
-        type="text"
-      />
-    </EditRule>
+    <Wrapper>
+      <EditRule htmlFor="rule">
+        <Input
+          {...register('rule')}
+          id="rule"
+          defaultValue={definition}
+          name="rule"
+          onBlur={trimInput}
+          placeholder="rule"
+          type="text"
+        />
+      </EditRule>
+    </Wrapper>
   );
 };
 
@@ -114,45 +139,55 @@ const Definition = styled.div`
 `;
 
 const Label = styled.label`
-  font-weight: bold;
   margin-right: 2px;
 `;
 
 const Rule = styled.span`
   margin-right: 2px;
+  font-weight: 600;
 `;
 
 const MissingRule = styled.span`
   color: tomato;
+  font-weight: 600;
+`;
+
+const SplitPiece = styled.span``;
+
+const DefinedRule = styled.span`
+  color: ${({ theme }) => theme.colors.highlight};
 `;
 
 const RuleList = styled.span``;
 
-// TODO move these into a common place
+const Wrapper = styled.fieldset`
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: flex;
+`;
+
 const LabelWrapper = styled.label`
   display: flex;
   flex-direction: column;
   font-size: 14px;
   font-weight: 600;
-  min-width: 50px;
 `;
 
 const Input = styled.input`
   padding: 0;
-  color: #333;
   border: 0;
   background: transparent;
   margin-bottom: 8px;
-  padding: 4px 6px;
-  min-width: 50px;
+  width: 100%;
 
   :-webkit-autofill {
     -webkit-box-shadow: 0 0 0 30px
       ${({ theme }) => theme.colors.headerBackground} inset;
-    -webkit-text-fill-color: #333;
+    -webkit-text-fill-color: #ccc;
   }
 `;
 
 const EditRule = styled(LabelWrapper)`
-  margin-right: 10px;
+  width: 100%;
 `;
