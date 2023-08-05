@@ -1,5 +1,7 @@
-import React, { useContext } from 'react';
+import _ from 'lodash';
+import React, { useContext, useEffect } from 'react';
 import styled from 'styled-components';
+import { useWatch } from 'react-hook-form';
 
 import RuleContext from 'contexts/rule-context';
 import HighlightedInput from '../highlighted-input';
@@ -8,10 +10,18 @@ type RuleComponentProps = {};
 
 const RuleLabel: React.FC<RuleComponentProps> = () => {
   const { isEditMode, rule, ruleForm } = useContext(RuleContext);
-  const { register } = ruleForm;
+  const { control, register, setValue } = ruleForm;
   const { label } = rule;
+  const watchName: string = useWatch({
+    control,
+    name: 'name',
+    defaultValue: rule.name
+  });
 
-  // TODO auto label based on name change
+  useEffect(() => {
+    const label = _.startCase(watchName);
+    setValue('label', label);
+  }, [setValue, watchName]);
 
   if (!isEditMode) {
     return <Label>{label}</Label>;

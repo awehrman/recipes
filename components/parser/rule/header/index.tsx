@@ -3,6 +3,7 @@ import styled from 'styled-components';
 
 import { Button } from 'components/common';
 import RuleContext from 'contexts/rule-context';
+import usePEGParser from 'hooks/use-peg-parser';
 import EditIcon from 'public/icons/edit.svg';
 import TrashIcon from 'public/icons/trash-can.svg';
 
@@ -12,9 +13,11 @@ import ExpandButton from './expand-button';
 
 type RuleComponentProps = {
   containerHeight: string;
+  id: string;
 };
 
-const RuleHeader: React.FC<RuleComponentProps> = ({ containerHeight }) => {
+const RuleHeader: React.FC<RuleComponentProps> = ({ containerHeight, id }) => {
+  const { deleteRule } = usePEGParser();
   const {
     setIsEditMode,
     isEditMode,
@@ -30,7 +33,8 @@ const RuleHeader: React.FC<RuleComponentProps> = ({ containerHeight }) => {
   }
 
   function handleRemoveRuleClick() {
-    // TODO
+    deleteRule(id);
+    // TODO launch modal to confirm
   }
 
   return (

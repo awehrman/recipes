@@ -60,7 +60,7 @@ const Rule: React.FC<RuleComponentProps> = ({ rule, violations }) => {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <RuleHeader containerHeight={containerHeight()} />
+        <RuleHeader containerHeight={containerHeight()} id={rule.id} />
         {isExpanded ? <RuleBody /> : null}
       </Wrapper>
     </RuleContext.Provider>

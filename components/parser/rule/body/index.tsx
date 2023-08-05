@@ -3,7 +3,10 @@ import React, { useContext } from 'react';
 import styled from 'styled-components';
 
 import RuleContext from 'contexts/rule-context';
-import Definition from './definition';
+
+import Comment from './comment';
+import Formatter from './formatter';
+import RuleDefinition from './rule-definition';
 
 type RuleComponentProps = {};
 
@@ -13,10 +16,11 @@ const RuleBody: React.FC<RuleComponentProps> = () => {
 
   function renderDefinitions() {
     return definitions.map((definition: ParserRuleDefinition) => (
-      <Definition
-        key={`${rule.id}-def-${definition.id}`}
-        definition={definition}
-      />
+      <Wrapper key={`wrapper-${definition.id}`}>
+        <Comment id={definition.id} />
+        {/* <RuleDefinition id={definition.id} />
+        {definition.formatter?.length ? <Formatter id={definition.id} /> : null} */}
+      </Wrapper>
     ));
   }
 
@@ -27,4 +31,9 @@ export default RuleBody;
 
 const Body = styled.div`
   margin: 6px 20px;
+`;
+
+const Wrapper = styled.div`
+  margin-right: 10px;
+  font-size: 14px;
 `;

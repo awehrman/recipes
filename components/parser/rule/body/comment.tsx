@@ -1,15 +1,20 @@
+import { ParserRuleDefinition } from '@prisma/client';
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 
 import RuleContext from 'contexts/rule-context';
 
 type RuleComponentProps = {
-  comment: string;
+  id: string;
 };
 
-const RuleComment: React.FC<RuleComponentProps> = ({ comment }) => {
-  const { isEditMode, ruleForm } = useContext(RuleContext);
+const RuleComment: React.FC<RuleComponentProps> = ({ id }) => {
+  const { isEditMode, rule, ruleForm } = useContext(RuleContext);
   const { register } = ruleForm;
+  const { definitions = [] } = rule;
+  const comment = definitions.find(
+    (d: ParserRuleDefinition) => d.id === id
+  )?.comment;
 
   function trimInput(event: React.ChangeEvent<HTMLInputElement>) {
     event.target.value = event.target.value.trim();
@@ -26,14 +31,14 @@ const RuleComment: React.FC<RuleComponentProps> = ({ comment }) => {
 
   return (
     <Wrapper>
-      <EditComment htmlFor="comment">
+      <EditComment htmlFor="definition.comment">
         <Input
-          {...register('comment')}
-          id="comment"
+          {...register(`definition[${id}].comment`)}
+          id="definition.comment"
           defaultValue={comment}
-          name="comment"
+          name="definition.comment"
           onBlur={trimInput}
-          placeholder="comment"
+          placeholder="definition.comment"
           type="text"
         />
       </EditComment>

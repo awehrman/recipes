@@ -213,6 +213,10 @@ const deleteParserRule = async (
   const response = { id: 'false' };
   try {
     await prisma.parserRule.delete({
+      // TODO this doesn't seem to be removing the definitions
+      include: {
+        definitions: true
+      },
       where: {
         id
       }

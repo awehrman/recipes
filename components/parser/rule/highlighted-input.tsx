@@ -22,7 +22,11 @@ const HighlightedInput = ({
     ruleForm: { control, setValue, trigger }
   } = useContext(RuleContext);
   const level = 'default';
-  const watchName = useWatch({ control, name: fieldName, defaultValue });
+  const watchName: string = useWatch({
+    control,
+    name: fieldName,
+    defaultValue
+  });
   const trimmedValue = (watchName?.length ? watchName : defaultValue)?.replace(
     / /g,
     '\u00a0'

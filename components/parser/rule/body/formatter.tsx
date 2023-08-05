@@ -1,5 +1,6 @@
 import { js_beautify, HTMLBeautifyOptions } from 'js-beautify';
 import React, { useCallback, useContext, useEffect } from 'react';
+import { useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 
 import RuleContext from 'contexts/rule-context';
@@ -29,10 +30,11 @@ const options: HTMLBeautifyOptions = {
   wrap_line_length: 110
 };
 
+// TODO can i not pass the fucking string here? lets just reference from index
 const RuleFormatter: React.FC<RuleComponentProps> = ({ id, formatter }) => {
   const formatted = js_beautify(formatter, options);
   const { isEditMode, ruleForm } = useContext(RuleContext);
-  const { register } = ruleForm;
+  const { control, register } = ruleForm;
 
   // TODO move into a hook
   const adjustTextAreaHeight = useCallback(() => {
@@ -40,6 +42,7 @@ const RuleFormatter: React.FC<RuleComponentProps> = ({ id, formatter }) => {
     if (textarea) {
       textarea.style.height = 'auto';
       textarea.style.height = `${textarea.scrollHeight}px`;
+      console.log(textarea.scrollHeight);
     }
   }, [id]);
 
@@ -47,9 +50,11 @@ const RuleFormatter: React.FC<RuleComponentProps> = ({ id, formatter }) => {
     adjustElementHeight(id);
   }, [formatted, id, isEditMode]);
 
+  // TODO this doesn't fire on typing
   useEffect(() => {
+    console.log('adjustTextAreaHeight', formatted);
     adjustTextAreaHeight();
-  }, [adjustTextAreaHeight, formatter, isEditMode]);
+  }, [adjustTextAreaHeight, formatted, formatter, isEditMode]);
 
   if (!isEditMode) {
     return <Formatter id={id}>{formatted}</Formatter>;

@@ -12,7 +12,7 @@ type RulesProps = {};
 const regex = /"(.*?)"/;
 
 const Rules: React.FC<RulesProps> = () => {
-  const { addRule, deleteRule, grammarErrors, loading, rules } = usePEGParser();
+  const { addRule, grammarErrors, loading, rules } = usePEGParser();
   const [showNewRuleForm, setShowNewRuleForm] = useState(false);
   const {
     control,

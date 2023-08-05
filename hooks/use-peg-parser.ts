@@ -260,6 +260,7 @@ function usePEGParser() {
   }
 
   function deleteRule(id: string) {
+    // does this only remove the rule or also the connected definitions?
     deleteParserRule({
       variables: { id },
       update: () => {

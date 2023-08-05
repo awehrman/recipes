@@ -52,6 +52,7 @@ export const authOptions = {
       return session;
     },
     async signIn({ user }: SignInProps): Promise<boolean> {
+      console.log('signIn', { user });
       const { role } = user;
       const isAuthorized = role === 'SUPERADMIN' || role === 'ADMIN';
 
