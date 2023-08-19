@@ -1,23 +1,25 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import usePEGParser from 'hooks/use-peg-parser';
+// import usePEGParser from 'hooks/use-peg-parser';
+
 import Rules from './rules';
 import Tests from './tests';
 
 type ParserProps = {};
 
-const PEGParser: React.FC<ParserProps> = () => {
-  const { tests } = usePEGParser();
+const Parser: React.FC<ParserProps> = () => {
+  // const { tests } = usePEGParser(rules);
+
   return (
     <Wrapper>
       <Rules />
-      <Tests tests={tests} />
+      {/* <Tests tests={tests} /> */}
     </Wrapper>
   );
 };
 
-export default PEGParser;
+export default Parser;
 
 const Wrapper = styled.div`
   display: flex;

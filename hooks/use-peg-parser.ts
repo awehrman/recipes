@@ -24,54 +24,6 @@ type Rule = {
   definitions: Definition[];
 };
 
-// const defaultRules: RuleProps[] = [
-//   {
-//     name: 'ingredientLine',
-//     label: 'Ingredient Line',
-//     definitions: [
-//       {
-//         example: 'one apple',
-//         definition: 'ing:ingredient',
-//         formatter: `{
-//   const values = [ing].flatMap((value) => value);
-//   return {
-//     rule: '#0_ingredientLine',
-//     type: 'ingredientLine',
-//     values
-//   };
-// }`
-//       }
-//     ]
-//   },
-//   {
-//     name: 'ingredient',
-//     label: 'Ingredient',
-//     definitions: [
-//       {
-//         example: 'apple',
-//         definition: 'ing:$(letter)+',
-//         formatter: `{
-//   return {
-//     rule: '#1_ingredient',
-//     type: 'ingredient',
-//     values: [ing.toLowerCase()]
-//   };
-// }`
-//       }
-//     ]
-//   },
-//   {
-//     name: 'letter',
-//     label: 'Letter',
-//     definitions: [
-//       {
-//         example: 'a',
-//         definition: '[a-z]i'
-//       }
-//     ]
-//   }
-// ];
-
 type TestProps = {
   reference: string;
   parsed: boolean;
@@ -155,33 +107,22 @@ const defaultTests = [
   }
 ];
 
-function usePEGParser() {
+function usePEGParser(rules: Rule[]) {
   let parser: any, parserSource;
   const tests = [...defaultTests];
-  const {
-    data = {},
-    loading,
-    refetch
-  } = useQuery(GET_ALL_PARSER_RULES_QUERY, {});
-  const { parserRules = [] } = data;
-  const grammarErrors = parserRules ? compileGrammar() : [];
-
-  const [addParserRule] = useMutation(ADD_PARSER_RULE_MUTATION);
-  const [updateParserRule] = useMutation(UPDATE_PARSER_RULE_MUTATION);
-  const [deleteParserRule] = useMutation(DELETE_PARSER_RULE_MUTATION);
-  // const [saveParserRules] = useMutation(SAVE_PARSER_RULES_MUTATION);
+  const grammarErrors = rules ? compileGrammar() : [];
 
   function compileGrammar() {
-    if (!parserRules.length) {
+    if (!rules.length) {
       return;
     }
     const starter = `start = ingredientLine \n`;
     const grammar =
       starter +
-      parserRules.map(
+      rules.map(
         (rule: Rule) =>
           `${rule.name} "${rule.label}" =
-        ${rule.definitions.map(
+        ${(rule?.definitions ?? []).map(
           (def) =>
             `// '${def.example}'
   ${def.rule}
@@ -223,70 +164,11 @@ function usePEGParser() {
     }
   }
 
-  function addRule(input: Rule, reset: any, setShowNewRuleForm: any): void {
-    console.log('addRule', { input });
-    try {
-      addParserRule({
-        variables: { input },
-        update: (_cache, data) => {
-          console.log('update', { data });
-          refetch();
-          setShowNewRuleForm(false);
-          reset();
-        }
-      });
-    } catch (e) {
-      console.log({ e });
-    }
-  }
-
-  function updateRule(rule: any) {
-    const input: RuleInputProps = {
-      id: rule.id,
-      name: rule.name
-    };
-
-    if (rule.definitions.length > 0) {
-      input.definitions = [...rule.definitions];
-    }
-    updateParserRule({
-      variables: {
-        input
-      },
-      update: () => {
-        refetch();
-      }
-    });
-  }
-
-  function deleteRule(id: string) {
-    // does this only remove the rule or also the connected definitions?
-    deleteParserRule({
-      variables: { id },
-      update: () => {
-        refetch();
-      }
-    });
-  }
-
-  function saveRules(rules = []) {
-    // saveParserRules({
-    //   variables: { rules }
-    // });
-  }
-
   return {
-    addRule,
-    deleteRule,
     compileGrammar,
     grammarErrors,
-    loading,
-    rules: parserRules,
     parser,
-    saveRules,
-    tests,
-    updateRule
+    tests
   };
 }
-
 export default usePEGParser;

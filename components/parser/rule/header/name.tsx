@@ -1,44 +1,32 @@
-import React, { useContext } from 'react';
+import _ from 'lodash';
+import React from 'react';
 import styled from 'styled-components';
 
-import RuleContext from 'contexts/rule-context';
-import HighlightedInput from '../highlighted-input';
+import { useRuleContext } from 'contexts/rule-context';
+import useParserRule from 'hooks/use-parser-rule';
+
+import AutoWidthInput from '../auto-width-input';
 
 type RuleComponentProps = {};
 
 const RuleName: React.FC<RuleComponentProps> = () => {
-  const { isEditMode, rule, ruleForm } = useContext(RuleContext);
-  const { register } = ruleForm;
-  const { name } = rule;
+  const {
+    state: { id, displayContext }
+  } = useRuleContext();
 
-  if (!isEditMode) {
+  const { rule } = useParserRule(id);
+  const { name = '' } = rule || {};
+
+  if (displayContext === 'display') {
     return <Name>{name}</Name>;
   }
 
-  return (
-    <Wrapper>
-      <HighlightedInput
-        defaultValue={name}
-        fieldName="name"
-        isEditMode={isEditMode}
-        isRequired
-        isSpellCheck={isEditMode}
-        placeholder="name"
-        registerField={register('name')}
-      />
-    </Wrapper>
-  );
+  return <AutoWidthInput defaultValue={name} fieldName="name" isRequired />;
 };
 
 export default RuleName;
 
-// TODO move these into a common file
-const Wrapper = styled.fieldset`
-  border: 0;
-  padding: 0;
-  margin: 0;
-  margin-right: 10px;
-`;
+RuleName.whyDidYouRender = true;
 
 const Name = styled.div`
   margin-right: 10px;

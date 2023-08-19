@@ -1,16 +1,26 @@
+import { ParserRuleDefinition } from '@prisma/client';
 import React, { ReactElement, useCallback, useContext } from 'react';
+import { useFormContext } from 'react-hook-form';
 import styled from 'styled-components';
 import { v4 } from 'uuid';
 
-import RuleContext from 'contexts/rule-context';
+import { useRuleContext } from 'contexts/rule-context';
+import useParserRule from 'hooks/use-parser-rule';
 
 type RuleComponentProps = {
-  definition: string;
+  definitionId: string;
 };
 
-const RuleDefinition: React.FC<RuleComponentProps> = ({ definition }) => {
-  const { isEditMode, violations, ruleForm } = useContext(RuleContext);
-  const { register } = ruleForm;
+const RuleDefinition: React.FC<RuleComponentProps> = ({ definitionId }) => {
+  const {
+    state: { id, displayContext }
+  } = useRuleContext();
+  const { rule, violations = [] } = useParserRule(id);
+  const { register } = useFormContext();
+  const { definitions = [] } = rule;
+  const definition = definitions.find(
+    (d: ParserRuleDefinition) => d.id === definitionId
+  )?.definition;
 
   const formatRules = useCallback(
     (definition: string): ReactElement[] => {
@@ -106,7 +116,7 @@ const RuleDefinition: React.FC<RuleComponentProps> = ({ definition }) => {
     return <>{components.map((component) => component)}</>;
   }
 
-  if (!isEditMode) {
+  if (displayContext === 'display') {
     return <Definition>{renderRule()}</Definition>;
   }
 

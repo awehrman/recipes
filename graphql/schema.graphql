@@ -100,6 +100,7 @@ type InstructionLine {
 
 type Mutation {
   addParserRule(input: ParserRuleInput): ParserRule
+  addParserRuleDefinition(input: ParserRuleDefinitionInput): ParserRuleDefinition
   authenticateEvernote(oauthVerifier: String, userId: String): EvernoteSession
   clearEvernoteSession(userId: String): EvernoteSession
   deleteParserRule(id: ID): ParserRule
@@ -176,6 +177,7 @@ input ParserRuleDefinitionInput {
   id: String
   order: Int!
   rule: String!
+  ruleId: String
 }
 
 input ParserRuleInput {
@@ -202,6 +204,7 @@ type Query {
   ingredients: [Ingredient]
   note(id: ID): Note
   notes: [Note]!
+  parserRule(id: ID): ParserRule
   parserRules: [ParserRule]
   users: [User]!
 }

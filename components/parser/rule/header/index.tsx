@@ -1,35 +1,31 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { Button } from 'components/common';
-import RuleContext from 'contexts/rule-context';
-import usePEGParser from 'hooks/use-peg-parser';
+import { useRuleContext } from 'contexts/rule-context';
+import useParserRule from 'hooks/use-parser-rule';
 import EditIcon from 'public/icons/edit.svg';
 import TrashIcon from 'public/icons/trash-can.svg';
 
+import ExpandButton from './expand-button';
 import Name from './name';
 import Label from './label';
-import ExpandButton from './expand-button';
 
-type RuleComponentProps = {
-  containerHeight: string;
-  id: string;
-};
+type RuleComponentProps = {};
 
-const RuleHeader: React.FC<RuleComponentProps> = ({ containerHeight, id }) => {
-  const { deleteRule } = usePEGParser();
+const RuleHeader: React.FC<RuleComponentProps> = () => {
   const {
-    setIsEditMode,
-    isEditMode,
-    isHovered: showEditButton
-  } = useContext(RuleContext);
+    dispatch,
+    state: { id, displayContext }
+  } = useRuleContext();
+  const { deleteRule } = useParserRule(id);
 
   function handleEditClick() {
-    setIsEditMode(!isEditMode);
-    // unset focus
-    if (document?.activeElement) {
-      (document.activeElement as HTMLButtonElement).blur();
-    }
+    dispatch({ type: 'SET_DISPLAY_CONTEXT', payload: 'edit' });
+    // TODO see if this is still needed when putting hover back in
+    // if (document?.activeElement) {
+    //   (document.activeElement as HTMLButtonElement).blur();
+    // }
   }
 
   function handleRemoveRuleClick() {
@@ -39,28 +35,25 @@ const RuleHeader: React.FC<RuleComponentProps> = ({ containerHeight, id }) => {
 
   return (
     <Header>
-      {showEditButton ? (
-        <EditRuleButton
-          height={containerHeight}
-          icon={<EditIcon />}
-          onClick={handleEditClick}
-        />
+      {displayContext === 'display' ? (
+        <EditRuleButton icon={<EditIcon />} onClick={handleEditClick} />
       ) : null}
       <Name />
       <Label />
-      {!isEditMode ? (
-        <ExpandButton />
-      ) : (
+      {displayContext === 'display' ? <ExpandButton /> : null}
+      {displayContext === 'edit' ? (
         <RemoveRuleButton
           icon={<TrashIcon />}
           onClick={handleRemoveRuleClick}
         />
-      )}
+      ) : null}
     </Header>
   );
 };
 
 export default RuleHeader;
+
+RuleHeader.whyDidYouRender = true;
 
 const Header = styled.div`
   display: flex;

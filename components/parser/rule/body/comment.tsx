@@ -1,26 +1,31 @@
 import { ParserRuleDefinition } from '@prisma/client';
 import React, { useContext } from 'react';
+import { useFormContext } from 'react-hook-form';
 import styled from 'styled-components';
 
-import RuleContext from 'contexts/rule-context';
+import { useRuleContext } from 'contexts/rule-context';
+import useParserRule from 'hooks/use-parser-rule';
 
 type RuleComponentProps = {
-  id: string;
+  definitionId: string; // TODO consider renaming to definitionId
 };
 
-const RuleComment: React.FC<RuleComponentProps> = ({ id }) => {
-  const { isEditMode, rule, ruleForm } = useContext(RuleContext);
-  const { register } = ruleForm;
+const RuleComment: React.FC<RuleComponentProps> = ({ definitionId }) => {
+  const {
+    state: { id, displayContext }
+  } = useRuleContext();
+  const { rule } = useParserRule(id);
+  const { register } = useFormContext();
   const { definitions = [] } = rule;
   const comment = definitions.find(
-    (d: ParserRuleDefinition) => d.id === id
+    (d: ParserRuleDefinition) => d.id === definitionId
   )?.comment;
 
   function trimInput(event: React.ChangeEvent<HTMLInputElement>) {
     event.target.value = event.target.value.trim();
   }
 
-  if (!isEditMode) {
+  if (displayContext === 'display') {
     return (
       <Comment>
         {`// `}
@@ -33,7 +38,7 @@ const RuleComment: React.FC<RuleComponentProps> = ({ id }) => {
     <Wrapper>
       <EditComment htmlFor="definition.comment">
         <Input
-          {...register(`definition[${id}].comment`)}
+          {...register(`definition[${definitionId}].comment`)}
           id="definition.comment"
           defaultValue={comment}
           name="definition.comment"

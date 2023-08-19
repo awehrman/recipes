@@ -1,9 +1,11 @@
+import { ParserRuleDefinition } from '@prisma/client';
 import { js_beautify, HTMLBeautifyOptions } from 'js-beautify';
-import React, { useCallback, useContext, useEffect } from 'react';
-import { useWatch } from 'react-hook-form';
+import React, { useCallback, useEffect } from 'react';
+import { useFormContext } from 'react-hook-form';
 import styled from 'styled-components';
 
-import RuleContext from 'contexts/rule-context';
+import { useRuleContext } from 'contexts/rule-context';
+import useParserRule from 'hooks/use-parser-rule';
 
 // TODO move this to a utils file
 const adjustElementHeight = (elementId: string): void => {
@@ -15,8 +17,7 @@ const adjustElementHeight = (elementId: string): void => {
 };
 
 type RuleComponentProps = {
-  id: string;
-  formatter: string;
+  definitionId: string;
 };
 
 // TODO move to a constants file
@@ -31,33 +32,40 @@ const options: HTMLBeautifyOptions = {
 };
 
 // TODO can i not pass the fucking string here? lets just reference from index
-const RuleFormatter: React.FC<RuleComponentProps> = ({ id, formatter }) => {
+const RuleFormatter: React.FC<RuleComponentProps> = ({ definitionId }) => {
+  const {
+    state: { id, displayContext }
+  } = useRuleContext();
+
+  const { rule } = useParserRule(id);
+  const { register } = useFormContext();
+  const { definitions = [] } = rule;
+  const formatter = definitions.find(
+    (d: ParserRuleDefinition) => d.id === definitionId
+  )?.formatter;
   const formatted = js_beautify(formatter, options);
-  const { isEditMode, ruleForm } = useContext(RuleContext);
-  const { control, register } = ruleForm;
 
   // TODO move into a hook
   const adjustTextAreaHeight = useCallback(() => {
-    const textarea = document.getElementById(id);
+    const textarea = document.getElementById(definitionId);
     if (textarea) {
       textarea.style.height = 'auto';
       textarea.style.height = `${textarea.scrollHeight}px`;
       console.log(textarea.scrollHeight);
     }
-  }, [id]);
+  }, [definitionId]);
 
   useEffect(() => {
-    adjustElementHeight(id);
-  }, [formatted, id, isEditMode]);
+    adjustElementHeight(definitionId);
+  }, [formatted, definitionId, displayContext]);
 
   // TODO this doesn't fire on typing
   useEffect(() => {
-    console.log('adjustTextAreaHeight', formatted);
     adjustTextAreaHeight();
-  }, [adjustTextAreaHeight, formatted, formatter, isEditMode]);
+  }, [adjustTextAreaHeight, formatted, formatter, displayContext]);
 
-  if (!isEditMode) {
-    return <Formatter id={id}>{formatted}</Formatter>;
+  if (displayContext === 'display') {
+    return <Formatter id={definitionId}>{formatted}</Formatter>;
   }
 
   function formatTextArea(event: React.ChangeEvent<HTMLTextAreaElement>) {

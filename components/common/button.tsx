@@ -24,7 +24,7 @@ type StyledButtonProps = {
 };
 
 const StyledButton = styled.button<StyledButtonProps>`
-  pointer: cursor;
+  cursor: pointer;
   text-decoration: none;
   height: ${({ height }) => height || 'auto'};
 `;

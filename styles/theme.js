@@ -21,7 +21,7 @@ export const theme = {
     inputHighlight: '#C3E7E0',
 
     lightBlue: 'rgba(128, 174, 245, .15)',
-    lightGreen: 'rgba115, 198, 182, .15)'
+    lightGreen: 'rgba(115, 198, 182, .15)'
   },
   sizes: {
     tablet_small: '500px',

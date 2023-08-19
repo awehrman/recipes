@@ -79,12 +79,56 @@ const getRules = async (
   return rules;
 };
 
+// TODO check on this; will nexus do this for us?
+type RuleArgs = {
+  id: string;
+};
+
+const getRule = async (
+  _root: unknown,
+  args: RuleArgs,
+  ctx: PartialAppContext | AppContext
+) => {
+  const { id } = args;
+  const { prisma } = ctx;
+  const where = { id };
+  const rule = await prisma.parserRule.findUniqueOrThrow({
+    where,
+    select: {
+      id: true,
+      name: true,
+      label: true,
+      definitions: {
+        select: {
+          id: true,
+          example: true,
+          formatter: true,
+          order: true,
+          rule: true
+        }
+      }
+    }
+  });
+  return rule;
+};
+
 export const RulesQuery = extendType({
   type: 'Query',
   definition(t) {
     t.list.field('parserRules', {
       type: ParserRule,
       resolve: getRules as FieldResolver<'Query', 'parserRules'>
+    });
+  }
+});
+
+export const RuleQuery = extendType({
+  type: 'Query',
+  definition(t) {
+    t.field('parserRule', {
+      type: ParserRule,
+      args: { id: idArg() },
+      resolve: getRule as FieldResolver<'Query', 'parserRule'>
     });
   }
 });
@@ -140,6 +184,44 @@ const addParserRule = async (
   } catch (e) {
     console.log({ e });
   }
+
+  return response;
+};
+
+const addParserRuleDefinition = async (
+  _source: SourceValue<'Mutation'>,
+  args: ArgsValue<'Mutation', 'addParserRuleDefinition'>,
+  ctx: PartialAppContext | AppContext
+) => {
+  const { input } = args;
+  const { example, formatter, order, rule, ruleId } = input || {};
+  const { prisma } = ctx;
+  console.log('addParserRuleDefinition mutation', { input });
+  const data = {
+    example: example ?? '',
+    formatter: formatter ?? '',
+    order: order ?? 0,
+    rule: rule ?? '',
+    parserRule: {
+      connect: {
+        id: ruleId
+      }
+    }
+  };
+
+  const response = { id: '-1' };
+  // try {
+  //   // TODO does this need to be explicitly tied to our parent rule? i mean probably right?
+  //   const result = await prisma.parserRuleDefinition.create({
+  //     data,
+  //     select: {
+  //       id: true
+  //     }
+  //   });
+  //   response.id = result.id;
+  // } catch (e) {
+  //   console.log({ e });
+  // }
 
   return response;
 };
@@ -243,6 +325,20 @@ export const AddParserRuleMutation = extendType({
   }
 });
 
+export const AddParserRuleDefinitionMutation = extendType({
+  type: 'Mutation',
+  definition(t) {
+    t.field('addParserRuleDefinition', {
+      type: 'ParserRuleDefinition',
+      args: { input: ParserRuleDefinitionInput },
+      resolve: addParserRuleDefinition as unknown as FieldResolver<
+        'Mutation',
+        'addParserRuleDefinition'
+      >
+    });
+  }
+});
+
 export const UpdateParserRuleMutation = extendType({
   type: 'Mutation',
   definition(t) {
@@ -291,5 +387,6 @@ export const ParserRuleDefinitionInput = inputObjectType({
     t.nonNull.int('order');
     t.string('example');
     t.string('formatter');
+    t.nullable.string('ruleId');
   }
 });

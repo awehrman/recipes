@@ -1,14 +1,14 @@
 import React from 'react';
 
-import PEGParser from '../components/parser';
+import Parser from '../components/parser';
 import Page from '../components/page';
 
 type ParserProps = {};
 
-const Parser: React.FC<ParserProps> = () => (
+const ParserPage: React.FC<ParserProps> = () => (
   <Page title="Parser">
-    <PEGParser />
+    <Parser />
   </Page>
 );
 
-export default Parser;
+export default ParserPage;

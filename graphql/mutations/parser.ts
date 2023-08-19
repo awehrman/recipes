@@ -8,6 +8,16 @@ export const ADD_PARSER_RULE_MUTATION = gql`
   }
 `;
 
+export const ADD_PARSER_RULE_DEFINITION_MUTATION = gql`
+  mutation ADD_PARSER_RULE_DEFINITION_MUTATION(
+    $input: ParserRuleDefinitionInput
+  ) {
+    addParserRuleDefinition(input: $input) {
+      id
+    }
+  }
+`;
+
 export const UPDATE_PARSER_RULE_MUTATION = gql`
   mutation UPDATE_PARSER_RULE_MUTATION($input: ParserRuleInput) {
     updateParserRule(input: $input) {
@@ -16,9 +26,31 @@ export const UPDATE_PARSER_RULE_MUTATION = gql`
   }
 `;
 
+export const UPDATE_PARSER_RULE_DEFINITION_MUTATION = gql`
+  mutation UPDATE_PARSER_RULE_DEFINITION_MUTATION(
+    $input: ParserRuleDefinitionInput
+  ) {
+    updateParserRuleDefinition(input: $input) {
+      id
+      example
+      formatter
+      rule
+      order
+    }
+  }
+`;
+
 export const DELETE_PARSER_RULE_MUTATION = gql`
   mutation DELETE_PARSER_RULE_MUTATION($id: ID) {
     deleteParserRule(id: $id) {
+      id
+    }
+  }
+`;
+
+export const DELETE_PARSER_RULE_DEFINITION_MUTATION = gql`
+  mutation DELETE_PARSER_RULE_DEFINITION_MUTATION($id: ID) {
+    deleteParserRuleDefinition(id: $id) {
       id
     }
   }
@@ -34,8 +66,10 @@ export const DELETE_PARSER_RULE_MUTATION = gql`
 
 const all = {
   ADD_PARSER_RULE_MUTATION,
+  ADD_PARSER_RULE_DEFINITION_MUTATION,
   UPDATE_PARSER_RULE_MUTATION,
-  DELETE_PARSER_RULE_MUTATION
+  DELETE_PARSER_RULE_MUTATION,
+  DELETE_PARSER_RULE_DEFINITION_MUTATION
   // SAVE_PARSER_RULES_MUTATION
 };
 
