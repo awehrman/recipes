@@ -1,6 +1,6 @@
-import { ParserRuleDefinition } from '@prisma/client';
+import _ from 'lodash';
 import { useQuery, useMutation } from '@apollo/client';
-import { ParserRuleWithRelations } from '@prisma/client';
+import { ParserRuleWithRelations, ParserRuleDefinition } from '@prisma/client';
 import { ArgsValue } from 'nexus/dist/core';
 
 import {
@@ -19,9 +19,25 @@ type ParserRules = {
   parserRules: ParserRuleWithRelations[];
 };
 
-type ParserRule = {
-  parserRule: ParserRuleWithRelations;
+type ParserRuleDefinitionWithRelationsWithTypeName = ParserRuleDefinition & {
+  __typename: string;
 };
+
+type ParserRuleWithRelationsWithTypeName = ParserRuleWithRelations & {
+  __typename: string;
+};
+
+function removeTypename(data: ParserRuleWithRelationsWithTypeName) {
+  const input = {
+    ..._.omit(data, '__typename'),
+    definitions: data.definitions.map(
+      (definition: ParserRuleDefinitionWithRelationsWithTypeName) => ({
+        ..._.omit(definition, '__typename')
+      })
+    )
+  };
+  return input;
+}
 
 function useParserRule(id: string) {
   const violations: any[] = [];
@@ -42,9 +58,8 @@ function useParserRule(id: string) {
     ADD_PARSER_RULE_DEFINITION_MUTATION
   );
 
-  function addRule(
-    input: ParserRuleWithRelations // TODO does this need to be an input type specifically?
-  ): void {
+  function addRule(data: ParserRuleWithRelationsWithTypeName): void {
+    const input = removeTypename(data);
     try {
       addParserRule({
         variables: { input },
@@ -103,7 +118,8 @@ function useParserRule(id: string) {
     });
   }
 
-  function updateRule(input: ParserRuleWithRelations) {
+  function updateRule(data: ParserRuleWithRelationsWithTypeName) {
+    const input = removeTypename(data);
     updateParserRule({
       variables: {
         input
@@ -113,19 +129,17 @@ function useParserRule(id: string) {
         const rules: ParserRules | null = cache.readQuery({
           query: GET_ALL_PARSER_RULES_QUERY
         });
-        console.log('update update', { currentRules: rules });
-        const data = {
+        const updated = {
           parserRules: (rules?.parserRules ?? []).map(
             (rule: ParserRuleWithRelations) =>
-              rule.id === input.id
+              rule.id === data.id
                 ? { ...input, __typename: 'ParserRule' }
                 : rule
           )
         };
-        console.log('update update', { updatedRules: data });
         cache.writeQuery({
           query: GET_ALL_PARSER_RULES_QUERY,
-          data
+          data: updated
         });
       }
     });
@@ -153,22 +167,12 @@ function useParserRule(id: string) {
     // TODO
   }
 
-  // TODO further restrict field type
-  function getDefinitionFieldValue(id: string, field: string) {
-    const { definitions = [] } = parserRule;
-    const value = definitions.find((d: ParserRuleDefinition) => d.id === id)?.[
-      field
-    ];
-    return value;
-  }
-
   return {
     addNewRuleDefinition,
     saveRuleDefinition,
     addRule,
     updateRule,
     deleteRule,
-    getDefinitionFieldValue,
     loading,
     refetch,
     rule: parserRule,

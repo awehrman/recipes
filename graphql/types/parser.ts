@@ -230,37 +230,37 @@ const updateParserRule = async (
 ) => {
   const { prisma } = ctx;
   const { input } = args;
-  let { id, name, label, definitions = [] } = input || {};
+  let { id, name, label = '', definitions = [] } = input || {};
   if (!id || !name) {
+    // TODO come back and make this a better error
     return { id: 'false' };
   }
 
-  if (!label) {
-    label = capitalize(name);
-  }
   const upsert: Prisma.ParserRuleDefinitionUpsertWithWhereUniqueWithoutParserRuleInput[] =
     (definitions ?? []).map((def, index) => ({
       where: { id: def?.id ?? undefined },
       create: {
         example: def?.example ?? '',
         rule: def?.rule ?? '',
-        order: parseInt(`${def?.example ?? index}`, 10),
+        order: parseInt(`${def?.order ?? index}`, 10),
         formatter: def?.formatter ?? null
       },
       update: {
         example: def?.example ?? '',
         rule: def?.rule ?? '',
-        order: parseInt(`${def?.example ?? index}`, 10),
+        order: parseInt(`${def?.order ?? index}`, 10),
         formatter: def?.formatter ?? null
       }
     }));
   const data: Prisma.ParserRuleUncheckedUpdateInput = {
     name,
-    label,
     definitions: {
       upsert
     }
   };
+  if (label) {
+    data.label = label;
+  }
   const response = { id };
   try {
     const result = await prisma.parserRule.update({

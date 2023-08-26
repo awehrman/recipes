@@ -45,21 +45,17 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule, onAddRuleCancel }) => {
 
   // TODO should this live in the rule context?
   function handleFormSubmit(data: ParserRuleWithRelations) {
-    const input = { ...data };
-    delete input.__typename;
-    console.log({ input });
-    // // TODO figure out definitions
-    // if (displayContext === 'edit') {
-    //   input.id = rule.id;
-    //   updateRule(input);
-    // }
+    if (displayContext === 'edit') {
+      updateRule(data);
+    }
 
-    // if (displayContext === 'add') {
-    //   addRule(input);
-    // }
-    // // TODO on success only? where to handle validation?
-    // onAddRuleCancel();
-    // dispatch({ type: 'SET_DISPLAY_CONTEXT', payload: 'display' });
+    if (displayContext === 'add') {
+      addRule(data);
+    }
+    // TODO on success only? where to handle validation?
+    // seems like these should happen on update
+    onAddRuleCancel();
+    dispatch({ type: 'SET_DISPLAY_CONTEXT', payload: 'display' });
   }
 
   return (

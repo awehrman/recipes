@@ -4,25 +4,25 @@ import styled from 'styled-components';
 
 type RuleComponentProps = {
   fieldKey: string;
-  definition: string;
+  rule: string;
   index: number;
 };
 
 /* validation
 
   const formatRules = useCallback(
-    (definition: string): ReactElement[] => {
+    (rule: string): ReactElement[] => {
       const components: ReactElement[] = [];
       // handle keyword lists
-      if (definition.startsWith('[') && definition.endsWith(']')) {
-        const keywords = definition.slice(1, definition.length - 1).split(',');
+      if (rule.startsWith('[') && rule.endsWith(']')) {
+        const keywords = rule.slice(1, rule.length - 1).split(',');
         const key = v4();
         components.push(<RuleList key={key}>[{keywords.join(', ')}]</RuleList>);
         return components;
       }
 
       // handle rules
-      const pieces = definition.split(' ');
+      const pieces = rule.split(' ');
 
       pieces.forEach((piece) => {
         // if we don't have a label, just return the rule
@@ -100,18 +100,14 @@ type RuleComponentProps = {
   );
 
   function renderRule() {
-    const components: ReactElement[] = formatRules(definition);
+    const components: ReactElement[] = formatRules(rule);
     return <>{components.map((component) => component)}</>;
   }
 */
 
-const RuleDefinition: React.FC<RuleComponentProps> = ({
-  fieldKey,
-  definition,
-  index = 0
-}) => {
+const Rule: React.FC<RuleComponentProps> = ({ fieldKey, rule, index = 0 }) => {
   const { register } = useFormContext();
-  const fieldName = `definitions.${index}.definition`;
+  const fieldName = `definitions.${index}.rule`;
 
   function trimInput(event: React.ChangeEvent<HTMLInputElement>) {
     event.target.value = event.target.value.trim();
@@ -124,7 +120,7 @@ const RuleDefinition: React.FC<RuleComponentProps> = ({
           {...register(fieldName)}
           key={fieldKey}
           id={fieldName}
-          defaultValue={definition}
+          defaultValue={rule}
           name={fieldName}
           onBlur={trimInput}
           placeholder="rule definition"
@@ -135,7 +131,7 @@ const RuleDefinition: React.FC<RuleComponentProps> = ({
   );
 };
 
-export default RuleDefinition;
+export default Rule;
 
 // const Definition = styled.div`
 //   margin-right: 10px;
