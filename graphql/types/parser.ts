@@ -140,7 +140,6 @@ const addParserRule = async (
   ctx: PartialAppContext | AppContext
 ) => {
   const { prisma } = ctx;
-  console.log('addParserRule mutation');
   const { input } = args;
   let { id, name = '', label = '', definitions = [] } = input || {};
   if (!name) {
@@ -171,7 +170,6 @@ const addParserRule = async (
     data.definitions = definitionsCreateMany;
   }
 
-  console.log(JSON.stringify({ data }, null, 2));
   const response = { id };
   try {
     const result = await prisma.parserRule.create({
@@ -196,7 +194,6 @@ const addParserRuleDefinition = async (
   const { input } = args;
   const { example, formatter, order, rule, ruleId } = input || {};
   const { prisma } = ctx;
-  console.log('addParserRuleDefinition mutation', { input });
   const data = {
     example: example ?? '',
     formatter: formatter ?? '',
@@ -232,7 +229,6 @@ const updateParserRule = async (
   ctx: PartialAppContext | AppContext
 ) => {
   const { prisma } = ctx;
-  console.log('updateParserRule mutation');
   const { input } = args;
   let { id, name, label, definitions = [] } = input || {};
   if (!id || !name) {
@@ -265,7 +261,6 @@ const updateParserRule = async (
       upsert
     }
   };
-  console.log({ data });
   const response = { id };
   try {
     const result = await prisma.parserRule.update({
@@ -291,7 +286,6 @@ const deleteParserRule = async (
   if (!id) {
     return { id: 'false' };
   }
-  console.log('deleteParserRule mutation', { args });
   const response = { id: 'false' };
   try {
     await prisma.parserRule.delete({

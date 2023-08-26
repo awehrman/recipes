@@ -1,26 +1,14 @@
-import { ParserRuleDefinition } from '@prisma/client';
-import React, { ReactElement, useCallback, useContext } from 'react';
+import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import styled from 'styled-components';
-import { v4 } from 'uuid';
-
-import { useRuleContext } from 'contexts/rule-context';
-import useParserRule from 'hooks/use-parser-rule';
 
 type RuleComponentProps = {
-  definitionId: string;
+  fieldKey: string;
+  definition: string;
+  index: number;
 };
 
-const RuleDefinition: React.FC<RuleComponentProps> = ({ definitionId }) => {
-  const {
-    state: { id, displayContext }
-  } = useRuleContext();
-  const { rule, violations = [] } = useParserRule(id);
-  const { register } = useFormContext();
-  const { definitions = [] } = rule;
-  const definition = definitions.find(
-    (d: ParserRuleDefinition) => d.id === definitionId
-  )?.definition;
+/* validation
 
   const formatRules = useCallback(
     (definition: string): ReactElement[] => {
@@ -115,10 +103,15 @@ const RuleDefinition: React.FC<RuleComponentProps> = ({ definitionId }) => {
     const components: ReactElement[] = formatRules(definition);
     return <>{components.map((component) => component)}</>;
   }
+*/
 
-  if (displayContext === 'display') {
-    return <Definition>{renderRule()}</Definition>;
-  }
+const RuleDefinition: React.FC<RuleComponentProps> = ({
+  fieldKey,
+  definition,
+  index = 0
+}) => {
+  const { register } = useFormContext();
+  const fieldName = `definitions.${index}.definition`;
 
   function trimInput(event: React.ChangeEvent<HTMLInputElement>) {
     event.target.value = event.target.value.trim();
@@ -128,12 +121,13 @@ const RuleDefinition: React.FC<RuleComponentProps> = ({ definitionId }) => {
     <Wrapper>
       <EditRule htmlFor="rule">
         <Input
-          {...register('rule')}
-          id="rule"
+          {...register(fieldName)}
+          key={fieldKey}
+          id={fieldName}
           defaultValue={definition}
-          name="rule"
+          name={fieldName}
           onBlur={trimInput}
-          placeholder="rule"
+          placeholder="rule definition"
           type="text"
         />
       </EditRule>
@@ -143,32 +137,32 @@ const RuleDefinition: React.FC<RuleComponentProps> = ({ definitionId }) => {
 
 export default RuleDefinition;
 
-const Definition = styled.div`
-  margin-right: 10px;
-  margin-bottom: 6px;
-`;
+// const Definition = styled.div`
+//   margin-right: 10px;
+//   margin-bottom: 6px;
+// `;
 
-const Label = styled.label`
-  margin-right: 2px;
-`;
+// const Label = styled.label`
+//   margin-right: 2px;
+// `;
 
-const Rule = styled.span`
-  margin-right: 2px;
-  font-weight: 600;
-`;
+// const Rule = styled.span`
+//   margin-right: 2px;
+//   font-weight: 600;
+// `;
 
-const MissingRule = styled.span`
-  color: tomato;
-  font-weight: 600;
-`;
+// const MissingRule = styled.span`
+//   color: tomato;
+//   font-weight: 600;
+// `;
 
-const SplitPiece = styled.span``;
+// const SplitPiece = styled.span``;
 
-const DefinedRule = styled.span`
-  color: ${({ theme }) => theme.colors.highlight};
-`;
+// const DefinedRule = styled.span`
+//   color: ${({ theme }) => theme.colors.highlight};
+// `;
 
-const RuleList = styled.span``;
+// const RuleList = styled.span``;
 
 const Wrapper = styled.fieldset`
   border: 0;

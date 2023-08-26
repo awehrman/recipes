@@ -26,7 +26,7 @@ const AddRule: React.FC<AddRuleProps> = () => {
       )}
 
       {!showAddButton ? (
-        <Rule context="add" id="-1" onCancel={handleCancelClick} />
+        <Rule context="add" id="-1" onAddRuleCancel={handleCancelClick} />
       ) : null}
     </Wrapper>
   );

@@ -1,8 +1,10 @@
+import { ParserRuleDefinition } from '@prisma/client';
 import { useQuery, useMutation } from '@apollo/client';
-import { ParserRuleDefinition, ParserRuleWithRelations } from '@prisma/client';
+import { ParserRuleWithRelations } from '@prisma/client';
+import { ArgsValue } from 'nexus/dist/core';
 
 import {
-  GET_ALL_PARSER_RULE_QUERY,
+  GET_PARSER_RULE_QUERY,
   GET_ALL_PARSER_RULES_QUERY
 } from '../graphql/queries/parser';
 import {
@@ -28,7 +30,7 @@ function useParserRule(id: string) {
     data = {},
     loading,
     refetch
-  } = useQuery(GET_ALL_PARSER_RULE_QUERY, {
+  } = useQuery(GET_PARSER_RULE_QUERY, {
     variables: { id }
   });
   const { parserRule = {} } = data;
@@ -47,16 +49,27 @@ function useParserRule(id: string) {
       addParserRule({
         variables: { input },
         update: (cache, res) => {
-          refetch();
+          // TODO read/write fragment vs read/write all rules query vs read/write just this rule?
           const rules: ParserRules | null = cache.readQuery({
             query: GET_ALL_PARSER_RULES_QUERY
           });
+          console.log('add update', { currentRules: rules });
+          // TODO temp
+          if (!(input?.definitions ?? []).length) {
+            input.definitions = [];
+          }
           const data = {
+            // TODO sort by order
             parserRules: [
               ...(rules?.parserRules ?? []),
-              res.data?.addParserRule
+              {
+                ...input,
+                id: res.data?.addParserRule.id,
+                __typename: 'ParserRule'
+              }
             ]
           };
+          console.log('add update', { updatedRules: data });
           cache.writeQuery({
             query: GET_ALL_PARSER_RULES_QUERY,
             data
@@ -95,22 +108,32 @@ function useParserRule(id: string) {
       variables: {
         input
       },
-      update: () => {
-        refetch();
+      update: (cache) => {
+        // TODO maybe read/write fragment is better?
+        const rules: ParserRules | null = cache.readQuery({
+          query: GET_ALL_PARSER_RULES_QUERY
+        });
+        console.log('update update', { currentRules: rules });
+        const data = {
+          parserRules: (rules?.parserRules ?? []).map(
+            (rule: ParserRuleWithRelations) =>
+              rule.id === input.id
+                ? { ...input, __typename: 'ParserRule' }
+                : rule
+          )
+        };
+        console.log('update update', { updatedRules: data });
+        cache.writeQuery({
+          query: GET_ALL_PARSER_RULES_QUERY,
+          data
+        });
       }
     });
   }
 
-  // TODO fix this
-  type AddParserRuleDefinitionArgsProps = {
-    ruleId: string;
-    example?: string;
-    formatter?: string;
-    order?: number;
-    rule?: string;
-  };
-
-  function addNewRuleDefinition(input: AddParserRuleDefinitionArgsProps) {
+  function addNewRuleDefinition(
+    input: ArgsValue<'Mutation', 'addParserRuleDefinition'>
+  ) {
     addParserRuleDefinition({
       variables: {
         input
@@ -130,12 +153,22 @@ function useParserRule(id: string) {
     // TODO
   }
 
+  // TODO further restrict field type
+  function getDefinitionFieldValue(id: string, field: string) {
+    const { definitions = [] } = parserRule;
+    const value = definitions.find((d: ParserRuleDefinition) => d.id === id)?.[
+      field
+    ];
+    return value;
+  }
+
   return {
     addNewRuleDefinition,
     saveRuleDefinition,
     addRule,
     updateRule,
     deleteRule,
+    getDefinitionFieldValue,
     loading,
     refetch,
     rule: parserRule,

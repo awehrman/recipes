@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import { useRuleContext } from 'contexts/rule-context';
@@ -11,15 +11,11 @@ type RuleComponentProps = {};
 
 const RuleName: React.FC<RuleComponentProps> = () => {
   const {
-    state: { id, displayContext }
+    state: { id }
   } = useRuleContext();
 
   const { rule } = useParserRule(id);
   const { name = '' } = rule || {};
-
-  if (displayContext === 'display') {
-    return <Name>{name}</Name>;
-  }
 
   return <AutoWidthInput defaultValue={name} fieldName="name" isRequired />;
 };

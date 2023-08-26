@@ -50,11 +50,13 @@ export function RuleProvider({
     displayContext: initialContext,
     isExpanded: true
   });
-
-  // if add, we need to insert a new definition
+  const memoizedContext = React.useMemo(
+    () => ({ state, dispatch }),
+    [state, dispatch]
+  );
 
   return (
-    <RuleContext.Provider value={{ state, dispatch }}>
+    <RuleContext.Provider value={memoizedContext}>
       {children}
     </RuleContext.Provider>
   );

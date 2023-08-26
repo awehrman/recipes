@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import React, { useCallback, useContext, useEffect } from 'react';
-import { useFormContext } from 'react-hook-form';
+import React, { useCallback, useEffect } from 'react';
+import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 
 import { useRuleContext } from 'contexts/rule-context';
@@ -12,33 +12,30 @@ type RuleComponentProps = {};
 
 const RuleLabel: React.FC<RuleComponentProps> = () => {
   const {
-    dispatch,
     state: { id, displayContext }
   } = useRuleContext();
 
-  const {
-    reset,
-    setValue,
-    watch,
-    formState: { isDirty }
-  } = useFormContext();
+  const { setValue } = useFormContext();
   const { rule } = useParserRule(id);
-  const { label = '' } = rule;
-  const watched = watch('name');
-  const isActiveElement = useCallback(
-    () => document.activeElement?.id === 'label',
+  const { label = '', name = '' } = rule;
+  const watched = useWatch({ name: 'name', defaultValue: name });
+  const isNameActiveElement = useCallback(
+    () => document.activeElement?.id === 'name',
     []
   )();
 
   useEffect(() => {
-    if (!isActiveElement) {
-      setValue('label', _.startCase(watched), { shouldValidate: true });
+    const pattern = /[^a-zA-Z0-9]/;
+    const hasSpecialCharacters = pattern.test(watched);
+    const autoLabel = _.startCase(watched);
+    if (
+      isNameActiveElement &&
+      displayContext !== 'display' &&
+      !hasSpecialCharacters
+    ) {
+      setValue('label', autoLabel, { shouldValidate: true });
     }
-  }, [isActiveElement, setValue, watched]);
-
-  if (displayContext === 'display') {
-    return <Label>{label}</Label>;
-  }
+  }, [isNameActiveElement, displayContext, setValue, watched]);
 
   return <StyledAutoWidthInput grow defaultValue={label} fieldName="label" />;
 };

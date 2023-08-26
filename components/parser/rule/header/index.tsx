@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import { Button } from 'components/common';
@@ -18,6 +18,7 @@ const RuleHeader: React.FC<RuleComponentProps> = () => {
     dispatch,
     state: { id, displayContext }
   } = useRuleContext();
+
   const { deleteRule } = useParserRule(id);
 
   function handleEditClick() {

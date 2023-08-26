@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
-import styled from 'styled-components';
 import { ParserRuleWithRelations } from '@prisma/client';
-import { FormProvider, useForm } from 'react-hook-form';
+import React from 'react';
+import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
+import styled from 'styled-components';
 
 import { RuleProvider, useRuleContext } from 'contexts/rule-context';
 import { Button } from 'components/common';
@@ -13,7 +13,7 @@ import RuleHeader from './header';
 type RuleComponentProps = {
   context?: DisplayContextTypes;
   id: string;
-  onCancel: () => void;
+  onAddRuleCancel: () => void;
 };
 
 type DisplayContextTypes = 'display' | 'edit' | 'add';
@@ -23,19 +23,10 @@ type RuleContentProps = {
   onAddRuleCancel: () => void;
 };
 
-// TODO fix this
-type AddParserRuleDefinitionArgsProps = {
-  ruleId: string;
-  example?: string;
-  formatter?: string;
-  order?: number;
-  rule?: string;
-};
-
 const RuleContent: React.FC<RuleContentProps> = ({ rule, onAddRuleCancel }) => {
   const methods = useForm<ParserRuleWithRelations>({ defaultValues: rule });
-  const { addRule, updateRule } = useParserRule(rule.id);
   const { handleSubmit, reset } = methods;
+  const { addRule, updateRule } = useParserRule(rule.id);
   const {
     dispatch,
     state: { displayContext }
@@ -45,45 +36,31 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule, onAddRuleCancel }) => {
   function handleCancelClick() {
     onAddRuleCancel();
     dispatch({ type: 'SET_DISPLAY_CONTEXT', payload: 'display' });
-    reset();
+    reset({
+      name: rule.name,
+      label: rule.label
+      // TODO definitions
+    });
   }
 
   // TODO should this live in the rule context?
   function handleFormSubmit(data: ParserRuleWithRelations) {
     const input = { ...data };
     delete input.__typename;
+    console.log({ input });
+    // // TODO figure out definitions
+    // if (displayContext === 'edit') {
+    //   input.id = rule.id;
+    //   updateRule(input);
+    // }
 
-    // TODO figure out definitions
-    if (displayContext === 'edit') {
-      input.id = rule.id;
-      updateRule(input);
-    }
-    if (displayContext === 'add') {
-      addRule(input);
-    }
+    // if (displayContext === 'add') {
+    //   addRule(input);
+    // }
     // // TODO on success only? where to handle validation?
-    dispatch({ type: 'SET_DISPLAY_CONTEXT', payload: 'display' });
-    onAddRuleCancel();
+    // onAddRuleCancel();
+    // dispatch({ type: 'SET_DISPLAY_CONTEXT', payload: 'display' });
   }
-
-  // useEffect(() => {
-  //   if (
-  //     !loaded &&
-  //     displayContext === 'add' &&
-  //     !(rule?.definitions ?? []).length
-  //   ) {
-  //     console.log('setup new rule definition');
-  //     const newRule: AddParserRuleDefinitionArgsProps = {
-  //       example: '',
-  //       formatter: '',
-  //       order: 0,
-  //       rule: '',
-  //       ruleId: rule.id
-  //     };
-  //     addNewRuleDefinition({ ...newRule });
-  //     setLoaded(true);
-  //   }
-  // }, [loaded, displayContext, rule, addNewRuleDefinition]);
 
   return (
     <FormProvider {...methods}>
@@ -93,7 +70,6 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule, onAddRuleCancel }) => {
       >
         <RuleHeader />
         <RuleBody />
-
         {displayContext !== 'display' ? (
           <Buttons>
             <CancelButton
@@ -112,8 +88,7 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule, onAddRuleCancel }) => {
 const Rule: React.FC<RuleComponentProps> = ({
   context = 'display', // TODO contextType?
   id,
-  onCancel // TODO i hate this; find a better way to call this
-  // TODO also call it something else like onAddRuleCleanup
+  onAddRuleCancel // TODO i hate this; find a better way to call this
 }) => {
   const { rule, loading } = useParserRule(id);
 
@@ -124,7 +99,7 @@ const Rule: React.FC<RuleComponentProps> = ({
 
   return (
     <RuleProvider id={id} initialContext={context}>
-      <RuleContent rule={rule} onAddRuleCancel={onCancel} />
+      <RuleContent rule={rule} onAddRuleCancel={onAddRuleCancel} />
     </RuleProvider>
   );
 };

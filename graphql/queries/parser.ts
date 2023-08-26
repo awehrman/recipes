@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client';
 
-export const GET_ALL_PARSER_RULE_QUERY = gql`
-  query GET_ALL_PARSER_RULE_QUERY($id: ID) {
+export const GET_PARSER_RULE_QUERY = gql`
+  query GET_PARSER_RULE_QUERY($id: ID) {
     parserRule(id: $id) {
       id
       name
@@ -35,7 +35,7 @@ export const GET_ALL_PARSER_RULES_QUERY = gql`
 `;
 
 const all = {
-  GET_ALL_PARSER_RULE_QUERY,
+  GET_PARSER_RULE_QUERY,
   GET_ALL_PARSER_RULES_QUERY
 };
 

@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useRef } from 'react';
-import { useFormContext } from 'react-hook-form';
+import React, { useEffect, useRef } from 'react';
+import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 
 import { useRuleContext } from 'contexts/rule-context';
@@ -18,9 +18,9 @@ const AutoWidthInput = ({
   const {
     state: { displayContext }
   } = useRuleContext();
-  const { register, watch } = useFormContext();
+  const { register } = useFormContext();
   const isSpellCheck = displayContext !== 'display';
-  const watched = watch(fieldName);
+  const watched = useWatch({ name: fieldName, defaultValue });
 
   useEffect(() => {
     if (sizeRef.current && containerRef.current && fieldsetRef.current) {

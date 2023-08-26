@@ -15,7 +15,7 @@ const Rules: React.FC<RulesProps> = () => {
 
   function renderRules() {
     return rules.map((rule: ParserRuleWithRelations) => (
-      <Rule key={rule.id} id={rule.id} onCancel={() => _.noop()} />
+      <Rule key={rule.id} id={rule.id} onAddRuleCancel={() => _.noop()} />
     ));
   }
 

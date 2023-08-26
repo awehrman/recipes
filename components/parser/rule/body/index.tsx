@@ -1,46 +1,51 @@
-import { ParserRuleDefinition } from '@prisma/client';
 import React from 'react';
+import { useFieldArray, useFormContext } from 'react-hook-form';
 import styled from 'styled-components';
 
 import { useRuleContext } from 'contexts/rule-context';
 
 import { Button } from 'components/common';
-import Comment from './comment';
+import Example from './example';
 import Formatter from './formatter';
-import RuleDefinition from './rule-definition';
-import useParserRule from 'hooks/use-parser-rule';
+import Definition from './definition';
 
 type RuleComponentProps = {};
 
 const RuleBody: React.FC<RuleComponentProps> = () => {
   const {
-    state: { id, displayContext }
+    state: { displayContext }
   } = useRuleContext();
-  const { rule } = useParserRule(id);
-  const { definitions = [] } = rule;
+  const { control, getValues } = useFormContext();
+  const { fields /*, append */ } = useFieldArray({
+    control,
+    name: 'definitions'
+  });
 
   function renderDefinitions() {
-    return definitions.map((definition: ParserRuleDefinition) => (
-      <Wrapper key={`wrapper-${definition.id}`}>
-        <Comment definitionId={definition.id} />
-        {/* <RuleDefinition definitionId={definition.id} />
-        {definition.formatter?.length ? (
-          <Formatter definitionId={definition.id} />
-        ) : null} */}
+    return fields.map((definition, index: number) => (
+      <Wrapper key={definition.id}>
+        <Example
+          // TODO should we create another context just for definitions?
+          example={getValues(`definitions.${index}.example`)}
+          fieldKey={definition.id}
+          index={index}
+        />
+        <Definition
+          definition={getValues(`definitions.${index}.definition`)}
+          fieldKey={definition.id}
+          index={index}
+        />
+        <Formatter
+          formatter={getValues(`definitions.${index}.formatter`)}
+          fieldKey={definition.id}
+          index={index}
+        />
       </Wrapper>
     ));
   }
 
   function handleAddNewDefinitionClick() {
-    // TODO
-    //const newRule: AddParserRuleDefinitionArgsProps = {
-    //       example: '',
-    //       formatter: '',
-    //       order: 0,
-    //       rule: '',
-    //       ruleId: rule.id
-    //     };
-    //     addNewRuleDefinition({ ...newRule });
+    // TODO append();
   }
 
   return (
