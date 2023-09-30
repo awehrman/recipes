@@ -142,13 +142,6 @@ const addParserRule = async (
   const { prisma } = ctx;
   const { input } = args;
   let { id, name = '', label = '', definitions = [] } = input || {};
-  if (!name) {
-    return { id: 'false' };
-  }
-
-  if (!label) {
-    label = capitalize(name);
-  }
 
   const definitionsCreateMany = {
     createMany: {
@@ -163,7 +156,7 @@ const addParserRule = async (
 
   const data: Prisma.ParserRuleUncheckedCreateInput = {
     name,
-    label
+    label: `${label}`
   };
 
   if ((definitions ?? []).length > 0) {
@@ -186,6 +179,12 @@ const addParserRule = async (
   return response;
 };
 
+// TODO why do we need to create a new definition on form mount?
+// this is going to cause us to have to go back and cleanup
+// and definitions that get
+// like maybe this just needs to be inserted into the cache?
+// there's got to be a default value for field arrays right??
+
 const addParserRuleDefinition = async (
   _source: SourceValue<'Mutation'>,
   args: ArgsValue<'Mutation', 'addParserRuleDefinition'>,
@@ -194,31 +193,33 @@ const addParserRuleDefinition = async (
   const { input } = args;
   const { example, formatter, order, rule, ruleId } = input || {};
   const { prisma } = ctx;
-  const data = {
+  const data: Prisma.ParserRuleDefinitionCreateInput = {
     example: example ?? '',
     formatter: formatter ?? '',
     order: order ?? 0,
-    rule: rule ?? '',
-    parserRule: {
-      connect: {
-        id: ruleId
-      }
-    }
+    rule: rule ?? ''
+    // for add we'll need to connect to the created rule on update
+    // parserRule: {
+    //   connect: {
+    //     id: ruleId
+    //   }
+    // }
   };
 
-  const response = { id: '-1' };
-  // try {
-  //   // TODO does this need to be explicitly tied to our parent rule? i mean probably right?
-  //   const result = await prisma.parserRuleDefinition.create({
-  //     data,
-  //     select: {
-  //       id: true
-  //     }
-  //   });
-  //   response.id = result.id;
-  // } catch (e) {
-  //   console.log({ e });
-  // }
+  console.log({ data });
+  const response = {};
+  try {
+    // TODO does this need to be explicitly tied to our parent rule? i mean probably right?
+    const result = await prisma.parserRuleDefinition.create({
+      data,
+      select: {
+        id: true
+      }
+    });
+    // response.id = result.id;
+  } catch (e) {
+    console.log({ e });
+  }
 
   return response;
 };

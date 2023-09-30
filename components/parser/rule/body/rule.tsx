@@ -1,12 +1,57 @@
 import React from 'react';
-import { useFormContext } from 'react-hook-form';
 import styled from 'styled-components';
 
+import AutoWidthInput from '../auto-width-input';
+
 type RuleComponentProps = {
-  fieldKey: string;
-  rule: string;
+  definitionId: string;
+  defaultValue: string;
   index: number;
 };
+
+const Rule: React.FC<RuleComponentProps> = ({
+  definitionId,
+  defaultValue,
+  index = 0,
+  ...props
+}) => {
+  const fieldName = `definitions.${index}.rule`;
+
+  function trimInput(event: React.ChangeEvent<HTMLInputElement>) {
+    event.target.value = event.target.value.trim();
+  }
+
+  return (
+    <Wrapper>
+      <AutoWidthInput
+        definitionId={definitionId}
+        defaultValue={defaultValue}
+        fieldName="rule"
+        definitionPath={fieldName}
+        grow
+        onBlur={trimInput}
+        placeholder="rule definition"
+        {...props}
+      />
+    </Wrapper>
+  );
+};
+
+export default Rule;
+
+const Wrapper = styled.fieldset`
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  font-weight: 600;
+  width: 100%;
+`;
+
+// TODO move validation stuff elsewhere
 
 /* validation
 
@@ -105,34 +150,6 @@ type RuleComponentProps = {
   }
 */
 
-const Rule: React.FC<RuleComponentProps> = ({ fieldKey, rule, index = 0 }) => {
-  const { register } = useFormContext();
-  const fieldName = `definitions.${index}.rule`;
-
-  function trimInput(event: React.ChangeEvent<HTMLInputElement>) {
-    event.target.value = event.target.value.trim();
-  }
-
-  return (
-    <Wrapper>
-      <EditRule htmlFor="rule">
-        <Input
-          {...register(fieldName)}
-          key={fieldKey}
-          id={fieldName}
-          defaultValue={rule}
-          name={fieldName}
-          onBlur={trimInput}
-          placeholder="rule definition"
-          type="text"
-        />
-      </EditRule>
-    </Wrapper>
-  );
-};
-
-export default Rule;
-
 // const Definition = styled.div`
 //   margin-right: 10px;
 //   margin-bottom: 6px;
@@ -159,35 +176,3 @@ export default Rule;
 // `;
 
 // const RuleList = styled.span``;
-
-const Wrapper = styled.fieldset`
-  border: 0;
-  padding: 0;
-  margin: 0;
-  display: flex;
-`;
-
-const LabelWrapper = styled.label`
-  display: flex;
-  flex-direction: column;
-  font-size: 14px;
-  font-weight: 600;
-`;
-
-const Input = styled.input`
-  padding: 0;
-  border: 0;
-  background: transparent;
-  margin-bottom: 8px;
-  width: 100%;
-
-  :-webkit-autofill {
-    -webkit-box-shadow: 0 0 0 30px
-      ${({ theme }) => theme.colors.headerBackground} inset;
-    -webkit-text-fill-color: #ccc;
-  }
-`;
-
-const EditRule = styled(LabelWrapper)`
-  width: 100%;
-`;

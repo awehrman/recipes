@@ -1,6 +1,7 @@
 import { ParserRuleWithRelations } from '@prisma/client';
+import _ from 'lodash';
 import React from 'react';
-import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import styled from 'styled-components';
 
 import { RuleProvider, useRuleContext } from 'contexts/rule-context';
@@ -23,23 +24,57 @@ type RuleContentProps = {
   onAddRuleCancel: () => void;
 };
 
+// TODO move this somewhere generic
+const getDefaultFormatter = (label: string, order: number) => `
+{
+  const values = [label].flatMap(value => value);
+  return {
+    rule: '#${order}_${_.camelCase(label)}',
+    type: '${_.camelCase(label)}',
+    values
+  };
+}
+`;
+
 const RuleContent: React.FC<RuleContentProps> = ({ rule, onAddRuleCancel }) => {
-  const methods = useForm<ParserRuleWithRelations>({ defaultValues: rule });
-  const { handleSubmit, reset } = methods;
-  const { addRule, updateRule } = useParserRule(rule.id);
+  // TODO since this is a bit circular here
+  // maybe we can adjust this on the component level?
+  const defaultFormatter = ''; // getDefaultFormatter(rule.label ?? '', 1);
   const {
     dispatch,
     state: { displayContext }
   } = useRuleContext();
+  const defaultValues = { ...rule };
+
+  if (displayContext === 'add' && !rule?.definitions?.length) {
+    // tack on a starting value
+    defaultValues.definitions = [
+      {
+        id: '-1',
+        ruleId: '-1',
+        example: '',
+        rule: 'label:*',
+        formatter: defaultFormatter,
+        order: 0
+      }
+    ];
+  }
+  const methods = useForm<ParserRuleWithRelations>({ defaultValues });
+  const { handleSubmit, reset } = methods;
+  const { addRule, updateRule } = useParserRule(rule?.id ?? '-1');
+
   const saveLabel = displayContext === 'add' ? 'Add Rule' : 'Save Rule';
 
   function handleCancelClick() {
+    // TODO should any of these useParserRule calls actually be dispatched from the ruleContext?
+    // whats the performance difference?
     onAddRuleCancel();
     dispatch({ type: 'SET_DISPLAY_CONTEXT', payload: 'display' });
     reset({
       name: rule.name,
-      label: rule.label
-      // TODO definitions
+      label: rule.label,
+      definitions: rule.definitions
+      // TODO order?
     });
   }
 
@@ -82,7 +117,7 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule, onAddRuleCancel }) => {
 };
 
 const Rule: React.FC<RuleComponentProps> = ({
-  context = 'display', // TODO contextType?
+  context = 'display', // TODO contextType enum?
   id,
   onAddRuleCancel // TODO i hate this; find a better way to call this
 }) => {
@@ -95,7 +130,7 @@ const Rule: React.FC<RuleComponentProps> = ({
 
   return (
     <RuleProvider id={id} initialContext={context}>
-      <RuleContent rule={rule} onAddRuleCancel={onAddRuleCancel} />
+      <RuleContent onAddRuleCancel={onAddRuleCancel} rule={rule} />
     </RuleProvider>
   );
 };
@@ -105,9 +140,8 @@ export default Rule;
 Rule.whyDidYouRender = true;
 
 const Buttons = styled.div`
-  display: flex;
-  justify-content: flex-end;
   margin: 10px 15px;
+  float: right;
 `;
 
 const CancelButton = styled(Button)`
@@ -130,11 +164,7 @@ const SaveButton = styled(Button)`
 `;
 
 const Wrapper = styled.form`
-  display: flex;
-  flex-direction: column;
-  flex-wrap: wrap;
   width: 600px;
-  position: relative;
   min-height: 40px;
 
   &.edit {

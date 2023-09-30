@@ -1,19 +1,20 @@
 import React from 'react';
-import { useFormContext } from 'react-hook-form';
 import styled from 'styled-components';
 
+import AutoWidthInput from '../auto-width-input';
+
 type RuleComponentProps = {
-  fieldKey: string;
-  example: string;
+  definitionId: string;
+  defaultValue: string;
   index: number;
 };
 
 const RuleExample: React.FC<RuleComponentProps> = ({
-  fieldKey,
-  example,
-  index = 0
+  definitionId,
+  defaultValue,
+  index = 0,
+  ...props
 }) => {
-  const { register } = useFormContext();
   const fieldName = `definitions.${index}.example`;
 
   function trimInput(event: React.ChangeEvent<HTMLInputElement>) {
@@ -22,18 +23,16 @@ const RuleExample: React.FC<RuleComponentProps> = ({
 
   return (
     <Wrapper>
-      <EditExample htmlFor={fieldName}>
-        <Input
-          {...register(fieldName)}
-          key={fieldKey}
-          id={fieldName}
-          defaultValue={example}
-          name={fieldName}
-          onBlur={trimInput}
-          placeholder="an example of this rule"
-          type="text"
-        />
-      </EditExample>
+      <AutoWidthInput
+        definitionId={definitionId}
+        defaultValue={defaultValue}
+        fieldName="example"
+        definitionPath={fieldName}
+        grow
+        onBlur={trimInput}
+        placeholder="an example of this rule"
+        {...props}
+      />
     </Wrapper>
   );
 };
@@ -46,38 +45,17 @@ const Wrapper = styled.fieldset`
   margin: 0;
   display: flex;
   color: #ccc;
-`;
-
-const LabelWrapper = styled.label`
+  position: relative;
+  width: 100%;
   display: flex;
   flex-direction: column;
   font-size: 14px;
   font-weight: 600;
-`;
-
-const Input = styled.input`
-  padding: 0;
-  color: #ccc;
-  border: 0;
-  background: transparent;
-  margin-bottom: 8px;
-  margin-left: 15px;
-  width: 100%;
-
-  :-webkit-autofill {
-    -webkit-box-shadow: 0 0 0 30px
-      ${({ theme }) => theme.colors.headerBackground} inset;
-    -webkit-text-fill-color: #ccc;
-  }
-`;
-
-const EditExample = styled(LabelWrapper)`
-  position: relative;
-  width: 100%;
 
   :before {
     content: '//';
-    top: -2px;
+    top: 3px;
+    left: -16px;
     position: absolute;
   }
 `;

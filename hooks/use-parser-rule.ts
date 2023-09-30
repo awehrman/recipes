@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import { useQuery, useMutation } from '@apollo/client';
 import { ParserRuleWithRelations, ParserRuleDefinition } from '@prisma/client';
-import { ArgsValue } from 'nexus/dist/core';
 
 import {
   GET_PARSER_RULE_QUERY,
@@ -145,16 +144,23 @@ function useParserRule(id: string) {
     });
   }
 
-  function addNewRuleDefinition(
-    input: ArgsValue<'Mutation', 'addParserRuleDefinition'>
-  ) {
+  function addNewRuleDefinition() {
+    // input: ArgsValue<'Mutation', 'addParserRuleDefinition'>
+    const input = {
+      example: null,
+      formatter: null,
+      order: 0,
+      rule: '', // TODO allow nulls here
+      ruleId: null
+    };
     addParserRuleDefinition({
       variables: {
-        input
+        ...input
       },
-      update: () => {
-        refetch();
-        // TODO is this sufficient?
+      update: (cache, data) => {
+        // TODO is this sufficient? ... probably not
+        // i think we need to directly update the cache
+        // refetch();
       }
     });
   }

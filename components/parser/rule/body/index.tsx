@@ -1,52 +1,72 @@
+import { ParserRuleDefinition } from '@prisma/client';
 import React from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import styled from 'styled-components';
 
+import { Button } from 'components/common';
 import { useRuleContext } from 'contexts/rule-context';
+import useParserRule from 'hooks/use-parser-rule';
 import PlusIcon from 'public/icons/plus.svg';
 
-import { Button } from 'components/common';
 import Example from './example';
 import Formatter from './formatter';
 import Rule from './rule';
 
 type RuleComponentProps = {};
 
+// TODO move to constants file
+const getDefaultValues = (order: number = 0) => ({
+  example: '',
+  rule: '',
+  formatter: '',
+  order
+});
+
 const RuleBody: React.FC<RuleComponentProps> = () => {
   const {
-    state: { displayContext }
+    state: { id, displayContext }
   } = useRuleContext();
-  const { control, getValues } = useFormContext();
+  const { control } = useFormContext();
   const { fields, append } = useFieldArray({
     control,
     name: 'definitions'
   });
+  const { rule } = useParserRule(id);
+  const { definitions = [] } = rule;
 
   function renderDefinitions() {
-    return fields.map((definition, index: number) => (
-      <Wrapper key={definition.id}>
-        <Example
-          // TODO should we create another context just for definitions?
-          example={getValues(`definitions.${index}.example`)}
-          fieldKey={definition.id}
-          index={index}
-        />
-        <Rule
-          rule={getValues(`definitions.${index}.rule`)}
-          fieldKey={definition.id}
-          index={index}
-        />
-        <Formatter
-          formatter={getValues(`definitions.${index}.formatter`)}
-          fieldKey={definition.id}
-          index={index}
-        />
-      </Wrapper>
-    ));
+    return fields.map((field, index: number) => {
+      const definitionId = definitions?.[0]?.id ?? '-1';
+      // TODO this should probably just be a helper function
+      const ruleDefinition = definitions.find(
+        (def: ParserRuleDefinition) => def.id === definitionId
+      );
+      const { example, formatter, rule } =
+        ruleDefinition ?? getDefaultValues(index);
+
+      // TODO should we create another context just for formDefinitions stuff?
+      // it would be nice to include the index, def id and the default values there
+      return (
+        <Wrapper key={field.id}>
+          <Example
+            defaultValue={example}
+            definitionId={definitionId}
+            index={index}
+          />
+          <Rule defaultValue={rule} definitionId={definitionId} index={index} />
+          <Formatter
+            defaultValue={formatter}
+            definitionId={definitionId}
+            index={index}
+          />
+        </Wrapper>
+      );
+    });
   }
 
   function handleAddNewDefinitionClick() {
-    append({ example: '', rule: '', formatter: '' });
+    const order = (fields ?? []).length + 1;
+    append({ example: '', rule: '', formatter: '', order });
   }
 
   return (
@@ -91,4 +111,5 @@ const Body = styled.div`
 const Wrapper = styled.div`
   margin: 6px 20px;
   font-size: 14px;
+  flex-basis: 100%;
 `;

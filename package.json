@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@apollo/client": "^3.7.2",
+    "@codemirror/lang-javascript": "^6.2.1",
+    "@lezer/highlight": "^1.1.6",
     "@monaco-editor/react": "^4.4.6",
     "@next-auth/prisma-adapter": "^1.0.5",
     "@next/font": "^13.1.1",
@@ -29,6 +31,8 @@
     "@types/react-window": "^1.8.5",
     "@types/styled-components": "^5.1.26",
     "@types/uuid": "^9.0.0",
+    "@uiw/codemirror-themes": "^4.21.18",
+    "@uiw/react-codemirror": "^4.21.18",
     "@welldone-software/why-did-you-render": "^7.0.1",
     "apollo-server-micro": "^3.11.1",
     "cheerio": "^1.0.0-rc.12",
