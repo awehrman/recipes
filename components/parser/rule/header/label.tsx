@@ -37,16 +37,24 @@ const RuleLabel: React.FC<RuleComponentProps> = () => {
     }
   }, [isNameActiveElement, displayContext, setValue, watched]);
 
-  return <StyledAutoWidthInput grow defaultValue={label} fieldName="label" />;
+  return (
+    <StyledAutoWidthInput
+      grow
+      defaultValue={label}
+      fieldName="label"
+      placeholder="label"
+    />
+  );
 };
 
 export default RuleLabel;
 
 const StyledAutoWidthInput = styled(AutoWidthInput)`
   font-weight: 600;
-`;
 
-const Label = styled.div`
-  margin-right: 10px;
-  width: 100%;
+  &::placeholder {
+    font-weight: 400;
+    color: #ccc;
+    font-style: italic;
+  }
 `;

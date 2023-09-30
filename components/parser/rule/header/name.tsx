@@ -17,7 +17,14 @@ const RuleName: React.FC<RuleComponentProps> = () => {
   const { rule } = useParserRule(id);
   const { name = '' } = rule || {};
 
-  return <AutoWidthInput defaultValue={name} fieldName="name" isRequired />;
+  return (
+    <AutoWidthInput
+      defaultValue={name}
+      fieldName="name"
+      isRequired
+      placeholder="name"
+    />
+  );
 };
 
 export default RuleName;

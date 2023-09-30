@@ -53,7 +53,7 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule, onAddRuleCancel }) => {
         id: '-1',
         ruleId: '-1',
         example: '',
-        rule: 'label:*',
+        rule: '',
         formatter: defaultFormatter,
         order: 0
       }
@@ -141,7 +141,7 @@ Rule.whyDidYouRender = true;
 
 const Buttons = styled.div`
   margin: 10px 15px;
-  float: right;
+  align-self: flex-end;
 `;
 
 const CancelButton = styled(Button)`
@@ -164,8 +164,12 @@ const SaveButton = styled(Button)`
 `;
 
 const Wrapper = styled.form`
+  // width: 600px;
+  // min-height: 40px;
+  display: flex;
+  flex-direction: column;
   width: 600px;
-  min-height: 40px;
+  position: relative;
 
   &.edit {
     left: -40px;
