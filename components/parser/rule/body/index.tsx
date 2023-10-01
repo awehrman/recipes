@@ -104,9 +104,7 @@ const AddNewDefinition = styled(Button)`
   }
 `;
 
-const Body = styled.div`
-  margin-top: 10px;
-`;
+const Body = styled.div``;
 
 const Wrapper = styled.div`
   margin: 6px 20px;

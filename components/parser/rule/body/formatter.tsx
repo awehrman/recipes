@@ -56,7 +56,7 @@ const formatterSetup = {
   closeBrackets: true,
   autocompletion: true,
   highlightSelectionMatches: true,
-  tabSize: 4
+  tabSize: 2
 };
 
 const formatterDisplayTheme = createTheme({
@@ -75,6 +75,7 @@ const formatterDisplayTheme = createTheme({
     lineHighlight: 'transparent'
   },
   styles: [
+    { tag: t.comment, color: '#ccc' },
     { tag: t.variableName, color: '#222', fontWeight: '600 !important' }
     // TODO figure out how to label rules to wire in validation
   ]
@@ -87,15 +88,16 @@ const formatterEditTheme = createTheme({
     backgroundImage: '',
     foreground: '#222',
     caret: '#C3E7E0',
-    selection: 'rgba(128, 174, 245, .15)',
-    selectionMatch: 'rgba(128, 174, 245, .15)',
+    selection: 'rgba(128, 174, 245, .05)',
+    selectionMatch: 'rgba(128, 174, 245, .05)',
     gutterBackground: 'transparent',
     gutterForeground: '#ccc',
-    gutterBorder: 'rgba(128, 174, 245, .15)',
+    gutterBorder: 'rgba(128, 174, 245, .05)',
     gutterActiveForeground: '',
-    lineHighlight: 'rgba(128, 174, 245, .15)'
+    lineHighlight: 'rgba(128, 174, 245, .05)'
   },
   styles: [
+    { tag: t.comment, color: '#ccc' },
     {
       tag: t.variableName,
       color: 'rgba(128, 174, 245, 1)',
@@ -111,13 +113,13 @@ const formatterAddTheme = createTheme({
     backgroundImage: '',
     foreground: '#222',
     caret: '#73C6B6',
-    selection: 'rgba(115, 198, 182, .15)',
-    selectionMatch: 'rgba(115, 198, 182, .15)',
+    selection: 'rgba(115, 198, 182, .05)',
+    selectionMatch: 'rgba(115, 198, 182, .05)',
     gutterBackground: 'transparent',
     gutterForeground: '#ccc',
-    gutterBorder: 'rgba(115, 198, 182, .15)',
+    gutterBorder: 'rgba(115, 198, 182, .05)',
     gutterActiveForeground: '',
-    lineHighlight: 'rgba(115, 198, 182, .15)'
+    lineHighlight: 'rgba(115, 198, 182, .05)'
   },
   styles: [
     { tag: t.comment, color: '#ccc' },
@@ -146,33 +148,33 @@ const RuleFormatter: React.FC<RuleComponentProps> = ({
     state: { id, displayContext }
   } = useRuleContext();
   const { control, getValues, register, setValue } = useFormContext();
-  const formUpdates = useWatch({ control });
+  // const formUpdates = useWatch({ control });
   const fieldName = `definitions.${index}.formatter`;
-  const formatted = js_beautify(defaultValue, options);
+  // const formatted = js_beautify(defaultValue, options);
   const watchedLabel = useWatch({ control, name: 'label', defaultValue: '' });
   const defaultPlaceholder = getDefaultFormatter(watchedLabel, index);
   const uniqueId = `${id}-${fieldName}`;
 
   // TODO move into a hook
-  const adjustTextAreaHeight = useCallback(() => {
-    const textarea = document.getElementById(fieldName);
-    if (textarea) {
-      if (displayContext === 'display' && !defaultValue.length) {
-        textarea.style.height = `0px`;
-      }
+  // const adjustTextAreaHeight = useCallback(() => {
+  //   const textarea = document.getElementById(fieldName);
+  //   if (textarea) {
+  //     if (displayContext === 'display' && !defaultValue.length) {
+  //       textarea.style.height = `0px`;
+  //     }
 
-      textarea.style.height = `${textarea.scrollHeight}px`;
-    }
-  }, [defaultValue.length, displayContext, fieldName]);
+  //     textarea.style.height = `${textarea.scrollHeight}px`;
+  //   }
+  // }, [defaultValue.length, displayContext, fieldName]);
 
-  useEffect(() => {
-    adjustElementHeight(fieldName);
-  }, [formatted, fieldName, displayContext]);
+  // useEffect(() => {
+  //   adjustElementHeight(fieldName);
+  // }, [formatted, fieldName, displayContext]);
 
-  // TODO this doesn't fire on typing
-  useEffect(() => {
-    adjustTextAreaHeight();
-  }, [adjustTextAreaHeight, formatted, defaultValue, displayContext]);
+  // // TODO this doesn't fire on typing
+  // useEffect(() => {
+  //   adjustTextAreaHeight();
+  // }, [adjustTextAreaHeight, formatted, defaultValue, displayContext]);
 
   function handleOnChange(value: string, viewUpdate: ViewUpdate) {
     // TODO do this on blur
@@ -217,18 +219,11 @@ const LabelWrapper = styled.label`
   font-size: 14px;
   font-weight: 600;
   min-width: 50px;
+  margin: 0 0 10px 0;
 `;
 
 const HiddenFormInput = styled.textarea`
   display: none;
-  padding: 0;
-  color: #333;
-  border: 0;
-  background: transparent;
-  margin-bottom: 8px;
-  padding: 4px 6px;
-  width: 100%;
-  height: 200px;
 `;
 
 const EditFormatter = styled(LabelWrapper)`
@@ -237,8 +232,17 @@ const EditFormatter = styled(LabelWrapper)`
 
 const StyledEditor = styled(CodeMirror)`
   * {
-    font-size: 14px;
-    font-family: 'Source Sans Pro', Verdana, sans-serif;
+    font-size: 12px;
+    // font-family: 'Source Sans Pro', Verdana, sans-serif;
+    font-family: Menlo, Monaco, 'Courier New', monospace;
     font-weight: 400;
+  }
+
+  .cm-line:first-child {
+    // padding-top: 10px;
+  }
+
+  .cm-line:last-child {
+    // padding-bottom: 10px;
   }
 `;

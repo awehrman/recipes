@@ -14,7 +14,6 @@ type AutoWidthInputProps = {
   definitionPath?: string;
   onBlur?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
-  grow?: boolean;
 };
 
 type WatchProps = {
@@ -30,9 +29,10 @@ const getFieldUpdates = ({
   state = {}
 }: WatchProps): string | null => {
   const { definitions = [] } = state;
+  const isTopLevelFormField = fieldName === 'name' || fieldName === 'label';
 
   // if this is a top-level field, we can directly get the values off the form
-  if (!definitions.length) {
+  if (isTopLevelFormField) {
     return state[fieldName];
   }
 
@@ -52,7 +52,6 @@ const AutoWidthInput: React.FC<AutoWidthInputProps> = ({
   definitionPath = null,
   onBlur = _.noop(),
   placeholder = null,
-  grow = false,
   ...props
 }) => {
   const containerRef = useRef<HTMLLabelElement>(null);
@@ -81,22 +80,23 @@ const AutoWidthInput: React.FC<AutoWidthInputProps> = ({
       ? placeholder
       : dirtyValue;
   const isSpellCheck = displayContext !== 'display';
-  const isMounted =
+  const isMounted = !!(
     sizeRef?.current &&
     containerRef?.current &&
     fieldsetRef?.current &&
-    canvasRef;
+    canvasRef?.current
+  );
   // TODO put this in context or a prop
   const uniqueId = `${id}-${definitionPath ?? fieldName}`;
 
   const updateInputWidth = useCallback(() => {
     if (isMounted) {
       const width = sizeRef.current.offsetWidth;
+      if (fieldName === 'name' || fieldName === 'label') {
+      }
       containerRef.current.style.width = `${width}px`;
-      // TODO check if this is actually needed for top level fields or not
-      // fieldsetRef.current.style.width = `${sizeRef.current.offsetWidth}px`;
     }
-  }, [isMounted]);
+  }, [fieldName, isMounted]);
 
   // TODO i want to move all of this width logic out of this component
   useLayoutEffect(() => {
@@ -139,7 +139,7 @@ const AutoWidthInput: React.FC<AutoWidthInputProps> = ({
   }
 
   return (
-    <Wrapper grow={grow} ref={fieldsetRef}>
+    <Wrapper ref={fieldsetRef}>
       <Label ref={containerRef} id={`${fieldName}-label`} htmlFor={uniqueId}>
         <InputField
           {...register(definitionPath ?? fieldName, {
@@ -165,26 +165,21 @@ const AutoWidthInput: React.FC<AutoWidthInputProps> = ({
 
 export default AutoWidthInput;
 
-type WrapperProps = {
-  grow: boolean;
-};
-
-const Wrapper = styled.fieldset<WrapperProps>`
+const Wrapper = styled.fieldset`
   border: 0;
   padding: 0;
   margin: 0;
   margin-right: 10px;
-  // TODO uh does this still work?
-  flex-grow: ${({ grow }) => (grow ? 1 : 0)};
-  flex-wrap: nowrap;
 `;
 
 const WidthTracker = styled.span`
   display: inline;
   visibility: hidden;
   // border: 1px solid blue;
-  // margin-left: 20px;
+  font-family: 'Source Sans Pro', Verdana, sans-serif;
   white-space: pre;
+  margin-top: -28px;
+  position: relative;
 `;
 
 const Label = styled.label`
@@ -192,6 +187,7 @@ const Label = styled.label`
   padding: 0;
   border: 0;
   min-width: 40px;
+  position: relative;
 `;
 
 const InputField = styled.input` 
@@ -204,10 +200,13 @@ const InputField = styled.input`
   border: 0;
   outline: 0;
   font-family: 'Source Sans Pro', Verdana, sans-serif;
-  margin-bottom: 5px; /* you'll want at least the height of the span border */
+  // margin-bottom: 5px; /* you'll want at least the height of the span border */
   background-color: transparent;
   width: inherit;
   white-space: pre;
+  position: absolute;
+  top: 0;
+  left: 0;
 
   &.edit, &.add {
     cursor: text;
@@ -215,6 +214,7 @@ const InputField = styled.input`
 
     &:focus {
 			outline: none !important;
+      // TODO idk maybe we should put an underline back? or at least re-enable the focus
   }
 
   &::placeholder {

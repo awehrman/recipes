@@ -28,7 +28,6 @@ const Rule: React.FC<RuleComponentProps> = ({
         defaultValue={defaultValue}
         fieldName="rule"
         definitionPath={fieldName}
-        grow
         onBlur={trimInput}
         placeholder="rule definition"
         {...props}

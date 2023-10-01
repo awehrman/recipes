@@ -20,8 +20,8 @@ const RuleLabel: React.FC<RuleComponentProps> = () => {
   const { label = '', name = '' } = rule;
   const watched = useWatch({ name: 'name', defaultValue: name });
   const isNameActiveElement = useCallback(
-    () => document.activeElement?.id === 'name',
-    []
+    () => document.activeElement?.id === `${id}-name`,
+    [id]
   )();
 
   useEffect(() => {
@@ -35,11 +35,10 @@ const RuleLabel: React.FC<RuleComponentProps> = () => {
     ) {
       setValue('label', autoLabel, { shouldValidate: true });
     }
-  }, [isNameActiveElement, displayContext, setValue, watched]);
+  }, [id, isNameActiveElement, displayContext, setValue, watched]);
 
   return (
     <StyledAutoWidthInput
-      grow
       defaultValue={label}
       fieldName="label"
       placeholder="label"

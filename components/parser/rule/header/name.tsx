@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import React from 'react';
-import styled from 'styled-components';
 
 import { useRuleContext } from 'contexts/rule-context';
 import useParserRule from 'hooks/use-parser-rule';
@@ -30,8 +29,3 @@ const RuleName: React.FC<RuleComponentProps> = () => {
 export default RuleName;
 
 RuleName.whyDidYouRender = true;
-
-const Name = styled.div`
-  margin-right: 10px;
-  font-weight: 400;
-`;

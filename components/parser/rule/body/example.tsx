@@ -28,7 +28,6 @@ const RuleExample: React.FC<RuleComponentProps> = ({
         defaultValue={defaultValue}
         fieldName="example"
         definitionPath={fieldName}
-        grow
         onBlur={trimInput}
         placeholder="an example of this rule"
         {...props}
@@ -42,7 +41,6 @@ export default RuleExample;
 const Wrapper = styled.fieldset`
   border: 0;
   padding: 0;
-  margin: 0;
   display: flex;
   color: #ccc;
   position: relative;
