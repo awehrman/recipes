@@ -49,6 +49,11 @@ const Wrapper = styled.fieldset`
   flex-direction: column;
   font-size: 14px;
   font-weight: 600;
+  margin-bottom: 4px;
+
+  input {
+    color: #ccc;
+  }
 
   :before {
     content: '//';

@@ -180,6 +180,8 @@ const WidthTracker = styled.span`
   white-space: pre;
   margin-top: -28px;
   position: relative;
+  // keep our z-index lower than the input so we don't trim any input text
+  z-index: 1;
 `;
 
 const Label = styled.label`
@@ -207,6 +209,7 @@ const InputField = styled.input`
   position: absolute;
   top: 0;
   left: 0;
+  z-index: 2;
 
   &.edit, &.add {
     cursor: text;

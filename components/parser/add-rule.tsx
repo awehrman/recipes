@@ -40,9 +40,10 @@ const Wrapper = styled.div`
 `;
 
 const Header = styled.h2`
-  font-size: 14px;
+  font-size: 16px;
   width: 100%;
-  font-weight: 400;
+  font-weight: 600;
+  color: #73c6b6;
 `;
 
 const AddRuleButton = styled(Button)`

@@ -94,6 +94,7 @@ const AddNewDefinition = styled(Button)`
   top: 2px;
   position: relative;
   top: 30px;
+  font-size: 12px;
 
   svg {
     position: relative;

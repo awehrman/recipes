@@ -2001,6 +2001,11 @@
     "@codemirror/state" "^6.0.0"
     "@codemirror/view" "^6.0.0"
 
+"@uiw/codemirror-extensions-events@^4.21.18":
+  version "4.21.18"
+  resolved "https://registry.yarnpkg.com/@uiw/codemirror-extensions-events/-/codemirror-extensions-events-4.21.18.tgz#c135fddec8301bf5cbc0a929699ae74a85db487b"
+  integrity sha512-wzYcVb0Pe1AODw7/VwlFFxuuLfEcNMNiEJT5j8z9yUVVaiR0sLDvl0f4LtBU9yyUnrnG/YAQ9Evdt8VNd0ae2w==
+
 "@uiw/codemirror-themes@^4.21.18":
   version "4.21.18"
   resolved "https://registry.yarnpkg.com/@uiw/codemirror-themes/-/codemirror-themes-4.21.18.tgz#a6cafdac0927246a9a85ddf1cbabb19c62086df2"

@@ -42,7 +42,7 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule, onAddRuleCancel }) => {
   const defaultFormatter = ''; // getDefaultFormatter(rule.label ?? '', 1);
   const {
     dispatch,
-    state: { displayContext }
+    state: { displayContext, isExpanded, isFocused }
   } = useRuleContext();
   const defaultValues = { ...rule };
 
@@ -93,14 +93,28 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule, onAddRuleCancel }) => {
     dispatch({ type: 'SET_DISPLAY_CONTEXT', payload: 'display' });
   }
 
+  const debouncedHandleMouseEnter = _.debounce(() => {
+    if (!isFocused) {
+      dispatch({ type: 'SET_IS_FOCUSED', payload: true });
+    }
+  }, 300);
+
+  const debouncedHandleMouseLeave = _.debounce(() => {
+    if (isFocused) {
+      dispatch({ type: 'SET_IS_FOCUSED', payload: false });
+    }
+  }, 300);
+
   return (
     <FormProvider {...methods}>
       <Wrapper
         className={displayContext}
+        onMouseEnter={debouncedHandleMouseEnter}
+        onMouseLeave={debouncedHandleMouseLeave}
         onSubmit={handleSubmit(handleFormSubmit)}
       >
         <RuleHeader />
-        <RuleBody />
+        {isExpanded || displayContext !== 'display' ? <RuleBody /> : null}
         {displayContext !== 'display' ? (
           <Buttons>
             <CancelButton
@@ -164,16 +178,17 @@ const SaveButton = styled(Button)`
 `;
 
 const Wrapper = styled.form`
-  // width: 600px;
-  // min-height: 40px;
   display: flex;
   flex-direction: column;
   width: 600px;
   position: relative;
+  margin-left: -40px;
+  padding-left: 40px;
+  margin-bottom: 10px;
 
   &.edit {
     left: -40px;
-    padding: 10px 0 10px 40px;
+    padding: 10px 0 10px 80px;
     width: 640px;
     background: ${({ theme }) => theme.colors.lightBlue};
     margin-bottom: 10px;
@@ -181,7 +196,7 @@ const Wrapper = styled.form`
 
   &.add {
     left: -40px;
-    padding: 10px 0 10px 40px;
+    padding: 10px 0 10px 80px;
     width: 640px;
     background: ${({ theme }) => theme.colors.lightGreen};
     margin-bottom: 10px;

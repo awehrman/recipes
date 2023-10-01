@@ -1,6 +1,8 @@
+import { ParserRuleDefinition } from '@prisma/client';
 import { javascript } from '@codemirror/lang-javascript';
+import * as events from '@uiw/codemirror-extensions-events';
 import { tags as t } from '@lezer/highlight';
-import CodeMirror, { ViewUpdate } from '@uiw/react-codemirror';
+import CodeMirror, { Extension, ViewUpdate } from '@uiw/react-codemirror';
 import { createTheme } from '@uiw/codemirror-themes';
 import { js_beautify, HTMLBeautifyOptions } from 'js-beautify';
 import _ from 'lodash';
@@ -9,15 +11,6 @@ import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 
 import { useRuleContext } from 'contexts/rule-context';
-
-// TODO move this to a utils file
-const adjustElementHeight = (fieldName: string): void => {
-  const el = document.getElementById(fieldName);
-  if (el) {
-    el.style.height = 'auto';
-    el.style.height = `${el.scrollHeight}px`;
-  }
-};
 
 type RuleComponentProps = {
   definitionId: string;
@@ -148,39 +141,22 @@ const RuleFormatter: React.FC<RuleComponentProps> = ({
     state: { id, displayContext }
   } = useRuleContext();
   const { control, getValues, register, setValue } = useFormContext();
-  // const formUpdates = useWatch({ control });
   const fieldName = `definitions.${index}.formatter`;
-  // const formatted = js_beautify(defaultValue, options);
   const watchedLabel = useWatch({ control, name: 'label', defaultValue: '' });
   const defaultPlaceholder = getDefaultFormatter(watchedLabel, index);
   const uniqueId = `${id}-${fieldName}`;
 
-  // TODO move into a hook
-  // const adjustTextAreaHeight = useCallback(() => {
-  //   const textarea = document.getElementById(fieldName);
-  //   if (textarea) {
-  //     if (displayContext === 'display' && !defaultValue.length) {
-  //       textarea.style.height = `0px`;
-  //     }
-
-  //     textarea.style.height = `${textarea.scrollHeight}px`;
-  //   }
-  // }, [defaultValue.length, displayContext, fieldName]);
-
-  // useEffect(() => {
-  //   adjustElementHeight(fieldName);
-  // }, [formatted, fieldName, displayContext]);
-
-  // // TODO this doesn't fire on typing
-  // useEffect(() => {
-  //   adjustTextAreaHeight();
-  // }, [adjustTextAreaHeight, formatted, defaultValue, displayContext]);
-
   function handleOnChange(value: string, viewUpdate: ViewUpdate) {
-    // TODO do this on blur
-    // const formatted = js_beautify(value, { indent_size: 4 });
     setValue(fieldName, value);
   }
+
+  const eventExt2 = events.content({
+    blur: () => {
+      const value = getValues(fieldName);
+      const formatted = js_beautify(value, options);
+      setValue(fieldName, formatted);
+    }
+  });
 
   return (
     <EditFormatter htmlFor={uniqueId}>
@@ -196,14 +172,14 @@ const RuleFormatter: React.FC<RuleComponentProps> = ({
       <StyledEditor
         basicSetup={formatterSetup}
         editable={displayContext !== 'display'}
-        extensions={[javascript({ jsx: true })]}
+        extensions={[javascript({ jsx: true }), eventExt2]}
         height="auto"
         indentWithTab
         onChange={handleOnChange}
         placeholder={displayContext === 'display' ? '' : defaultPlaceholder}
         readOnly={displayContext === 'display'}
         theme={themeOptions[displayContext]}
-        width="550px"
+        width="520px"
         value={getValues(fieldName)}
       />
     </EditFormatter>
@@ -228,6 +204,7 @@ const HiddenFormInput = styled.textarea`
 
 const EditFormatter = styled(LabelWrapper)`
   margin-right: 10px;
+  margin-top: 6px;
 `;
 
 const StyledEditor = styled(CodeMirror)`

@@ -16,17 +16,13 @@ type RuleComponentProps = {};
 const RuleHeader: React.FC<RuleComponentProps> = () => {
   const {
     dispatch,
-    state: { id, displayContext }
+    state: { id, displayContext, isFocused }
   } = useRuleContext();
 
   const { deleteRule } = useParserRule(id);
 
   function handleEditClick() {
     dispatch({ type: 'SET_DISPLAY_CONTEXT', payload: 'edit' });
-    // TODO see if this is still needed when putting hover back in
-    // if (document?.activeElement) {
-    //   (document.activeElement as HTMLButtonElement).blur();
-    // }
   }
 
   function handleRemoveRuleClick() {
@@ -36,7 +32,7 @@ const RuleHeader: React.FC<RuleComponentProps> = () => {
 
   return (
     <Header>
-      {displayContext === 'display' ? (
+      {displayContext === 'display' && isFocused ? (
         <EditRuleButton icon={<EditIcon />} onClick={handleEditClick} />
       ) : null}
       <Name />
@@ -102,5 +98,7 @@ const EditRuleButton = styled(Button)`
 
   svg {
     height: 13px;
+    top: 2px;
+    position: relative;
   }
 `;
