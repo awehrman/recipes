@@ -224,6 +224,7 @@ const addParserRuleDefinition = async (
   return response;
 };
 
+// TODO all of this should probably go into a transaction
 const updateParserRule = async (
   _source: SourceValue<'Mutation'>,
   args: ArgsValue<'Mutation', 'updateParserRule'>,
@@ -236,6 +237,16 @@ const updateParserRule = async (
     // TODO come back and make this a better error
     return { id: 'false' };
   }
+
+  // clean out any removed definitions
+  await prisma.parserRuleDefinition.deleteMany({
+    where: {
+      parserRuleId: id,
+      id: {
+        notIn: (definitions ?? []).map((def) => def?.id ?? '')
+      }
+    }
+  });
 
   const upsert: Prisma.ParserRuleDefinitionUpsertWithWhereUniqueWithoutParserRuleInput[] =
     (definitions ?? []).map((def, index) => ({

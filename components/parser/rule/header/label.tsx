@@ -37,11 +37,30 @@ const RuleLabel: React.FC<RuleComponentProps> = () => {
     }
   }, [id, isNameActiveElement, displayContext, setValue, watched]);
 
+  const containerRef = React.useRef<HTMLLabelElement | null>(null);
+  const sizeRef = React.useRef<HTMLSpanElement | null>(null);
+
+  const containerRefCallback = (node: HTMLLabelElement | null) => {
+    // Set the containerRef.current to the node
+    if (containerRef.current !== node) {
+      containerRef.current = node;
+    }
+  };
+
+  const sizeRefCallback = (node: HTMLSpanElement | null) => {
+    // Set the sizeRef.current to the node
+    if (sizeRef.current !== node) {
+      sizeRef.current = node;
+    }
+  };
+
   return (
     <StyledAutoWidthInput
       defaultValue={label}
       fieldName="label"
       placeholder="label"
+      containerRefCallback={containerRefCallback}
+      sizeRefCallback={sizeRefCallback}
     />
   );
 };

@@ -7,12 +7,16 @@ type RuleComponentProps = {
   definitionId: string;
   defaultValue: string;
   index: number;
+  containerRefCallback: (ref: HTMLLabelElement | null) => void;
+  sizeRefCallback: (ref: HTMLSpanElement | null) => void;
 };
 
 const RuleExample: React.FC<RuleComponentProps> = ({
   definitionId,
   defaultValue,
   index = 0,
+  containerRefCallback,
+  sizeRefCallback,
   ...props
 }) => {
   const fieldName = `definitions.${index}.example`;
@@ -30,6 +34,8 @@ const RuleExample: React.FC<RuleComponentProps> = ({
         definitionPath={fieldName}
         onBlur={trimInput}
         placeholder="an example of this rule"
+        containerRefCallback={containerRefCallback}
+        sizeRefCallback={sizeRefCallback}
         {...props}
       />
     </Wrapper>

@@ -1,6 +1,12 @@
 import { ParserRuleDefinition } from '@prisma/client';
 import _ from 'lodash';
-import React, { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  MutableRefObject
+} from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 
@@ -14,6 +20,8 @@ type AutoWidthInputProps = {
   definitionPath?: string;
   onBlur?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
+  containerRefCallback: (ref: HTMLLabelElement | null) => void;
+  sizeRefCallback: (ref: HTMLSpanElement | null) => void;
 };
 
 type WatchProps = {
@@ -52,12 +60,15 @@ const AutoWidthInput: React.FC<AutoWidthInputProps> = ({
   definitionPath = null,
   onBlur = _.noop(),
   placeholder = null,
+  sizeRefCallback,
+  containerRefCallback,
   ...props
 }) => {
-  const containerRef = useRef<HTMLLabelElement>(null);
-  const fieldsetRef = useRef<HTMLFieldSetElement>(null);
-  const sizeRef = useRef<HTMLSpanElement>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const registeredFieldName = definitionPath ?? fieldName;
+
+  const containerRef: MutableRefObject<HTMLLabelElement | null> = useRef(null);
+  const sizeRef: MutableRefObject<HTMLLabelElement | null> = useRef(null);
 
   const {
     state: { id, displayContext }
@@ -80,23 +91,16 @@ const AutoWidthInput: React.FC<AutoWidthInputProps> = ({
       ? placeholder
       : dirtyValue;
   const isSpellCheck = displayContext !== 'display';
-  const isMounted = !!(
-    sizeRef?.current &&
-    containerRef?.current &&
-    fieldsetRef?.current &&
-    canvasRef?.current
-  );
-  // TODO put this in context or a prop
-  const uniqueId = `${id}-${definitionPath ?? fieldName}`;
+  const uniqueId = `${id}-${registeredFieldName}`;
 
+  // TODO our refs are borked here
   const updateInputWidth = useCallback(() => {
-    if (isMounted) {
+    if (sizeRef?.current && containerRef?.current) {
       const width = sizeRef.current.offsetWidth;
-      if (fieldName === 'name' || fieldName === 'label') {
-      }
+      console.log('setting', width, containerRef.current?.id);
       containerRef.current.style.width = `${width}px`;
     }
-  }, [fieldName, isMounted]);
+  }, []);
 
   // TODO i want to move all of this width logic out of this component
   useLayoutEffect(() => {
@@ -120,29 +124,31 @@ const AutoWidthInput: React.FC<AutoWidthInputProps> = ({
   }, []);
 
   function handleOnKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
-    if (!!isMounted) {
-      const { key } = event;
-      const canvas = canvasRef.current;
-      if (canvas) {
-        const context = canvas.getContext('2d');
-        if (context) {
-          const computedStyled = window.getComputedStyle(sizeRef.current);
-          context.font = computedStyled.font;
-          context.clearRect(0, 0, canvas.width, canvas.height);
-          const keyWidth = context.measureText(key).width;
-          const originalWidth = sizeRef.current.offsetWidth;
-          const width = originalWidth + keyWidth;
-          containerRef.current.style.width = `${width}px`;
-        }
+    const { key } = event;
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const context = canvas.getContext('2d');
+      if (context && sizeRef?.current && containerRef?.current) {
+        const computedStyled = window.getComputedStyle(sizeRef.current);
+        context.font = computedStyled.font;
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        const keyWidth = context.measureText(key).width;
+        const originalWidth = sizeRef.current.offsetWidth;
+        const width = originalWidth + keyWidth;
+        containerRef.current.style.width = `${width}px`;
       }
     }
   }
 
   return (
-    <Wrapper ref={fieldsetRef}>
-      <Label ref={containerRef} id={`${fieldName}-label`} htmlFor={uniqueId}>
+    <Wrapper>
+      <Label
+        ref={containerRefCallback}
+        id={`label-${uniqueId}`}
+        htmlFor={uniqueId}
+      >
         <InputField
-          {...register(definitionPath ?? fieldName, {
+          {...register(registeredFieldName, {
             required: isRequired,
             disabled: displayContext === 'display'
           })}
@@ -157,7 +163,9 @@ const AutoWidthInput: React.FC<AutoWidthInputProps> = ({
           {...props}
         />
         {/* we'll let the span determine the width of our input */}
-        <WidthTracker ref={sizeRef}>{displaySizePlaceholder}</WidthTracker>
+        <WidthTracker ref={sizeRefCallback}>
+          {displaySizePlaceholder}
+        </WidthTracker>
       </Label>
     </Wrapper>
   );

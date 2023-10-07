@@ -7,6 +7,7 @@ import { Button } from 'components/common';
 import { useRuleContext } from 'contexts/rule-context';
 import useParserRule from 'hooks/use-parser-rule';
 import PlusIcon from 'public/icons/plus.svg';
+import TrashIcon from 'public/icons/trash-can.svg';
 
 import Example from './example';
 import Formatter from './formatter';
@@ -26,13 +27,29 @@ const RuleBody: React.FC<RuleComponentProps> = () => {
   const {
     state: { id, displayContext }
   } = useRuleContext();
+  // TODO
+  const showDeleteDefinitionButton = (index: number) =>
+    displayContext !== 'display' && index !== 0;
   const { control } = useFormContext();
-  const { fields, append } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control,
     name: 'definitions'
   });
   const { rule } = useParserRule(id);
   const { definitions = [] } = rule;
+
+  // NOTE: we want to utilize cb refs here so we keep these straight
+  const containerRefs: { [key: number]: HTMLLabelElement | null } = {};
+  const handleContainerRefCallback =
+    (index: number) => (ref: HTMLLabelElement | null) => {
+      containerRefs[index] = ref;
+    };
+
+  const sizeRefs: { [key: number]: HTMLSpanElement | null } = {};
+  const handleSizeRefCallback =
+    (index: number) => (ref: HTMLSpanElement | null) => {
+      sizeRefs[index] = ref;
+    };
 
   function renderDefinitions() {
     return fields.map((field, index: number) => {
@@ -52,13 +69,28 @@ const RuleBody: React.FC<RuleComponentProps> = () => {
             defaultValue={example}
             definitionId={definitionId}
             index={index}
+            containerRefCallback={handleContainerRefCallback(index)}
+            sizeRefCallback={handleSizeRefCallback(index)}
           />
-          <Rule defaultValue={rule} definitionId={definitionId} index={index} />
+          <Rule
+            defaultValue={rule}
+            definitionId={definitionId}
+            index={index}
+            containerRefCallback={handleContainerRefCallback(index)}
+            sizeRefCallback={handleSizeRefCallback(index)}
+          />
           <Formatter
             defaultValue={formatter}
             definitionId={definitionId}
             index={index}
           />
+          {showDeleteDefinitionButton(index) ? (
+            <DeleteButton
+              icon={<TrashIcon />}
+              onClick={() => handleRemoveDefinitionClick(index)}
+              label="Remove definition"
+            />
+          ) : null}
         </Wrapper>
       );
     });
@@ -67,6 +99,10 @@ const RuleBody: React.FC<RuleComponentProps> = () => {
   function handleAddNewDefinitionClick() {
     const order = (fields ?? []).length + 1;
     append({ example: '', rule: '', formatter: '', order });
+  }
+
+  function handleRemoveDefinitionClick(index: number) {
+    remove(index);
   }
 
   return (
@@ -101,6 +137,21 @@ const AddNewDefinition = styled(Button)`
     height: 12px;
     fill: ${({ theme }) => theme.colors.altGreen};
     top: 2px;
+    margin-right: 5px;
+  }
+`;
+
+const DeleteButton = styled(Button)`
+  border: 0;
+  background: transparent;
+  color: tomato;
+  float: right;
+
+  svg {
+    position: relative;
+    height: 12px;
+    top: 1px;
+    fill: tomato;
     margin-right: 5px;
   }
 `;

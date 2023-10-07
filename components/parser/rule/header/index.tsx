@@ -70,7 +70,7 @@ const RemoveRuleButton = styled(Button)`
   font-size: 14px;
   align-self: flex-end;
   position: absolute;
-  top: 0;
+  top: 6px;
   right: 0;
 
   svg {
@@ -100,5 +100,6 @@ const EditRuleButton = styled(Button)`
     height: 13px;
     top: 2px;
     position: relative;
+    cursor: pointer;
   }
 `;
