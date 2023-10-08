@@ -1,7 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 
-// import usePEGParser from 'hooks/use-peg-parser';
+import usePEGParser from 'hooks/use-peg-parser';
+import useParserRules from 'hooks/use-parser-rules';
 
 import Rules from './rules';
 import Tests from './tests';
@@ -9,12 +10,13 @@ import Tests from './tests';
 type ParserProps = {};
 
 const Parser: React.FC<ParserProps> = () => {
-  // const { tests } = usePEGParser(rules);
+  const { rules = [] } = useParserRules();
+  const { errors, tests } = usePEGParser(rules);
 
   return (
     <Wrapper>
       <Rules />
-      {/* <Tests tests={tests} /> */}
+      <Tests tests={tests} />
     </Wrapper>
   );
 };

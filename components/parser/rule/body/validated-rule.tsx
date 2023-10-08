@@ -6,6 +6,21 @@ import { v4 } from 'uuid';
 import useParserRules from 'hooks/use-parser-rules';
 import { useRuleContext } from 'contexts/rule-context';
 
+const PEG_CHARACTERS = [
+  '!',
+  '*',
+  '+',
+  '$',
+  '|',
+  '(',
+  ')',
+  '[',
+  ']',
+  'i',
+  'a-z',
+  'A-Z',
+  '0-9'
+];
 type WatchProps = {
   state: any; // TODO
   fieldName: string;
@@ -60,18 +75,6 @@ const ValidatedRule: React.FC<ValidatedRuleComponentProps> = ({
   const ruleNames: string[] = rules.map(
     (rule: ParserRuleWithRelations) => rule.name
   );
-  // TODO
-  // we have two sets of errors that we'll want to validate against
-  // the form-hook errors thats an object indexed by field name
-  // and contains the error message
-  // this is useful if we want to wholesale highlight the entire field
-  // for being a duplicate
-  // we might also want to highlight if the field is empty
-
-  // but this is mostly parsing the rule definition
-  // bolding the label, and applying a colored highlight to defined rules
-
-  // so i need to create a list of pre-defined rules
 
   const formUpdates = useWatch({ control });
   const updatedFormValue = getFieldUpdates({
@@ -100,18 +103,21 @@ const ValidatedRule: React.FC<ValidatedRuleComponentProps> = ({
 
       // handle rules
       const pieces = rule.split(' ');
-
       pieces.forEach((piece) => {
         // if we don't have a label, just return the rule
         if (!piece.includes(':')) {
           // TODO idk this might not be enough when we get to more complicated expressions...
           // its like i need a fucking peg parser for this itself
-          const splitArray = piece.split(/([*!+|()[\]])/).filter(Boolean);
+          const splitArray = piece.split(/([*!+$|()[\]])/).filter(Boolean);
           const key = v4();
           return components.push(
             <Rule key={key}>
               {splitArray.map((splitPiece, index) => {
-                if (!ruleNames.includes(splitPiece)) {
+                const isSpecialCharacter = PEG_CHARACTERS.find(
+                  (char) => char === splitPiece
+                );
+
+                if (!ruleNames.includes(splitPiece) && !isSpecialCharacter) {
                   return (
                     <MissingRule key={`${index}-${splitPiece}`}>
                       {splitPiece}
@@ -119,18 +125,18 @@ const ValidatedRule: React.FC<ValidatedRuleComponentProps> = ({
                   );
                 }
 
-                if (['*', '+', '!', '(', ')', '[', ']'].includes(splitPiece)) {
+                if (ruleNames.includes(splitPiece) && !isSpecialCharacter) {
                   return (
-                    <SplitPiece key={`piece-${index}-${splitPiece}`}>
+                    <DefinedRule key={`piece-${index}-${splitPiece}`}>
                       {splitPiece}
-                    </SplitPiece>
+                    </DefinedRule>
                   );
                 }
 
                 return (
-                  <DefinedRule key={`piece-${index}-${splitPiece}`}>
+                  <SplitPiece key={`piece-${index}-${splitPiece}`}>
                     {splitPiece}
-                  </DefinedRule>
+                  </SplitPiece>
                 );
               })}
             </Rule>
@@ -145,7 +151,10 @@ const ValidatedRule: React.FC<ValidatedRuleComponentProps> = ({
         components.push(
           <Rule key={key}>
             {splitArray.map((splitPiece, index) => {
-              if (!ruleNames.includes(splitPiece)) {
+              const isSpecialCharacter = PEG_CHARACTERS.find(
+                (char) => char === splitPiece
+              );
+              if (!ruleNames.includes(splitPiece) && !isSpecialCharacter) {
                 return (
                   <MissingRule key={`${index}-${splitPiece}`}>
                     {splitPiece}
@@ -153,18 +162,18 @@ const ValidatedRule: React.FC<ValidatedRuleComponentProps> = ({
                 );
               }
 
-              if (['*', '+', '!', '(', ')', '[', ']'].includes(splitPiece)) {
+              if (ruleNames.includes(splitPiece) && !isSpecialCharacter) {
                 return (
-                  <SplitPiece key={`piece-${index}-${splitPiece}`}>
+                  <DefinedRule key={`piece-${index}-${splitPiece}`}>
                     {splitPiece}
-                  </SplitPiece>
+                  </DefinedRule>
                 );
               }
 
               return (
-                <DefinedRule key={`piece-${index}-${splitPiece}`}>
+                <SplitPiece key={`piece-${index}-${splitPiece}`}>
                   {splitPiece}
-                </DefinedRule>
+                </SplitPiece>
               );
             })}
           </Rule>
@@ -195,7 +204,9 @@ const MissingRule = styled.span`
   font-weight: 600;
 `;
 
-const SplitPiece = styled.span``;
+const SplitPiece = styled.span`
+  font-weight: 400;
+`;
 
 const DefinedRule = styled.span`
   color: ${({ theme }) => theme.colors.highlight};

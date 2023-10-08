@@ -110,7 +110,7 @@ const defaultTests = [
 function usePEGParser(rules: Rule[]) {
   let parser: any, parserSource;
   const tests = [...defaultTests];
-  const grammarErrors = rules ? compileGrammar() : [];
+  const errors = rules ? compileGrammar() : [];
 
   function compileGrammar() {
     if (!rules.length) {
@@ -130,21 +130,25 @@ function usePEGParser(rules: Rule[]) {
         )}`
       ).join(`
 `);
-    const errors: any[] = [];
+    const grammarErrors: any[] = [];
     try {
       parserSource = peggy.generate(grammar, {
         cache: true,
         output: 'source',
         error: function (_stage, message, location) {
-          errors.push({ message, location });
+          grammarErrors.push({ message, location });
         }
       });
       parser = eval(parserSource.toString());
       parseTests();
     } catch (e) {
-      // TODO we might want to log the parsing error
+      // TODO keep thinking about this
+      // grammarErrors.push({
+      //   message: e,
+      //   level: 'grammar'
+      // });
     }
-    return errors;
+    return grammarErrors;
   }
 
   function parseTests() {
@@ -166,7 +170,7 @@ function usePEGParser(rules: Rule[]) {
 
   return {
     compileGrammar,
-    grammarErrors,
+    errors,
     parser,
     tests
   };

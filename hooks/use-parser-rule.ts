@@ -66,7 +66,6 @@ function useParserRule(id: string) {
           const rules: ParserRules | null = cache.readQuery({
             query: GET_ALL_PARSER_RULES_QUERY
           });
-          console.log('add update', { currentRules: rules });
           // TODO temp
           if (!(input?.definitions ?? []).length) {
             input.definitions = [];
@@ -82,7 +81,6 @@ function useParserRule(id: string) {
               }
             ]
           };
-          console.log('add update', { updatedRules: data });
           cache.writeQuery({
             query: GET_ALL_PARSER_RULES_QUERY,
             data
@@ -90,7 +88,6 @@ function useParserRule(id: string) {
         }
       });
     } catch (e) {
-      console.log({ e });
       // TODO handle error
     }
   }
