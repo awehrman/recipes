@@ -10,31 +10,7 @@ import useParserRule from 'hooks/use-parser-rule';
 
 import RuleBody from './body';
 import RuleHeader from './header';
-
-type RuleComponentProps = {
-  context?: DisplayContextTypes;
-  id: string;
-  onAddRuleCancel: () => void;
-};
-
-type DisplayContextTypes = 'display' | 'edit' | 'add';
-
-type RuleContentProps = {
-  rule: ParserRuleWithRelations;
-  onAddRuleCancel: () => void;
-};
-
-// TODO move this somewhere generic
-const getDefaultFormatter = (label: string, order: number) => `
-{
-  const values = [label].flatMap(value => value);
-  return {
-    rule: '#${order}_${_.camelCase(label)}',
-    type: '${_.camelCase(label)}',
-    values
-  };
-}
-`;
+import { RuleComponentProps, RuleContentProps } from '../types';
 
 const RuleContent: React.FC<RuleContentProps> = ({ rule, onAddRuleCancel }) => {
   // TODO since this is a bit circular here
@@ -63,11 +39,7 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule, onAddRuleCancel }) => {
     defaultValues,
     mode: 'onBlur'
   });
-  const {
-    formState: { errors },
-    handleSubmit,
-    reset
-  } = methods;
+  const { handleSubmit, reset } = methods;
   const { addRule, updateRule } = useParserRule(rule?.id ?? '-1');
 
   const saveLabel = displayContext === 'add' ? 'Add Rule' : 'Save Rule';
@@ -138,7 +110,7 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule, onAddRuleCancel }) => {
 };
 
 const Rule: React.FC<RuleComponentProps> = ({
-  context = 'display', // TODO contextType enum?
+  context = 'display',
   id,
   onAddRuleCancel // TODO i hate this; find a better way to call this
 }) => {

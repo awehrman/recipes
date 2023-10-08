@@ -2,6 +2,7 @@ import { tags as t } from '@lezer/highlight';
 import { createTheme } from '@uiw/codemirror-themes';
 import { Extension } from '@uiw/react-codemirror';
 import _ from 'lodash';
+
 import { ThemeOptionKey } from 'components/parser/types';
 
 export const getDefaultFormatter = (label: string, order: number): string =>

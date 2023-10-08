@@ -3,6 +3,7 @@ import React, { useCallback, useEffect } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 
+import { EmptyComponentProps } from 'components/parser/types';
 import { useRuleContext } from 'contexts/rule-context';
 import useParserRule from 'hooks/use-parser-rule';
 import useParserRules from 'hooks/use-parser-rules';
@@ -10,9 +11,7 @@ import useParserRules from 'hooks/use-parser-rules';
 import AutoWidthInput from '../auto-width-input';
 import { isDuplicateRule } from '../validators';
 
-type RuleComponentProps = {};
-
-const RuleLabel: React.FC<RuleComponentProps> = () => {
+const RuleLabel: React.FC<EmptyComponentProps> = () => {
   const {
     state: { id, displayContext }
   } = useRuleContext();

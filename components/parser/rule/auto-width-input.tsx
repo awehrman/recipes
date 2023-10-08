@@ -1,4 +1,3 @@
-import { ParserRuleDefinition } from '@prisma/client';
 import _ from 'lodash';
 import React, {
   useCallback,
@@ -9,48 +8,11 @@ import React, {
 } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
+
 import { useRuleContext } from 'contexts/rule-context';
 
-type AutoWidthInputProps = {
-  fieldName?: string;
-  isRequired?: boolean;
-  defaultValue?: string;
-  definitionId?: string;
-  definitionPath?: string;
-  onBlur?: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  placeholder?: string;
-  containerRefCallback: (ref: HTMLLabelElement | null) => void;
-  sizeRefCallback: (ref: HTMLSpanElement | null) => void;
-  validators?: any; // TODO
-};
-
-type WatchProps = {
-  state: any; // TODO
-  fieldName: string;
-  getValues?: (str: string) => string | undefined;
-  definitionId?: string | null;
-};
-
-const getFieldUpdates = ({
-  definitionId = null,
-  fieldName = '',
-  state = {}
-}: WatchProps): string | null => {
-  const { definitions = [] } = state;
-  const isTopLevelFormField = fieldName === 'name' || fieldName === 'label';
-
-  // if this is a top-level field, we can directly get the values off the form
-  if (isTopLevelFormField) {
-    return state[fieldName];
-  }
-
-  // otherwise we'll need to find the definition first, then the value
-  const definition = definitions.find(
-    (def: ParserRuleDefinition) => def.id === definitionId
-  );
-
-  return definition?.[fieldName];
-};
+import { getFieldUpdates } from '../utils';
+import { AutoWidthInputProps } from '../types';
 
 const AutoWidthInput: React.FC<AutoWidthInputProps> = ({
   fieldName = '',

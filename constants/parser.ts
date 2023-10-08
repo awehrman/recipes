@@ -1,4 +1,3 @@
-import { ParserRuleDefinition } from '@prisma/client';
 import { HTMLBeautifyOptions } from 'js-beautify';
 
 export const BEAUTIFY_OPTIONS: HTMLBeautifyOptions = {
@@ -11,14 +10,18 @@ export const BEAUTIFY_OPTIONS: HTMLBeautifyOptions = {
   wrap_line_length: 110
 };
 
-export const getDefaultDefinitions = (order: number = 0) => ({
-  example: '',
-  rule: '',
-  formatter: '',
-  order
-});
-
-export const findRuleDefinition = (
-  definitionId: string,
-  definitions: ParserRuleDefinition[] = []
-) => definitions.find((def: ParserRuleDefinition) => def.id === definitionId);
+export const PEG_CHARACTERS = [
+  '!',
+  '*',
+  '+',
+  '$',
+  '|',
+  '(',
+  ')',
+  '[',
+  ']',
+  'i',
+  'a-z',
+  'A-Z',
+  '0-9'
+];

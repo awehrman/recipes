@@ -9,8 +9,8 @@ import useParserRule from 'hooks/use-parser-rule';
 import PlusIcon from 'public/icons/plus.svg';
 import TrashIcon from 'public/icons/trash-can.svg';
 
-import { getDefaultDefinitions, findRuleDefinition } from 'constants/parser';
 import { EmptyComponentProps } from '../../types';
+import { getDefaultDefinitions, findRuleDefinition } from '../../utils';
 import Example from './example';
 import Formatter from './formatter';
 import Rule from './rule';

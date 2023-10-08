@@ -1,59 +1,15 @@
-import { ParserRuleDefinition, ParserRuleWithRelations } from '@prisma/client';
+import { ParserRuleWithRelations } from '@prisma/client';
 import React, { ReactNode, useCallback } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 import { v4 } from 'uuid';
-import useParserRules from 'hooks/use-parser-rules';
+
+import { ValidatedRuleComponentProps } from 'components/parser/types';
+import { getFieldUpdates } from 'components/parser/utils';
+import { PEG_CHARACTERS } from 'constants/parser';
 import { useRuleContext } from 'contexts/rule-context';
 import { useRuleDefinitionContext } from 'contexts/rule-definition-context';
-
-const PEG_CHARACTERS = [
-  '!',
-  '*',
-  '+',
-  '$',
-  '|',
-  '(',
-  ')',
-  '[',
-  ']',
-  'i',
-  'a-z',
-  'A-Z',
-  '0-9'
-];
-type WatchProps = {
-  state: any; // TODO
-  fieldName: string;
-  getValues?: (str: string) => string | undefined;
-  definitionId?: string | null;
-};
-
-const getFieldUpdates = ({
-  definitionId = null,
-  fieldName = '',
-  state = {}
-}: WatchProps): string | null => {
-  const { definitions = [] } = state;
-  const isTopLevelFormField = fieldName === 'name' || fieldName === 'label';
-
-  // if this is a top-level field, we can directly get the values off the form
-  if (isTopLevelFormField) {
-    return state[fieldName];
-  }
-
-  // otherwise we'll need to find the definition first, then the value
-  const definition = definitions.find(
-    (def: ParserRuleDefinition) => def.id === definitionId
-  );
-
-  return definition?.[fieldName];
-};
-
-type ValidatedRuleComponentProps = {
-  fieldName: string;
-  placeholder: string;
-};
+import useParserRules from 'hooks/use-parser-rules';
 
 const ValidatedRule: React.FC<ValidatedRuleComponentProps> = ({
   fieldName,
@@ -69,8 +25,7 @@ const ValidatedRule: React.FC<ValidatedRuleComponentProps> = ({
 
   const {
     control,
-    formState: { isDirty, errors },
-    register
+    formState: { isDirty }
   } = useFormContext();
   const ruleNames: string[] = rules.map(
     (rule: ParserRuleWithRelations) => rule.name

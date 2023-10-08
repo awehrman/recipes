@@ -9,13 +9,14 @@ import styled from 'styled-components';
 
 import { useRuleContext } from 'contexts/rule-context';
 import { useRuleDefinitionContext } from 'contexts/rule-definition-context';
+import { ThemeOptionKey, EmptyComponentProps } from 'components/parser/types';
+import { BEAUTIFY_OPTIONS } from 'constants/parser';
+
 import {
   getDefaultFormatter,
   formatterSetup,
   themeOptions
 } from './formatter.theme';
-import { ThemeOptionKey, EmptyComponentProps } from 'components/parser/types';
-import { BEAUTIFY_OPTIONS } from 'constants/parser';
 
 const RuleFormatter: React.FC<EmptyComponentProps> = () => {
   const {
