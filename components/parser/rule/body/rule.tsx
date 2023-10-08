@@ -2,31 +2,21 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { useRuleContext } from 'contexts/rule-context';
+import { useRuleDefinitionContext } from 'contexts/rule-definition-context';
 import useParserRules from 'hooks/use-parser-rules';
 
 import AutoWidthInput from '../auto-width-input';
 import { isDuplicateRule, isNotEmpty } from '../validators';
 import ValidatedRule from './validated-rule';
+import { EmptyComponentProps } from 'components/parser/types';
 
-type RuleComponentProps = {
-  definitionId: string;
-  defaultValue: string;
-  index: number;
-  containerRefCallback: (ref: HTMLLabelElement | null) => void;
-  sizeRefCallback: (ref: HTMLSpanElement | null) => void;
-};
-
-const Rule: React.FC<RuleComponentProps> = ({
-  definitionId,
-  defaultValue,
-  index = 0,
-  containerRefCallback,
-  sizeRefCallback,
-  ...props
-}) => {
+const Rule: React.FC<EmptyComponentProps> = () => {
   const { rules = [] } = useParserRules();
   const {
-    state: { id, displayContext }
+    state: { index, definitionId, rule }
+  } = useRuleDefinitionContext();
+  const {
+    state: { id, displayContext, containerRefCallback, sizeRefCallback }
   } = useRuleContext();
   const fieldName = `definitions.${index}.rule`;
   const placeholder = `rule definition`;
@@ -40,28 +30,22 @@ const Rule: React.FC<RuleComponentProps> = ({
   return (
     <Wrapper>
       {showParsedRule ? (
-        <ValidatedRule
-          definitionId={definitionId}
-          defaultValue={defaultValue}
-          fieldName={fieldName}
-          placeholder={placeholder}
-        />
+        <ValidatedRule fieldName={fieldName} placeholder={placeholder} />
       ) : (
         <AutoWidthInput
           definitionId={definitionId}
-          defaultValue={defaultValue}
+          defaultValue={rule}
           fieldName="rule"
           definitionPath={fieldName}
           onBlur={trimInput}
           placeholder={placeholder}
-          containerRefCallback={containerRefCallback}
-          sizeRefCallback={sizeRefCallback}
+          containerRefCallback={containerRefCallback(index)}
+          sizeRefCallback={sizeRefCallback(index)}
           validators={{
             isDuplicateRule: (value: string) =>
               isDuplicateRule(value, rules, id, fieldName),
             isNotEmpty: (value: string) => isNotEmpty(value, fieldName)
           }}
-          {...props}
         />
       )}
     </Wrapper>

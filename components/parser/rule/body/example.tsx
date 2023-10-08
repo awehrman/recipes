@@ -1,24 +1,18 @@
 import React from 'react';
 import styled from 'styled-components';
 
+import { EmptyComponentProps } from '../../types';
 import AutoWidthInput from '../auto-width-input';
+import { useRuleDefinitionContext } from 'contexts/rule-definition-context';
+import { useRuleContext } from 'contexts/rule-context';
 
-type RuleComponentProps = {
-  definitionId: string;
-  defaultValue: string;
-  index: number;
-  containerRefCallback: (ref: HTMLLabelElement | null) => void;
-  sizeRefCallback: (ref: HTMLSpanElement | null) => void;
-};
-
-const RuleExample: React.FC<RuleComponentProps> = ({
-  definitionId,
-  defaultValue,
-  index = 0,
-  containerRefCallback,
-  sizeRefCallback,
-  ...props
-}) => {
+const RuleExample: React.FC<EmptyComponentProps> = () => {
+  const {
+    state: { index, definitionId, example }
+  } = useRuleDefinitionContext();
+  const {
+    state: { containerRefCallback, sizeRefCallback }
+  } = useRuleContext();
   const fieldName = `definitions.${index}.example`;
 
   function trimInput(event: React.ChangeEvent<HTMLInputElement>) {
@@ -29,14 +23,13 @@ const RuleExample: React.FC<RuleComponentProps> = ({
     <Wrapper>
       <AutoWidthInput
         definitionId={definitionId}
-        defaultValue={defaultValue}
+        defaultValue={example}
         fieldName="example"
         definitionPath={fieldName}
         onBlur={trimInput}
         placeholder="an example of this rule"
-        containerRefCallback={containerRefCallback}
-        sizeRefCallback={sizeRefCallback}
-        {...props}
+        containerRefCallback={containerRefCallback(index)}
+        sizeRefCallback={sizeRefCallback(index)}
       />
     </Wrapper>
   );

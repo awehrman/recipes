@@ -1,42 +1,26 @@
 import { javascript } from '@codemirror/lang-javascript';
 import * as events from '@uiw/codemirror-extensions-events';
 import CodeMirror, { ViewUpdate } from '@uiw/react-codemirror';
-import { js_beautify, HTMLBeautifyOptions } from 'js-beautify';
+import { js_beautify } from 'js-beautify';
 import _ from 'lodash';
 import React from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 
 import { useRuleContext } from 'contexts/rule-context';
+import { useRuleDefinitionContext } from 'contexts/rule-definition-context';
 import {
   getDefaultFormatter,
   formatterSetup,
   themeOptions
 } from './formatter.theme';
+import { ThemeOptionKey, EmptyComponentProps } from 'components/parser/types';
+import { BEAUTIFY_OPTIONS } from 'constants/parser';
 
-type RuleComponentProps = {
-  definitionId: string;
-  defaultValue: string;
-  index: number;
-};
-
-// TODO move to a constants file
-const options: HTMLBeautifyOptions = {
-  indent_size: 2,
-  indent_char: ' ',
-  max_preserve_newlines: 1,
-  preserve_newlines: true,
-  indent_scripts: 'normal',
-  end_with_newline: false,
-  wrap_line_length: 110
-};
-
-const RuleFormatter: React.FC<RuleComponentProps> = ({
-  definitionId,
-  defaultValue,
-  index = 0,
-  ...props
-}) => {
+const RuleFormatter: React.FC<EmptyComponentProps> = () => {
+  const {
+    state: { index, formatter }
+  } = useRuleDefinitionContext();
   const {
     state: { id, displayContext }
   } = useRuleContext();
@@ -46,14 +30,14 @@ const RuleFormatter: React.FC<RuleComponentProps> = ({
   const defaultPlaceholder = getDefaultFormatter(watchedLabel, index);
   const uniqueId = `${id}-${fieldName}`;
 
-  function handleOnChange(value: string, viewUpdate: ViewUpdate) {
+  function handleOnChange(value: string, _viewUpdate: ViewUpdate) {
     setValue(fieldName, value);
   }
 
   const handleOnBlur = events.content({
     blur: () => {
       const value = getValues(fieldName);
-      const formatted = js_beautify(value, options);
+      const formatted = js_beautify(value, BEAUTIFY_OPTIONS);
       setValue(fieldName, formatted);
     }
   });
@@ -63,11 +47,10 @@ const RuleFormatter: React.FC<RuleComponentProps> = ({
       <HiddenFormInput
         {...register(fieldName)}
         id={uniqueId}
-        defaultValue={defaultValue ?? defaultPlaceholder}
+        defaultValue={formatter ?? defaultPlaceholder}
         disabled={displayContext === 'display'}
         name={fieldName}
         placeholder={displayContext === 'display' ? '' : defaultPlaceholder}
-        {...props}
       />
       <StyledEditor
         basicSetup={formatterSetup}
@@ -78,7 +61,7 @@ const RuleFormatter: React.FC<RuleComponentProps> = ({
         onChange={handleOnChange}
         placeholder={displayContext === 'display' ? '' : defaultPlaceholder}
         readOnly={displayContext === 'display'}
-        theme={themeOptions[displayContext]}
+        theme={themeOptions[displayContext as ThemeOptionKey]}
         width="520px"
         value={getValues(fieldName)}
       />
@@ -88,7 +71,6 @@ const RuleFormatter: React.FC<RuleComponentProps> = ({
 
 export default RuleFormatter;
 
-// TODO move these into a common place
 const LabelWrapper = styled.label`
   display: flex;
   flex-direction: column;

@@ -11,7 +11,7 @@ type ParserProps = {};
 
 const Parser: React.FC<ParserProps> = () => {
   const { rules = [] } = useParserRules();
-  const { errors, tests } = usePEGParser(rules);
+  const { tests } = usePEGParser(rules);
 
   return (
     <Wrapper>

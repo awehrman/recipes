@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { v4 } from 'uuid';
 
+// TODO move these
 type TestsProps = {
   tests: TestProps[];
 };
@@ -11,6 +12,7 @@ type TestProps = {
   reference: string;
   parsed: boolean;
   expected: ExpectedProps[];
+  passed?: boolean;
   details?: DetailsProps;
   error?: {
     message?: string;

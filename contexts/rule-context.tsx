@@ -19,6 +19,12 @@ type RuleState = {
   displayContext: string;
   isExpanded: boolean;
   isFocused: boolean;
+  containerRefs: { [key: number]: HTMLLabelElement | null };
+  sizeRefs: { [key: number]: HTMLSpanElement | null };
+  containerRefCallback: (
+    index: number
+  ) => (ref: HTMLLabelElement | null) => void;
+  sizeRefCallback: (index: number) => (ref: HTMLSpanElement | null) => void;
 };
 
 type RuleAction = {
@@ -70,11 +76,27 @@ export function RuleProvider({
   id,
   initialContext = 'display'
 }: RuleProviderProps) {
+  const containerRefs: { [key: number]: HTMLLabelElement | null } = {};
+  const handleContainerRefCallback =
+    (index: number) => (ref: HTMLLabelElement | null) => {
+      containerRefs[index] = ref;
+    };
+
+  const sizeRefs: { [key: number]: HTMLSpanElement | null } = {};
+  const handleSizeRefCallback =
+    (index: number) => (ref: HTMLSpanElement | null) => {
+      sizeRefs[index] = ref;
+    };
+
   const [state, dispatch] = useReducer(ruleReducer, {
     id,
     displayContext: initialContext,
     isExpanded: true,
-    isFocused: initialContext === 'display' ? false : true
+    isFocused: initialContext === 'display' ? false : true,
+    containerRefs,
+    sizeRefs,
+    containerRefCallback: handleContainerRefCallback,
+    sizeRefCallback: handleSizeRefCallback
   });
   const memoizedContext = useMemo(
     () => ({ state, dispatch }),

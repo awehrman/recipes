@@ -1,6 +1,8 @@
 import { tags as t } from '@lezer/highlight';
 import { createTheme } from '@uiw/codemirror-themes';
+import { Extension } from '@uiw/react-codemirror';
 import _ from 'lodash';
+import { ThemeOptionKey } from 'components/parser/types';
 
 export const getDefaultFormatter = (label: string, order: number): string =>
   `{
@@ -95,9 +97,8 @@ const formatterAddTheme = createTheme({
   ]
 });
 
-// TODO fix this type
-export const themeOptions: any = {
+export const themeOptions: Record<ThemeOptionKey, Extension> = {
+  add: formatterAddTheme,
   display: formatterDisplayTheme,
-  edit: formatterEditTheme,
-  add: formatterAddTheme
+  edit: formatterEditTheme
 };

@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { v4 } from 'uuid';
 import useParserRules from 'hooks/use-parser-rules';
 import { useRuleContext } from 'contexts/rule-context';
+import { useRuleDefinitionContext } from 'contexts/rule-definition-context';
 
 const PEG_CHARACTERS = [
   '!',
@@ -50,15 +51,11 @@ const getFieldUpdates = ({
 };
 
 type ValidatedRuleComponentProps = {
-  definitionId: string;
-  defaultValue: string;
   fieldName: string;
   placeholder: string;
 };
 
 const ValidatedRule: React.FC<ValidatedRuleComponentProps> = ({
-  definitionId,
-  defaultValue,
   fieldName,
   placeholder
 }) => {
@@ -66,6 +63,9 @@ const ValidatedRule: React.FC<ValidatedRuleComponentProps> = ({
   const {
     state: { displayContext }
   } = useRuleContext();
+  const {
+    state: { definitionId, rule }
+  } = useRuleDefinitionContext();
 
   const {
     control,
@@ -82,7 +82,7 @@ const ValidatedRule: React.FC<ValidatedRuleComponentProps> = ({
     fieldName,
     state: formUpdates
   });
-  const dirtyValue = !isDirty ? defaultValue : updatedFormValue;
+  const dirtyValue = !isDirty ? rule : updatedFormValue;
 
   const currentRuleDefinition =
     displayContext !== 'display' && !dirtyValue?.length

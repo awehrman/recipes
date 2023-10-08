@@ -1,14 +1,8 @@
-import { useMutation, useQuery } from '@apollo/client';
-import peggy from 'peggy';
+import peggy, { Parser, DiagnosticNote } from 'peggy';
 
-import { GET_ALL_PARSER_RULES_QUERY } from '../graphql/queries/parser';
-import {
-  ADD_PARSER_RULE_MUTATION,
-  DELETE_PARSER_RULE_MUTATION,
-  // SAVE_PARSER_RULES_MUTATION,
-  UPDATE_PARSER_RULE_MUTATION
-} from '../graphql/mutations/parser';
+import { defaultTests } from 'constants/parser-tests';
 
+// TODO move these
 type Definition = {
   id: string;
   example: string;
@@ -27,17 +21,12 @@ type Rule = {
 type TestProps = {
   reference: string;
   parsed: boolean;
+  passed?: boolean;
   expected: ExpectedProps[];
   details?: DetailsProps;
   error?: {
     message?: string;
   };
-};
-
-type RuleInputProps = {
-  id?: string;
-  name: string;
-  definitions?: Definition[];
 };
 
 type DetailsProps = {
@@ -51,71 +40,15 @@ type ExpectedProps = {
   value: string;
 };
 
-// TODO move this to a constants file
-const defaultTests = [
-  {
-    reference: 'apple',
-    parsed: false,
-    expected: [
-      {
-        type: 'ingredient',
-        value: 'apple'
-      }
-    ]
-  },
-  {
-    reference: 'one apple',
-    parsed: false,
-    expected: [
-      {
-        type: 'amount',
-        value: 'one'
-      },
-      {
-        type: 'ingredient',
-        value: 'apple'
-      }
-    ]
-  },
-  {
-    reference: '1 apple',
-    parsed: false,
-    expected: [
-      {
-        type: 'amount',
-        value: '1'
-      },
-      {
-        type: 'ingredient',
-        value: 'apple'
-      }
-    ]
-  },
-  {
-    reference: '12 apples',
-    parsed: false,
-    expected: [
-      {
-        type: 'amount',
-        value: '12'
-      },
-      {
-        type: 'ingredient',
-        value: 'apples'
-      }
-    ]
-  }
-];
+type ParserUtility = {
+  parser: Parser | undefined;
+  errors: DiagnosticNote[] | undefined;
+  grammar: string;
+};
 
 function usePEGParser(rules: Rule[]) {
-  let parser: any, parserSource;
-  const tests = [...defaultTests];
-  const errors = rules ? compileGrammar() : [];
-
-  function compileGrammar() {
-    if (!rules.length) {
-      return;
-    }
+  function compileGrammar(): ParserUtility {
+    let parser: Parser, parserSource: string;
     const starter = `start = ingredientLine \n`;
     const grammar =
       starter +
@@ -130,49 +63,76 @@ function usePEGParser(rules: Rule[]) {
         )}`
       ).join(`
 `);
-    const grammarErrors: any[] = [];
+    const grammarErrors: DiagnosticNote[] = [];
     try {
       parserSource = peggy.generate(grammar, {
         cache: true,
         output: 'source',
         error: function (_stage, message, location) {
-          grammarErrors.push({ message, location });
+          if (location) {
+            grammarErrors.push({ message, location });
+          }
         }
       });
       parser = eval(parserSource.toString());
-      parseTests();
+      return {
+        parser,
+        errors: grammarErrors,
+        grammar
+      };
     } catch (e) {
       // TODO keep thinking about this
       // grammarErrors.push({
       //   message: e,
       //   level: 'grammar'
       // });
+      return {
+        parser: undefined,
+        errors: grammarErrors,
+        grammar
+      };
     }
-    return grammarErrors;
   }
 
-  function parseTests() {
+  function parseTests(parser: Parser | undefined): TestProps[] {
+    const tests: TestProps[] = [...defaultTests];
     if (parser) {
       tests.forEach((test: TestProps) => {
         try {
           const details = parser.parse(test.reference);
           test.parsed = true;
           test.details = details;
-          // TODO make sure expected match
+          test.passed = test.expected.every((exp) => {
+            const matchingDetail = details.values.find(
+              (detail: DetailsProps) =>
+                detail.type === exp.type &&
+                detail?.values &&
+                detail.values[0] === exp.value
+            );
+            return matchingDetail !== undefined;
+          });
         } catch (e: any) {
           test.parsed = false;
-          test.error = e;
-          // console.log(`failed to parse test ${test.reference}`);
+          test.error = {
+            message: `${e}`
+          };
         }
       });
     }
+    return tests;
   }
 
+  const utils: ParserUtility = compileGrammar();
+  const { parser, errors, grammar } = utils;
+  const tests = parseTests(parser);
+
   return {
-    compileGrammar,
-    errors,
     parser,
-    tests
+    errors,
+    grammar,
+    tests,
+    compileGrammar,
+    parseTests
   };
 }
 export default usePEGParser;

@@ -1,33 +1,24 @@
-import { ParserRuleDefinition } from '@prisma/client';
 import React from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import styled from 'styled-components';
 
 import { Button } from 'components/common';
 import { useRuleContext } from 'contexts/rule-context';
+import { RuleDefinitionProvider } from 'contexts/rule-definition-context';
 import useParserRule from 'hooks/use-parser-rule';
 import PlusIcon from 'public/icons/plus.svg';
 import TrashIcon from 'public/icons/trash-can.svg';
 
+import { getDefaultDefinitions, findRuleDefinition } from 'constants/parser';
+import { EmptyComponentProps } from '../../types';
 import Example from './example';
 import Formatter from './formatter';
 import Rule from './rule';
 
-type RuleComponentProps = {};
-
-// TODO move to constants file
-const getDefaultValues = (order: number = 0) => ({
-  example: '',
-  rule: '',
-  formatter: '',
-  order
-});
-
-const RuleBody: React.FC<RuleComponentProps> = () => {
+const RuleBody: React.FC<EmptyComponentProps> = () => {
   const {
     state: { id, displayContext }
   } = useRuleContext();
-  // TODO
   const showDeleteDefinitionButton = (index: number) =>
     displayContext !== 'display' && index !== 0;
   const { control } = useFormContext();
@@ -38,60 +29,38 @@ const RuleBody: React.FC<RuleComponentProps> = () => {
   const { rule } = useParserRule(id);
   const { definitions = [] } = rule;
 
-  // NOTE: we want to utilize cb refs here so we keep these straight
-  const containerRefs: { [key: number]: HTMLLabelElement | null } = {};
-  const handleContainerRefCallback =
-    (index: number) => (ref: HTMLLabelElement | null) => {
-      containerRefs[index] = ref;
-    };
-
-  const sizeRefs: { [key: number]: HTMLSpanElement | null } = {};
-  const handleSizeRefCallback =
-    (index: number) => (ref: HTMLSpanElement | null) => {
-      sizeRefs[index] = ref;
-    };
-
   function renderDefinitions() {
     return fields.map((field, index: number) => {
       const definitionId = definitions?.[0]?.id ?? '-1';
-      // TODO this should probably just be a helper function
-      const ruleDefinition = definitions.find(
-        (def: ParserRuleDefinition) => def.id === definitionId
-      );
+      const ruleDefinition = findRuleDefinition(definitionId, definitions);
       const { example, formatter, rule } =
-        ruleDefinition ?? getDefaultValues(index);
+        ruleDefinition ?? getDefaultDefinitions(index);
+      const defaultValues = {
+        example,
+        formatter,
+        rule
+      };
 
-      // TODO should we create another context just for formDefinitions stuff?
-      // it would be nice to include the index, def id and the default values there
       return (
-        <Wrapper key={field.id}>
-          <Example
-            defaultValue={example}
-            definitionId={definitionId}
-            index={index}
-            containerRefCallback={handleContainerRefCallback(index)}
-            sizeRefCallback={handleSizeRefCallback(index)}
-          />
-          <Rule
-            defaultValue={rule}
-            definitionId={definitionId}
-            index={index}
-            containerRefCallback={handleContainerRefCallback(index)}
-            sizeRefCallback={handleSizeRefCallback(index)}
-          />
-          <Formatter
-            defaultValue={formatter}
-            definitionId={definitionId}
-            index={index}
-          />
-          {showDeleteDefinitionButton(index) ? (
-            <DeleteButton
-              icon={<TrashIcon />}
-              onClick={() => handleRemoveDefinitionClick(index)}
-              label="Remove definition"
-            />
-          ) : null}
-        </Wrapper>
+        <RuleDefinitionProvider
+          key={field.id}
+          definitionId={definitionId}
+          defaultValues={defaultValues}
+          index={index}
+        >
+          <Wrapper>
+            <Example />
+            <Rule />
+            <Formatter />
+            {showDeleteDefinitionButton(index) ? (
+              <DeleteButton
+                icon={<TrashIcon />}
+                onClick={() => handleRemoveDefinitionClick(index)}
+                label="Remove definition"
+              />
+            ) : null}
+          </Wrapper>
+        </RuleDefinitionProvider>
       );
     });
   }
