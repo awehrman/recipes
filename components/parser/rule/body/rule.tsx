@@ -1,7 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
 
+import { useRuleContext } from 'contexts/rule-context';
+import useParserRules from 'hooks/use-parser-rules';
+
 import AutoWidthInput from '../auto-width-input';
+import { isDuplicateRule, isNotEmpty } from '../validators';
+import ValidatedRule from './validated-rule';
 
 type RuleComponentProps = {
   definitionId: string;
@@ -19,7 +24,14 @@ const Rule: React.FC<RuleComponentProps> = ({
   sizeRefCallback,
   ...props
 }) => {
+  const { rules = [] } = useParserRules();
+  const {
+    state: { id, displayContext }
+  } = useRuleContext();
   const fieldName = `definitions.${index}.rule`;
+  const placeholder = `rule definition`;
+  const isNotActiveElement = false; // TODO
+  const showParsedRule = displayContext === 'display' || isNotActiveElement;
 
   function trimInput(event: React.ChangeEvent<HTMLInputElement>) {
     event.target.value = event.target.value.trim();
@@ -27,15 +39,28 @@ const Rule: React.FC<RuleComponentProps> = ({
 
   return (
     <Wrapper>
+      {showParsedRule ? (
+        <ValidatedRule
+          definitionId={definitionId}
+          defaultValue={defaultValue}
+          fieldName={fieldName}
+          placeholder={placeholder}
+        />
+      ) : null}
       <AutoWidthInput
         definitionId={definitionId}
         defaultValue={defaultValue}
         fieldName="rule"
         definitionPath={fieldName}
         onBlur={trimInput}
-        placeholder="rule definition"
+        placeholder={placeholder}
         containerRefCallback={containerRefCallback}
         sizeRefCallback={sizeRefCallback}
+        validators={{
+          isDuplicateRule: (value: string) =>
+            isDuplicateRule(value, rules, id, 'rule'),
+          isNotEmpty: (value: string) => isNotEmpty(value, 'rule')
+        }}
         {...props}
       />
     </Wrapper>
@@ -55,129 +80,3 @@ const Wrapper = styled.fieldset`
   font-weight: 600;
   width: 100%;
 `;
-
-// TODO move validation stuff elsewhere
-
-/* validation
-
-  const formatRules = useCallback(
-    (rule: string): ReactElement[] => {
-      const components: ReactElement[] = [];
-      // handle keyword lists
-      if (rule.startsWith('[') && rule.endsWith(']')) {
-        const keywords = rule.slice(1, rule.length - 1).split(',');
-        const key = v4();
-        components.push(<RuleList key={key}>[{keywords.join(', ')}]</RuleList>);
-        return components;
-      }
-
-      // handle rules
-      const pieces = rule.split(' ');
-
-      pieces.forEach((piece) => {
-        // if we don't have a label, just return the rule
-        if (!piece.includes(':')) {
-          // TODO idk this might not be enough when we get to more complicated expressions...
-          // its like i need a fucking peg parser for this itself
-          const splitArray = piece.split(/([*!+|()[\]])/).filter(Boolean);
-          const key = v4();
-
-          return components.push(
-            <Rule key={key}>
-              {splitArray.map((splitPiece, index) => {
-                if (violations.includes(splitPiece)) {
-                  return (
-                    <MissingRule key={`${index}-${splitPiece}`}>
-                      {splitPiece}
-                    </MissingRule>
-                  );
-                }
-
-                if (['*', '+', '!', '(', ')', '[', ']'].includes(splitPiece)) {
-                  return (
-                    <SplitPiece key={`piece-${index}-${splitPiece}`}>
-                      {splitPiece}
-                    </SplitPiece>
-                  );
-                }
-
-                return (
-                  <DefinedRule key={`piece-${index}-${splitPiece}`}>
-                    {splitPiece}
-                  </DefinedRule>
-                );
-              })}
-            </Rule>
-          );
-        }
-
-        // TODO dry this up
-        const [label, rule] = piece.split(':');
-        const splitArray = rule.split(/([*!+|()[\]])/).filter(Boolean);
-        const key = v4();
-        components.push(<Label key={`label-${key}`}>{label}:</Label>);
-        components.push(
-          <Rule key={key}>
-            {splitArray.map((splitPiece, index) => {
-              if (violations.includes(splitPiece)) {
-                return (
-                  <MissingRule key={`${index}-${splitPiece}`}>
-                    {splitPiece}
-                  </MissingRule>
-                );
-              }
-
-              if (['*', '+', '!', '(', ')', '[', ']'].includes(splitPiece)) {
-                return (
-                  <SplitPiece key={`piece-${index}-${splitPiece}`}>
-                    {splitPiece}
-                  </SplitPiece>
-                );
-              }
-
-              return (
-                <DefinedRule key={`piece-${index}-${splitPiece}`}>
-                  {splitPiece}
-                </DefinedRule>
-              );
-            })}
-          </Rule>
-        );
-      });
-      return components;
-    },
-    [violations]
-  );
-
-  function renderRule() {
-    const components: ReactElement[] = formatRules(rule);
-    return <>{components.map((component) => component)}</>;
-  }
-*/
-
-// const Definition = styled.div`
-//   margin-right: 10px;
-//   margin-bottom: 6px;
-// `;
-
-// const Label = styled.label`
-//   margin-right: 2px;
-// `;
-
-// const Rule = styled.span`
-//   margin-right: 2px;
-//   font-weight: 600;
-// `;
-
-// const MissingRule = styled.span`
-//   color: tomato;
-//   font-weight: 600;
-// `;
-
-// const SplitPiece = styled.span``;
-
-// const DefinedRule = styled.span`
-//   color: ${({ theme }) => theme.colors.highlight};
-// `;
-
-// const RuleList = styled.span``;

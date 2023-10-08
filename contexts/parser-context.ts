@@ -1,3 +1,4 @@
+import { ParserRuleWithRelations } from '@prisma/client';
 import React from 'react';
 import {
   Control,
@@ -28,7 +29,13 @@ type Methods = {
 type Config = {
   minLength: number;
   validate: {
-    // TODO this will be fun but i haven't thought about it yet
+    isDuplicateRule: (
+      value: string,
+      rules: ParserRuleWithRelations[],
+      ruleId: string,
+      fieldName: string
+    ) => boolean | string;
+    isNotEmpty: (value: string, fieldName: string) => boolean | string;
   };
 };
 

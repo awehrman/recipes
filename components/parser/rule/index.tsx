@@ -59,8 +59,15 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule, onAddRuleCancel }) => {
       }
     ];
   }
-  const methods = useForm<ParserRuleWithRelations>({ defaultValues });
-  const { handleSubmit, reset } = methods;
+  const methods = useForm<ParserRuleWithRelations>({
+    defaultValues,
+    mode: 'onBlur'
+  });
+  const {
+    formState: { errors },
+    handleSubmit,
+    reset
+  } = methods;
   const { addRule, updateRule } = useParserRule(rule?.id ?? '-1');
 
   const saveLabel = displayContext === 'add' ? 'Add Rule' : 'Save Rule';

@@ -165,17 +165,8 @@ function useParserRule(id: string) {
     });
   }
 
-  function saveRuleDefinition() {
-    // TODO
-  }
-
-  function cancelRuleDefinition() {
-    // TODO
-  }
-
   return {
     addNewRuleDefinition,
-    saveRuleDefinition,
     addRule,
     updateRule,
     deleteRule,

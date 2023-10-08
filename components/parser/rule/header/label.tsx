@@ -5,8 +5,10 @@ import styled from 'styled-components';
 
 import { useRuleContext } from 'contexts/rule-context';
 import useParserRule from 'hooks/use-parser-rule';
+import useParserRules from 'hooks/use-parser-rules';
 
 import AutoWidthInput from '../auto-width-input';
+import { isDuplicateRule } from '../validators';
 
 type RuleComponentProps = {};
 
@@ -14,6 +16,7 @@ const RuleLabel: React.FC<RuleComponentProps> = () => {
   const {
     state: { id, displayContext }
   } = useRuleContext();
+  const { rules = [] } = useParserRules();
 
   const { setValue } = useFormContext();
   const { rule } = useParserRule(id);
@@ -61,6 +64,10 @@ const RuleLabel: React.FC<RuleComponentProps> = () => {
       placeholder="label"
       containerRefCallback={containerRefCallback}
       sizeRefCallback={sizeRefCallback}
+      validators={{
+        isDuplicateRule: (value: string) =>
+          isDuplicateRule(value, rules, id, 'label')
+      }}
     />
   );
 };
