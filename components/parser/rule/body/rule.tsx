@@ -46,23 +46,24 @@ const Rule: React.FC<RuleComponentProps> = ({
           fieldName={fieldName}
           placeholder={placeholder}
         />
-      ) : null}
-      <AutoWidthInput
-        definitionId={definitionId}
-        defaultValue={defaultValue}
-        fieldName="rule"
-        definitionPath={fieldName}
-        onBlur={trimInput}
-        placeholder={placeholder}
-        containerRefCallback={containerRefCallback}
-        sizeRefCallback={sizeRefCallback}
-        validators={{
-          isDuplicateRule: (value: string) =>
-            isDuplicateRule(value, rules, id, 'rule'),
-          isNotEmpty: (value: string) => isNotEmpty(value, 'rule')
-        }}
-        {...props}
-      />
+      ) : (
+        <AutoWidthInput
+          definitionId={definitionId}
+          defaultValue={defaultValue}
+          fieldName="rule"
+          definitionPath={fieldName}
+          onBlur={trimInput}
+          placeholder={placeholder}
+          containerRefCallback={containerRefCallback}
+          sizeRefCallback={sizeRefCallback}
+          validators={{
+            isDuplicateRule: (value: string) =>
+              isDuplicateRule(value, rules, id, fieldName),
+            isNotEmpty: (value: string) => isNotEmpty(value, fieldName)
+          }}
+          {...props}
+        />
+      )}
     </Wrapper>
   );
 };

@@ -1,10 +1,9 @@
-import { ParserRuleDefinition } from '@prisma/client';
+import { ParserRuleDefinition, ParserRuleWithRelations } from '@prisma/client';
 import React, { ReactNode, useCallback } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 import { v4 } from 'uuid';
-
-import useParserRule from 'hooks/use-parser-rule';
+import useParserRules from 'hooks/use-parser-rules';
 import { useRuleContext } from 'contexts/rule-context';
 
 type WatchProps = {
@@ -46,19 +45,34 @@ const ValidatedRule: React.FC<ValidatedRuleComponentProps> = ({
   definitionId,
   defaultValue,
   fieldName,
-  placeholder,
-  ...props
+  placeholder
 }) => {
+  const { rules = [] } = useParserRules();
   const {
-    state: { id, displayContext }
+    state: { displayContext }
   } = useRuleContext();
-  const { violations = [] } = useParserRule(id);
 
   const {
     control,
-    formState: { isDirty },
+    formState: { isDirty, errors },
     register
   } = useFormContext();
+  const ruleNames: string[] = rules.map(
+    (rule: ParserRuleWithRelations) => rule.name
+  );
+  // TODO
+  // we have two sets of errors that we'll want to validate against
+  // the form-hook errors thats an object indexed by field name
+  // and contains the error message
+  // this is useful if we want to wholesale highlight the entire field
+  // for being a duplicate
+  // we might also want to highlight if the field is empty
+
+  // but this is mostly parsing the rule definition
+  // bolding the label, and applying a colored highlight to defined rules
+
+  // so i need to create a list of pre-defined rules
+
   const formUpdates = useWatch({ control });
   const updatedFormValue = getFieldUpdates({
     definitionId,
@@ -76,6 +90,7 @@ const ValidatedRule: React.FC<ValidatedRuleComponentProps> = ({
     (rule: string) => {
       const components: ReactNode[] = [];
       // handle keyword lists
+      // TODO give the rule a type to distinguish this better
       if (rule.startsWith('[') && rule.endsWith(']')) {
         const keywords = rule.slice(1, rule.length - 1).split(',');
         const key = v4();
@@ -93,11 +108,10 @@ const ValidatedRule: React.FC<ValidatedRuleComponentProps> = ({
           // its like i need a fucking peg parser for this itself
           const splitArray = piece.split(/([*!+|()[\]])/).filter(Boolean);
           const key = v4();
-
           return components.push(
             <Rule key={key}>
               {splitArray.map((splitPiece, index) => {
-                if (violations.includes(splitPiece)) {
+                if (!ruleNames.includes(splitPiece)) {
                   return (
                     <MissingRule key={`${index}-${splitPiece}`}>
                       {splitPiece}
@@ -131,7 +145,7 @@ const ValidatedRule: React.FC<ValidatedRuleComponentProps> = ({
         components.push(
           <Rule key={key}>
             {splitArray.map((splitPiece, index) => {
-              if (violations.includes(splitPiece)) {
+              if (!ruleNames.includes(splitPiece)) {
                 return (
                   <MissingRule key={`${index}-${splitPiece}`}>
                     {splitPiece}
@@ -158,7 +172,7 @@ const ValidatedRule: React.FC<ValidatedRuleComponentProps> = ({
       });
       return components;
     },
-    [violations]
+    [ruleNames]
   );
 
   return <Wrapper>{formatRules(`${currentRuleDefinition}`)}</Wrapper>;

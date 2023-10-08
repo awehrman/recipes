@@ -9,9 +9,7 @@ import React, {
 } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
-import useParserRules from 'hooks/use-parser-rules';
 import { useRuleContext } from 'contexts/rule-context';
-import { isDuplicateRule, isNotEmpty } from './validators';
 
 type AutoWidthInputProps = {
   fieldName?: string;
@@ -67,7 +65,6 @@ const AutoWidthInput: React.FC<AutoWidthInputProps> = ({
   validators = {},
   ...props
 }) => {
-  const { rules = [] } = useParserRules();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const registeredFieldName = definitionPath ?? fieldName;
 
@@ -101,7 +98,6 @@ const AutoWidthInput: React.FC<AutoWidthInputProps> = ({
   const updateInputWidth = useCallback(() => {
     if (sizeRef?.current && containerRef?.current) {
       const width = sizeRef.current.offsetWidth;
-      console.log('setting', width, containerRef.current?.id);
       containerRef.current.style.width = `${width}px`;
     }
   }, []);
@@ -153,13 +149,8 @@ const AutoWidthInput: React.FC<AutoWidthInputProps> = ({
       >
         <InputField
           {...register(registeredFieldName, {
-            required: isRequired,
             disabled: displayContext === 'display',
-            // validate: {
-            //   isDuplicateRule: (value: string) =>
-            //     isDuplicateRule(value, rules, id, fieldName),
-            //   isNotEmpty: (value: string) => isNotEmpty(value, fieldName)
-            // }
+            required: isRequired,
             validate: { ...validators }
           })}
           id={uniqueId}

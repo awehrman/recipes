@@ -39,7 +39,6 @@ function removeTypename(data: ParserRuleWithRelationsWithTypeName) {
 }
 
 function useParserRule(id: string) {
-  const violations: any[] = [];
   // this should fetch from the cache first since we have a type policy enabled
   const {
     data = {},
@@ -172,8 +171,7 @@ function useParserRule(id: string) {
     deleteRule,
     loading,
     refetch,
-    rule: parserRule,
-    violations
+    rule: parserRule
   };
 }
 
