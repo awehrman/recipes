@@ -5,6 +5,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import styled from 'styled-components';
 
 import { RuleProvider, useRuleContext } from 'contexts/rule-context';
+import { useParserContext } from 'contexts/parser-context';
 import { Button } from 'components/common';
 import useParserRule from 'hooks/use-parser-rule';
 
@@ -12,7 +13,7 @@ import RuleBody from './body';
 import RuleHeader from './header';
 import { RuleComponentProps, RuleContentProps } from '../types';
 
-const RuleContent: React.FC<RuleContentProps> = ({ rule, onAddRuleCancel }) => {
+const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
   // TODO since this is a bit circular here
   // maybe we can adjust this on the component level?
   const defaultFormatter = ''; // getDefaultFormatter(rule.label ?? '', 1);
@@ -41,13 +42,14 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule, onAddRuleCancel }) => {
   });
   const { handleSubmit, reset } = methods;
   const { addRule, updateRule } = useParserRule(rule?.id ?? '-1');
+  const { dispatch: parserDispatch } = useParserContext();
 
   const saveLabel = displayContext === 'add' ? 'Add Rule' : 'Save Rule';
 
   function handleCancelClick() {
     // TODO should any of these useParserRule calls actually be dispatched from the ruleContext?
     // whats the performance difference?
-    onAddRuleCancel();
+    parserDispatch({ type: 'SET_IS_ADD_BUTTON_DISPLAYED', payload: true });
     dispatch({ type: 'SET_DISPLAY_CONTEXT', payload: 'display' });
     reset({
       name: rule.name,
@@ -68,7 +70,7 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule, onAddRuleCancel }) => {
     }
     // TODO on success only? where to handle validation?
     // seems like these should happen on update
-    onAddRuleCancel();
+    parserDispatch({ type: 'SET_IS_ADD_BUTTON_DISPLAYED', payload: true });
     dispatch({ type: 'SET_DISPLAY_CONTEXT', payload: 'display' });
   }
 
@@ -109,11 +111,7 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule, onAddRuleCancel }) => {
   );
 };
 
-const Rule: React.FC<RuleComponentProps> = ({
-  context = 'display',
-  id,
-  onAddRuleCancel // TODO i hate this; find a better way to call this
-}) => {
+const Rule: React.FC<RuleComponentProps> = ({ context = 'display', id }) => {
   const { rule, loading } = useParserRule(id);
 
   if (loading) {
@@ -123,7 +121,7 @@ const Rule: React.FC<RuleComponentProps> = ({
 
   return (
     <RuleProvider id={id} initialContext={context}>
-      <RuleContent onAddRuleCancel={onAddRuleCancel} rule={rule} />
+      <RuleContent rule={rule} />
     </RuleProvider>
   );
 };

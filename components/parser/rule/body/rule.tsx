@@ -15,8 +15,9 @@ const Rule: React.FC<EmptyComponentProps> = () => {
   const {
     state: { index, definitionId, rule }
   } = useRuleDefinitionContext();
+  console.log('[rule]', { index, definitionId, rule });
   const {
-    state: { id, displayContext, containerRefCallback, sizeRefCallback }
+    state: { id, displayContext }
   } = useRuleContext();
   const fieldName = `definitions.${index}.rule`;
   const placeholder = `rule definition`;
@@ -30,17 +31,20 @@ const Rule: React.FC<EmptyComponentProps> = () => {
   return (
     <Wrapper>
       {showParsedRule ? (
-        <ValidatedRule fieldName={fieldName} placeholder={placeholder} />
+        <ValidatedRule
+          fieldName={fieldName}
+          index={index}
+          placeholder={placeholder}
+        />
       ) : (
         <AutoWidthInput
           definitionId={definitionId}
           defaultValue={rule}
           fieldName="rule"
+          index={index}
           definitionPath={fieldName}
           onBlur={trimInput}
           placeholder={placeholder}
-          containerRefCallback={containerRefCallback(index)}
-          sizeRefCallback={sizeRefCallback(index)}
           validators={{
             isDuplicateRule: (value: string) =>
               isDuplicateRule(value, rules, id, fieldName),

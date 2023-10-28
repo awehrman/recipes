@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
+
+import { useParserContext } from 'contexts/parser-context';
 
 import Rule from './rule';
 import { Button } from 'components/common';
@@ -7,27 +9,28 @@ import { Button } from 'components/common';
 type AddRuleProps = {};
 
 const AddRule: React.FC<AddRuleProps> = () => {
-  const [showAddButton, setShowAddButton] = useState<boolean>(true);
+  const {
+    state: { isAddButtonDisplayed },
+    dispatch: parserDispatch
+  } = useParserContext();
 
   function handleAddRuleClick() {
-    setShowAddButton(false);
+    parserDispatch({ type: 'SET_IS_ADD_BUTTON_DISPLAYED', payload: false });
   }
 
-  function handleCancelClick() {
-    setShowAddButton(true);
+  function handleAddRuleCancelClick() {
+    parserDispatch({ type: 'SET_IS_ADD_BUTTON_DISPLAYED', payload: true });
   }
 
   return (
     <Wrapper>
-      {showAddButton ? (
+      {isAddButtonDisplayed ? (
         <AddRuleButton label="Add Rule" onClick={handleAddRuleClick} />
       ) : (
         <Header>Add New Rule</Header>
       )}
 
-      {!showAddButton ? (
-        <Rule context="add" id="-1" onAddRuleCancel={handleCancelClick} />
-      ) : null}
+      {!isAddButtonDisplayed ? <Rule context="add" id="-1" /> : null}
     </Wrapper>
   );
 };

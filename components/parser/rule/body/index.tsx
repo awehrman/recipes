@@ -1,6 +1,7 @@
 import React from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import styled from 'styled-components';
+import { v4 } from 'uuid';
 
 import { Button } from 'components/common';
 import { useRuleContext } from 'contexts/rule-context';
@@ -19,8 +20,7 @@ const RuleBody: React.FC<EmptyComponentProps> = () => {
   const {
     state: { id, displayContext }
   } = useRuleContext();
-  const showDeleteDefinitionButton = (index: number) =>
-    displayContext !== 'display' && index !== 0;
+  const showDeleteDefinitionButton = () => displayContext !== 'display';
   const { control } = useFormContext();
   const { fields, append, remove } = useFieldArray({
     control,
@@ -31,7 +31,7 @@ const RuleBody: React.FC<EmptyComponentProps> = () => {
 
   function renderDefinitions() {
     return fields.map((field, index: number) => {
-      const definitionId = definitions?.[0]?.id ?? '-1';
+      const definitionId = definitions?.[index]?.id ?? '-1';
       const ruleDefinition = findRuleDefinition(definitionId, definitions);
       const { example, formatter, rule } =
         ruleDefinition ?? getDefaultDefinitions(index);
@@ -49,16 +49,15 @@ const RuleBody: React.FC<EmptyComponentProps> = () => {
           index={index}
         >
           <Wrapper>
+            {showDeleteDefinitionButton() ? (
+              <DeleteButton
+                onClick={() => handleRemoveDefinitionClick(index)}
+                label="Remove Definition"
+              />
+            ) : null}
             <Example />
             <Rule />
             <Formatter />
-            {showDeleteDefinitionButton(index) ? (
-              <DeleteButton
-                icon={<TrashIcon />}
-                onClick={() => handleRemoveDefinitionClick(index)}
-                label="Remove definition"
-              />
-            ) : null}
           </Wrapper>
         </RuleDefinitionProvider>
       );
@@ -66,8 +65,10 @@ const RuleBody: React.FC<EmptyComponentProps> = () => {
   }
 
   function handleAddNewDefinitionClick() {
-    const order = (fields ?? []).length + 1;
-    append({ example: '', rule: '', formatter: '', order });
+    // getting the length itself will increment our order for us
+    const order = (fields ?? []).length;
+    const definitionId = v4();
+    append({ id: definitionId, example: '', rule: '', formatter: '', order });
   }
 
   function handleRemoveDefinitionClick(index: number) {
@@ -113,8 +114,14 @@ const AddNewDefinition = styled(Button)`
 const DeleteButton = styled(Button)`
   border: 0;
   background: transparent;
-  color: tomato;
-  float: right;
+  color: #ccc;
+  font-size: 12px;
+  font-weight: 600;
+  position: absolute;
+  right: 0;
+  top: 4px;
+  cursor: pointer;
+  z-index: 100;
 
   svg {
     position: relative;
@@ -131,4 +138,5 @@ const Wrapper = styled.div`
   margin: 6px 20px;
   font-size: 14px;
   flex-basis: 100%;
+  position: relative;
 `;

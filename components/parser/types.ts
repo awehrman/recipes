@@ -17,9 +17,8 @@ export type AutoWidthInputProps = {
   definitionPath?: string;
   onBlur?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
-  containerRefCallback: (ref: HTMLLabelElement | null) => void;
-  sizeRefCallback: (ref: HTMLSpanElement | null) => void;
   validators?: any; // TODO
+  index?: number;
 };
 
 export type WatchParserForm = {
@@ -27,22 +26,22 @@ export type WatchParserForm = {
   fieldName: string;
   getValues?: (str: string) => string | undefined;
   definitionId?: string | null;
+  index?: number;
 };
 
 export type ValidatedRuleComponentProps = {
   fieldName: string;
   placeholder: string;
+  index: number;
 };
 
 export type RuleComponentProps = {
   context?: DisplayContextTypes;
   id: string;
-  onAddRuleCancel: () => void;
 };
 
 export type DisplayContextTypes = 'display' | 'edit' | 'add';
 
 export type RuleContentProps = {
   rule: ParserRuleWithRelations;
-  onAddRuleCancel: () => void;
 };

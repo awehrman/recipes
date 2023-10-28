@@ -11,9 +11,6 @@ const RuleExample: React.FC<EmptyComponentProps> = () => {
   const {
     state: { index, definitionId, example }
   } = useRuleDefinitionContext();
-  const {
-    state: { containerRefCallback, sizeRefCallback }
-  } = useRuleContext();
   const fieldName = `definitions.${index}.example`;
 
   function trimInput(event: React.ChangeEvent<HTMLInputElement>) {
@@ -29,8 +26,7 @@ const RuleExample: React.FC<EmptyComponentProps> = () => {
         definitionPath={fieldName}
         onBlur={trimInput}
         placeholder="an example of this rule"
-        containerRefCallback={containerRefCallback(index)}
-        sizeRefCallback={sizeRefCallback(index)}
+        index={index}
       />
     </Wrapper>
   );

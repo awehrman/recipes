@@ -18,6 +18,10 @@ import {
   themeOptions
 } from './formatter.theme';
 
+const insertOrder = (value: string, index: number) => {
+  return value.replace(/\${ORDER}/g, index.toString());
+};
+
 const RuleFormatter: React.FC<EmptyComponentProps> = () => {
   const {
     state: { index, formatter }
@@ -29,6 +33,7 @@ const RuleFormatter: React.FC<EmptyComponentProps> = () => {
   const fieldName = `definitions.${index}.formatter`;
   const watchedLabel = useWatch({ control, name: 'label', defaultValue: '' });
   const defaultPlaceholder = getDefaultFormatter(watchedLabel, index);
+  const formattedWithOrder = insertOrder(`${formatter}`, index);
   const uniqueId = `${id}-${fieldName}`;
 
   function handleOnChange(value: string, _viewUpdate: ViewUpdate) {
@@ -43,12 +48,21 @@ const RuleFormatter: React.FC<EmptyComponentProps> = () => {
     }
   });
 
+  function getEditorValue() {
+    const value = getValues(fieldName);
+    if (displayContext !== 'display') {
+      return value;
+    }
+    const formattedWithOrder = insertOrder(`${value}`, index);
+    return formattedWithOrder;
+  }
+
   return (
     <EditFormatter htmlFor={uniqueId}>
       <HiddenFormInput
         {...register(fieldName)}
         id={uniqueId}
-        defaultValue={formatter ?? defaultPlaceholder}
+        defaultValue={formattedWithOrder ?? defaultPlaceholder}
         disabled={displayContext === 'display'}
         name={fieldName}
         placeholder={displayContext === 'display' ? '' : defaultPlaceholder}
@@ -64,7 +78,7 @@ const RuleFormatter: React.FC<EmptyComponentProps> = () => {
         readOnly={displayContext === 'display'}
         theme={themeOptions[displayContext as ThemeOptionKey]}
         width="520px"
-        value={getValues(fieldName)}
+        value={getEditorValue()}
       />
     </EditFormatter>
   );

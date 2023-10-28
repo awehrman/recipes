@@ -18,7 +18,8 @@ export const findRuleDefinition = (
 export const getFieldUpdates = ({
   definitionId = null,
   fieldName = '',
-  state = {}
+  state = {},
+  index
 }: WatchParserForm): string | null => {
   const { definitions = [] } = state;
   const isTopLevelFormField = fieldName === 'name' || fieldName === 'label';
@@ -30,7 +31,8 @@ export const getFieldUpdates = ({
 
   // otherwise we'll need to find the definition first, then the value
   const definition = definitions.find(
-    (def: ParserRuleDefinition) => def.id === definitionId
+    (def: ParserRuleDefinition) =>
+      def.id === definitionId && def.order === index
   );
 
   return definition?.[fieldName];

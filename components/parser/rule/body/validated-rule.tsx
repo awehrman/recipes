@@ -13,7 +13,8 @@ import useParserRules from 'hooks/use-parser-rules';
 
 const ValidatedRule: React.FC<ValidatedRuleComponentProps> = ({
   fieldName,
-  placeholder
+  placeholder,
+  index
 }) => {
   const { rules = [] } = useParserRules();
   const {
@@ -35,9 +36,11 @@ const ValidatedRule: React.FC<ValidatedRuleComponentProps> = ({
   const updatedFormValue = getFieldUpdates({
     definitionId,
     fieldName,
-    state: formUpdates
+    state: formUpdates,
+    index
   });
   const dirtyValue = !isDirty ? rule : updatedFormValue;
+  console.log({ index, rule, updatedFormValue });
 
   const currentRuleDefinition =
     displayContext !== 'display' && !dirtyValue?.length
