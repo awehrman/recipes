@@ -70,12 +70,13 @@ const RemoveRuleButton = styled(Button)`
   font-size: 14px;
   align-self: flex-end;
   position: absolute;
-  top: 6px;
+  top: -2px;
   right: 0;
+  margin-right: 8px;
+  padding-top: 4px;
 
   svg {
     fill: tomato;
-    margin-right: 8px;
     height: 14px;
   }
 `;

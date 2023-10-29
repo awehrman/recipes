@@ -3,7 +3,7 @@ import { ParserRuleWithRelations } from '@prisma/client';
 import React from 'react';
 import styled from 'styled-components';
 
-import { ParserProvider } from 'contexts/parser-context';
+import { ParserProvider, useParserContext } from 'contexts/parser-context';
 import useParserRules from 'hooks/use-parser-rules';
 
 import Rule from './rule';
@@ -24,9 +24,9 @@ const Rules: React.FC<RulesProps> = () => {
     <RulesWrapper>
       <ParserProvider>
         <Header>Rules</Header>
-        {loading && !rules.length && <Loading>Loading...</Loading>}
-        {renderRules()}
         <AddRule />
+        {loading && !rules.length && <Loading>Loading rules...</Loading>}
+        {renderRules()}
       </ParserProvider>
     </RulesWrapper>
   );
@@ -35,13 +35,12 @@ const Rules: React.FC<RulesProps> = () => {
 export default Rules;
 
 const Loading = styled.div`
-  margin-bottom: 10px;
   font-size: 14px;
   color: #222;
 `;
 
 const RulesWrapper = styled.div`
-  min-width: 600px;
+  width: 600px;
 `;
 
 const Header = styled.h1`
@@ -49,5 +48,4 @@ const Header = styled.h1`
   font-weight: 300;
   font-size: 18px;
   flex-basis: 90%;
-  margin-bottom: 10px;
 `;

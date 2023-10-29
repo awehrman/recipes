@@ -122,7 +122,6 @@ const TestWrapper = styled.div<TestWrapperProps>`
 
 const Wrapper = styled.div`
   flex-basis: calc(30% - 40px);
-  margin-left: 40px;
 `;
 
 const Details = styled.div`

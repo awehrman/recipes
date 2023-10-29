@@ -15,7 +15,6 @@ const Rule: React.FC<EmptyComponentProps> = () => {
   const {
     state: { index, definitionId, rule }
   } = useRuleDefinitionContext();
-  console.log('[rule]', { index, definitionId, rule });
   const {
     state: { id, displayContext }
   } = useRuleContext();
@@ -32,7 +31,7 @@ const Rule: React.FC<EmptyComponentProps> = () => {
     <Wrapper>
       {showParsedRule ? (
         <ValidatedRule
-          fieldName={fieldName}
+          fieldName="rule"
           index={index}
           placeholder={placeholder}
         />

@@ -13,6 +13,12 @@ const apolloClient = new ApolloClient({
                 id: args?.id ?? '-1'
               });
             }
+          },
+          parserRules: {
+            merge(existing, incoming) {
+              console.log({ existing, incoming });
+              return incoming;
+            }
           }
         }
       }

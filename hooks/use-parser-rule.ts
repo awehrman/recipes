@@ -1,11 +1,7 @@
 import _ from 'lodash';
 import { useQuery, useMutation } from '@apollo/client';
-import { ParserRuleWithRelations, ParserRuleDefinition } from '@prisma/client';
 
-import {
-  GET_PARSER_RULE_QUERY,
-  GET_ALL_PARSER_RULES_QUERY
-} from '../graphql/queries/parser';
+import { GET_PARSER_RULE_QUERY } from '../graphql/queries/parser';
 import {
   ADD_PARSER_RULE_MUTATION,
   DELETE_PARSER_RULE_MUTATION,
@@ -13,31 +9,14 @@ import {
   ADD_PARSER_RULE_DEFINITION_MUTATION
 } from '../graphql/mutations/parser';
 
-// TODO there's probably a smarter way to do this
-type ParserRules = {
-  parserRules: ParserRuleWithRelations[];
-};
-
-type ParserRuleDefinitionWithRelationsWithTypeName = ParserRuleDefinition & {
-  __typename: string;
-};
-
-type ParserRuleWithRelationsWithTypeName = ParserRuleWithRelations & {
-  __typename: string;
-};
-
-function removeTypename(data: ParserRuleWithRelationsWithTypeName) {
-  const input = {
-    ..._.omit(data, '__typename'),
-    definitions: data.definitions.map(
-      (definition: ParserRuleDefinitionWithRelationsWithTypeName) => ({
-        ..._.omit(definition, '__typename')
-      })
-    )
-  };
-  return input;
-}
-
+import {
+  handleAddRuleUpdate,
+  handleAddNewRuleDefinitionRuleUpdate,
+  handleDeleteRuleUpdate,
+  handleUpdateRuleUpdate,
+  removeTypename,
+  ParserRuleWithRelationsWithTypeName
+} from './helpers/parser-rule';
 function useParserRule(id: string) {
   // this should fetch from the cache first since we have a type policy enabled
   const {
@@ -58,85 +37,49 @@ function useParserRule(id: string) {
 
   function addRule(data: ParserRuleWithRelationsWithTypeName): void {
     const input = removeTypename(data);
-    try {
-      addParserRule({
-        variables: { input },
-        update: (cache, res) => {
-          // TODO read/write fragment vs read/write all rules query vs read/write just this rule?
-          const rules: ParserRules | null = cache.readQuery({
-            query: GET_ALL_PARSER_RULES_QUERY
-          });
-          // TODO temp
-          if (!(input?.definitions ?? []).length) {
-            input.definitions = [];
-          }
-          const data = {
-            // TODO sort by order
-            parserRules: [
-              ...(rules?.parserRules ?? []),
-              {
-                ...input,
-                id: res.data?.addParserRule.id,
-                __typename: 'ParserRule'
-              }
-            ]
-          };
-          cache.writeQuery({
-            query: GET_ALL_PARSER_RULES_QUERY,
-            data
-          });
+    addParserRule({
+      optimisticResponse: {
+        addParserRule: {
+          ...data,
+          id: '-1'
         }
-      });
-    } catch (e) {
-      // TODO handle error
-    }
+      },
+      variables: { input },
+      update: (cache, res) => handleAddRuleUpdate(cache, res, data)
+    });
   }
 
   function deleteRule(id: string) {
-    // TODO does this only remove the rule or also the connected definitions?
     deleteParserRule({
+      optimisticResponse: {
+        deleteParserRule: {
+          id
+        }
+      },
       variables: { id },
-      update: (cache) => {
-        const rules: ParserRules | null = cache.readQuery({
-          query: GET_ALL_PARSER_RULES_QUERY
-        });
-        const data = {
-          parserRules: (rules?.parserRules ?? []).filter(
-            (rule: any) => rule.id !== id
-          )
-        };
-        cache.writeQuery({
-          query: GET_ALL_PARSER_RULES_QUERY,
-          data
-        });
-      }
+      update: (cache, res) => handleDeleteRuleUpdate(cache, res, id, refetch)
     });
   }
 
   function updateRule(data: ParserRuleWithRelationsWithTypeName) {
     const input = removeTypename(data);
+    console.log({
+      optimisticResponse: {
+        updateParserRule: {
+          ...data // TODO do we have to check or sub id's for any new definitions?
+        }
+      }
+    });
     updateParserRule({
+      optimisticResponse: {
+        updateParserRule: {
+          ...data // TODO do we have to check or sub id's for any new definitions?
+        }
+      },
       variables: {
         input
       },
-      update: (cache) => {
-        // TODO maybe read/write fragment is better?
-        const rules: ParserRules | null = cache.readQuery({
-          query: GET_ALL_PARSER_RULES_QUERY
-        });
-        const updated = {
-          parserRules: (rules?.parserRules ?? []).map(
-            (rule: ParserRuleWithRelations) =>
-              rule.id === data.id
-                ? { ...input, __typename: 'ParserRule' }
-                : rule
-          )
-        };
-        cache.writeQuery({
-          query: GET_ALL_PARSER_RULES_QUERY,
-          data: updated
-        });
-      }
+      update: (cache, res) => handleUpdateRuleUpdate(cache, res, input)
     });
   }
 
@@ -145,19 +88,23 @@ function useParserRule(id: string) {
     const input = {
       example: null,
       formatter: null,
-      order: 0,
+      order: 0, // TODO increment this properly
       rule: '', // TODO allow nulls here
       ruleId: null
     };
     addParserRuleDefinition({
+      optimisticResponse: {
+        addParserRuleDefinition: {
+          ...input,
+          id: '-1',
+          __typename: 'ParserRuleDefinition'
+        }
+      },
       variables: {
         ...input
       },
-      update: (cache, data) => {
-        // TODO is this sufficient? ... probably not
-        // i think we need to directly update the cache
-        // refetch();
-      }
+      update: (cache, res) =>
+        handleAddNewRuleDefinitionRuleUpdate(cache, res, input)
     });
   }
 

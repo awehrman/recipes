@@ -40,6 +40,7 @@ export default AddRule;
 const Wrapper = styled.div`
   display: flex;
   flex-wrap: wrap;
+  padding: 10px 0;
 `;
 
 const Header = styled.h2`
@@ -47,6 +48,7 @@ const Header = styled.h2`
   width: 100%;
   font-weight: 600;
   color: #73c6b6;
+  margin-top: 0;
 `;
 
 const AddRuleButton = styled(Button)`

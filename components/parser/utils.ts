@@ -34,7 +34,6 @@ export const getFieldUpdates = ({
     (def: ParserRuleDefinition) =>
       def.id === definitionId && def.order === index
   );
-
   return definition?.[fieldName];
 };
 

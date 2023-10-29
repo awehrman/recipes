@@ -57,6 +57,10 @@ const RuleFormatter: React.FC<EmptyComponentProps> = () => {
     return formattedWithOrder;
   }
 
+  if (displayContext === 'display' && !formatter?.length) {
+    return null;
+  }
+
   return (
     <EditFormatter htmlFor={uniqueId}>
       <HiddenFormInput

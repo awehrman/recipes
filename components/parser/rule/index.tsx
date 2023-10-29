@@ -114,10 +114,10 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
 const Rule: React.FC<RuleComponentProps> = ({ context = 'display', id }) => {
   const { rule, loading } = useParserRule(id);
 
-  if (loading) {
-    // TODO this should be a loading skeleton
-    return <div>Loading...</div>;
-  }
+  // if (loading) {
+  //   // TODO this should be a loading skeleton
+  //   return <Loading>Loading rule...</Loading>;
+  // }
 
   return (
     <RuleProvider id={id} initialContext={context}>
@@ -129,6 +129,11 @@ const Rule: React.FC<RuleComponentProps> = ({ context = 'display', id }) => {
 export default Rule;
 
 Rule.whyDidYouRender = true;
+
+const Loading = styled.div`
+  font-size: 14px;
+  color: #222;
+`;
 
 const Buttons = styled.div`
   margin: 10px 15px;

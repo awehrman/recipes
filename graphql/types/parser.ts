@@ -10,13 +10,6 @@ import {
 } from 'nexus';
 import { ArgsValue, SourceValue } from 'nexus/dist/core';
 
-type DefinitionProps = {
-  id?: string;
-  example: string;
-  definition: string;
-  formatter?: string | null;
-};
-
 export const ParserRuleDefinition = objectType({
   name: 'ParserRuleDefinition',
   definition(t) {
@@ -63,6 +56,7 @@ const getRules = async (
     where,
     select: {
       id: true,
+      // order: true,
       name: true,
       label: true,
       definitions: {
@@ -96,6 +90,7 @@ const getRule = async (
     where,
     select: {
       id: true,
+      // order: true,
       name: true,
       label: true,
       definitions: {

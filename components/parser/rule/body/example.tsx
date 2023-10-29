@@ -9,6 +9,9 @@ import AutoWidthInput from '../auto-width-input';
 
 const RuleExample: React.FC<EmptyComponentProps> = () => {
   const {
+    state: { displayContext }
+  } = useRuleContext();
+  const {
     state: { index, definitionId, example }
   } = useRuleDefinitionContext();
   const fieldName = `definitions.${index}.example`;
@@ -16,6 +19,8 @@ const RuleExample: React.FC<EmptyComponentProps> = () => {
   function trimInput(event: React.ChangeEvent<HTMLInputElement>) {
     event.target.value = event.target.value.trim();
   }
+
+  if (displayContext === 'display' && !example) return null;
 
   return (
     <Wrapper>

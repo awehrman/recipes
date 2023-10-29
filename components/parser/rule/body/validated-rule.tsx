@@ -40,7 +40,6 @@ const ValidatedRule: React.FC<ValidatedRuleComponentProps> = ({
     index
   });
   const dirtyValue = !isDirty ? rule : updatedFormValue;
-  console.log({ index, rule, updatedFormValue });
 
   const currentRuleDefinition =
     displayContext !== 'display' && !dirtyValue?.length

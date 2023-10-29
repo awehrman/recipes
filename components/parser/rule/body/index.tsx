@@ -49,15 +49,15 @@ const RuleBody: React.FC<EmptyComponentProps> = () => {
           index={index}
         >
           <Wrapper>
+            <Example />
+            <Rule />
+            <Formatter />
             {showDeleteDefinitionButton() ? (
               <DeleteButton
                 onClick={() => handleRemoveDefinitionClick(index)}
                 label="Remove Definition"
               />
             ) : null}
-            <Example />
-            <Rule />
-            <Formatter />
           </Wrapper>
         </RuleDefinitionProvider>
       );
