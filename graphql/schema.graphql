@@ -161,6 +161,7 @@ type ParserRule {
   id: String
   label: String
   name: String
+  order: Int!
 }
 
 type ParserRuleDefinition {
@@ -185,6 +186,7 @@ input ParserRuleInput {
   id: String
   label: String
   name: String!
+  order: Int!
 }
 
 enum Properties {

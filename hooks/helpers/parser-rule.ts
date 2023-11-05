@@ -67,7 +67,6 @@ export const handleAddRuleUpdate = (
       ? { id: res.data.addParserRule.id }
       : {})
   }));
-
   if (isOptimisticResponse) {
     parserRules.push({ ...input, id: '-1', __typename: 'ParserRule' });
   }
@@ -84,7 +83,6 @@ export const handleUpdateRuleUpdate = (
   res: any,
   input: any
 ) => {
-  console.log('handleUpdateRuleUpdate', { res, input });
   const rules: ParserRules | null = cache.readQuery({
     query: GET_ALL_PARSER_RULES_QUERY
   });
@@ -109,6 +107,7 @@ export const handleUpdateRuleUpdate = (
     // });
     cache.writeFragment({
       id: cacheKey,
+      // TODO move this fragment
       fragment: gql`
         fragment WriteFragment on ParserRuleDefinition {
           id
@@ -134,7 +133,6 @@ export const handleUpdateRuleUpdate = (
 
   const data = { parserRules };
 
-  console.log({ data });
   cache.writeQuery({
     query: GET_ALL_PARSER_RULES_QUERY,
     data
@@ -147,7 +145,7 @@ export const handleAddNewRuleDefinitionRuleUpdate = (
   res: any,
   input: any
 ) => {
-  console.log('handleAddNewRuleDefinitionRuleUpdate', { res, input });
+  console.log('TODO handleAddNewRuleDefinitionRuleUpdate', { res, input });
 };
 
 export const handleDeleteRuleUpdate = (
@@ -156,7 +154,6 @@ export const handleDeleteRuleUpdate = (
   id: string,
   refetch: any
 ) => {
-  console.log('handleDeleteRuleUpdate', { res, id });
   /*
     Cache data may be lost when replacing the parserRules field of a Query object.
 

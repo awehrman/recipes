@@ -14,14 +14,17 @@ import RuleHeader from './header';
 import { RuleComponentProps, RuleContentProps } from '../types';
 
 const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
-  // TODO since this is a bit circular here
-  // maybe we can adjust this on the component level?
   const defaultFormatter = ''; // getDefaultFormatter(rule.label ?? '', 1);
   const {
     dispatch,
     state: { displayContext, isExpanded, isFocused }
   } = useRuleContext();
-  const defaultValues = { ...rule };
+  const defaultValues = {
+    name: '',
+    label: '',
+    order: 0,
+    ...rule
+  };
 
   if (displayContext === 'add' && !rule?.definitions?.length) {
     // tack on a starting value
@@ -41,7 +44,7 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
     mode: 'onBlur'
   });
   const { handleSubmit, reset } = methods;
-  const { addRule, updateRule } = useParserRule(rule?.id ?? '-1');
+  const { addRule, updateRule } = useParserRule(rule.id);
   const { dispatch: parserDispatch } = useParserContext();
 
   const saveLabel = displayContext === 'add' ? 'Add Rule' : 'Save Rule';
@@ -51,22 +54,25 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
     // whats the performance difference?
     parserDispatch({ type: 'SET_IS_ADD_BUTTON_DISPLAYED', payload: true });
     dispatch({ type: 'SET_DISPLAY_CONTEXT', payload: 'display' });
-    reset({
-      name: rule.name,
-      label: rule.label,
-      definitions: rule.definitions
-      // TODO order?
-    });
+    // reset({
+    //   name: '',
+    //   label: rule.label ?? '',
+    //   definitions: rule.definitions ?? [],
+    //   order: rule.order ?? 0
+    // });
   }
 
-  // TODO should this live in the rule context?
-  function handleFormSubmit(data: ParserRuleWithRelations) {
+  function handleFormSubmit(data: ParserRuleWithRelations, event: any) {
+    // TODO resetting screws with our default width
+    event.target.reset();
+
     if (displayContext === 'edit') {
       updateRule(data);
-    }
-
-    if (displayContext === 'add') {
+    } else if (displayContext === 'add') {
       addRule(data);
+      // reset({
+      //   defaultValues
+      // });
     }
     // TODO on success only? where to handle validation?
     // seems like these should happen on update
@@ -78,7 +84,7 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
     if (!isFocused) {
       dispatch({ type: 'SET_IS_FOCUSED', payload: true });
     }
-  }, 300);
+  }, 100);
 
   const debouncedHandleMouseLeave = _.debounce(() => {
     if (isFocused) {
@@ -87,13 +93,13 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
   }, 300);
 
   return (
-    <FormProvider {...methods}>
-      <Wrapper
-        className={displayContext}
-        onMouseEnter={debouncedHandleMouseEnter}
-        onMouseLeave={debouncedHandleMouseLeave}
-        onSubmit={handleSubmit(handleFormSubmit)}
-      >
+    <Wrapper
+      className={displayContext}
+      onMouseEnter={debouncedHandleMouseEnter}
+      onMouseLeave={debouncedHandleMouseLeave}
+      onSubmit={handleSubmit(handleFormSubmit)}
+    >
+      <FormProvider {...methods}>
         <RuleHeader />
         {isExpanded || displayContext !== 'display' ? <RuleBody /> : null}
         {displayContext !== 'display' ? (
@@ -106,18 +112,13 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
             <SaveButton type="submit" label={saveLabel} />
           </Buttons>
         ) : null}
-      </Wrapper>
-    </FormProvider>
+      </FormProvider>
+    </Wrapper>
   );
 };
 
 const Rule: React.FC<RuleComponentProps> = ({ context = 'display', id }) => {
   const { rule, loading } = useParserRule(id);
-
-  // if (loading) {
-  //   // TODO this should be a loading skeleton
-  //   return <Loading>Loading rule...</Loading>;
-  // }
 
   return (
     <RuleProvider id={id} initialContext={context}>
@@ -128,7 +129,7 @@ const Rule: React.FC<RuleComponentProps> = ({ context = 'display', id }) => {
 
 export default Rule;
 
-Rule.whyDidYouRender = true;
+// RuleContent.whyDidYouRender = true;
 
 const Loading = styled.div`
   font-size: 14px;

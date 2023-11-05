@@ -26,11 +26,13 @@ export const ParserRule = objectType({
   sourceType: `{
     id: string;
     name: string;
+    order: int;
     label: string;
     definitions: ParserRuleDefinition[];
   }`,
   definition(t) {
     t.nullable.string('id');
+    t.nonNull.int('order', { resolve: (root) => root?.order ?? 0 });
     t.string('name');
     t.string('label');
     t.list.field('definitions', {
@@ -40,6 +42,7 @@ export const ParserRule = objectType({
   }
 });
 
+// TODO move
 type PartialAppContext = {
   prisma: PrismaClient;
 };
@@ -56,7 +59,7 @@ const getRules = async (
     where,
     select: {
       id: true,
-      // order: true,
+      order: true,
       name: true,
       label: true,
       definitions: {
@@ -90,7 +93,7 @@ const getRule = async (
     where,
     select: {
       id: true,
-      // order: true,
+      order: true,
       name: true,
       label: true,
       definitions: {
@@ -136,7 +139,7 @@ const addParserRule = async (
 ) => {
   const { prisma } = ctx;
   const { input } = args;
-  let { id, name = '', label = '', definitions = [] } = input || {};
+  let { id, name = '', label = '', order = 0, definitions = [] } = input || {};
 
   const definitionsCreateMany = {
     createMany: {
@@ -151,7 +154,8 @@ const addParserRule = async (
 
   const data: Prisma.ParserRuleUncheckedCreateInput = {
     name,
-    label: `${label}`
+    label: `${label}`,
+    order
   };
 
   if ((definitions ?? []).length > 0) {
@@ -227,7 +231,7 @@ const updateParserRule = async (
 ) => {
   const { prisma } = ctx;
   const { input } = args;
-  let { id, name, label = '', definitions = [] } = input || {};
+  let { id, name, label = '', order = 0, definitions = [] } = input || {};
   if (!id || !name) {
     // TODO come back and make this a better error
     return { id: 'false' };
@@ -268,6 +272,9 @@ const updateParserRule = async (
   if (label) {
     data.label = label;
   }
+  if (order) {
+    data.order = order;
+  }
   const response = { id };
   try {
     const result = await prisma.parserRule.update({
@@ -291,15 +298,37 @@ const deleteParserRule = async (
   const { prisma } = ctx;
   const { id } = args;
   if (!id) {
+    // lol this response type is dumb; put something helpful here
     return { id: 'false' };
   }
   const response = { id: 'false' };
+  const definitionIds = await prisma.parserRuleDefinition.findMany({
+    where: {
+      parserRuleId: id
+    },
+    select: {
+      id: true
+    }
+  });
+  // TODO go back and see if we can accomplish this with a single request
+  // including just a definitions: true, didn't seem to work
+  try {
+    await prisma.parserRuleDefinition.deleteMany({
+      where: {
+        id: {
+          in: definitionIds.map((def) => def.id)
+        }
+      }
+    });
+  } catch (e) {
+    console.log({ e });
+  }
+
   try {
     await prisma.parserRule.delete({
-      // TODO this doesn't seem to be removing the definitions
-      include: {
-        definitions: true
-      },
+      // include: {
+      //   definitions: true
+      // },
       where: {
         id
       }
@@ -372,6 +401,7 @@ export const ParserRuleInput = inputObjectType({
   name: 'ParserRuleInput',
   definition(t) {
     t.nullable.string('id');
+    t.nonNull.int('order');
     t.nonNull.string('name');
     t.string('label');
     t.list.field('definitions', {

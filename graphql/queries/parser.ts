@@ -6,6 +6,7 @@ export const GET_PARSER_RULE_QUERY = gql`
       id
       name
       label
+      order
       definitions {
         id
         example
@@ -23,6 +24,7 @@ export const GET_ALL_PARSER_RULES_QUERY = gql`
       id
       name
       label
+      order
       definitions {
         id
         example

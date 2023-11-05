@@ -18,10 +18,6 @@ const AddRule: React.FC<AddRuleProps> = () => {
     parserDispatch({ type: 'SET_IS_ADD_BUTTON_DISPLAYED', payload: false });
   }
 
-  function handleAddRuleCancelClick() {
-    parserDispatch({ type: 'SET_IS_ADD_BUTTON_DISPLAYED', payload: true });
-  }
-
   return (
     <Wrapper>
       {isAddButtonDisplayed ? (
@@ -30,7 +26,7 @@ const AddRule: React.FC<AddRuleProps> = () => {
         <Header>Add New Rule</Header>
       )}
 
-      {!isAddButtonDisplayed ? <Rule context="add" id="-1" /> : null}
+      {!isAddButtonDisplayed ? <Rule context="add" id="add-rule" /> : null}
     </Wrapper>
   );
 };

@@ -30,14 +30,12 @@ const AutoWidthInput: React.FC<AutoWidthInputProps> = ({
     register
   } = useFormContext();
   const formUpdates = useWatch({ control });
-
   const updatedFormValue = getFieldUpdates({
     definitionId,
     fieldName,
     state: formUpdates,
     index
   });
-
   const dirtyValue = !isDirty ? defaultValue : updatedFormValue;
   const displaySizePlaceholder =
     displayContext !== 'display' && !dirtyValue?.length
@@ -45,20 +43,21 @@ const AutoWidthInput: React.FC<AutoWidthInputProps> = ({
       : dirtyValue;
   const isSpellCheck = displayContext !== 'display';
   const uniqueId = `${id}-${registeredFieldName}`;
+  const registerField = register(registeredFieldName, {
+    required: isRequired,
+    validate: { ...validators }
+  });
 
   return (
     <Wrapper>
       <Label id={`label-${uniqueId}`} htmlFor={uniqueId}>
         <InputField
-          {...register(registeredFieldName, {
-            disabled: displayContext === 'display',
-            required: isRequired,
-            validate: { ...validators }
-          })}
+          {...registerField}
           id={uniqueId}
           autoComplete="off"
           className={`${displayContext}`}
           defaultValue={defaultValue}
+          disabled={displayContext === 'display'}
           placeholder={placeholder ?? fieldName}
           spellCheck={isSpellCheck}
           type="text"
@@ -72,6 +71,8 @@ const AutoWidthInput: React.FC<AutoWidthInputProps> = ({
 };
 
 export default AutoWidthInput;
+
+// AutoWidthInput.whyDidYouRender = true;
 
 const Wrapper = styled.fieldset`
   border: 0;

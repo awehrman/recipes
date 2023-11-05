@@ -270,6 +270,7 @@ model ParserRule {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  order Int
   name  String
   label String
 

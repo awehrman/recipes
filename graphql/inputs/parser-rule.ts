@@ -5,6 +5,7 @@ export default gql`
     id
     name
     label
+    order
     definitions {
       id
       example

@@ -15,8 +15,7 @@ const apolloClient = new ApolloClient({
             }
           },
           parserRules: {
-            merge(existing, incoming) {
-              console.log({ existing, incoming });
+            merge(_existing, incoming) {
               return incoming;
             }
           }
