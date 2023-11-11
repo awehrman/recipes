@@ -32,7 +32,7 @@ const RuleHeader: React.FC<RuleComponentProps> = () => {
 
   return (
     <Header>
-      {displayContext === 'display' && isFocused ? (
+      {displayContext === 'display' && true ? (
         <EditRuleButton icon={<EditIcon />} onClick={handleEditClick} />
       ) : null}
       <Name />
@@ -90,15 +90,17 @@ const EditRuleButton = styled(Button)`
   font-size: 13px;
   position: absolute;
   left: -30px;
+  top: -2px;
   z-index: 1;
   background: transparent;
   border: 2px solid transparent;
   display: flex;
-  padding-top: 1px;
   justify-content: flex-start;
+  padding: 3px 5px 7px 7px;
 
   svg {
     height: 13px;
+    width: 13px;
     top: 2px;
     position: relative;
     cursor: pointer;

@@ -14,6 +14,7 @@ import useParserRules from 'hooks/use-parser-rules';
 const ValidatedRule: React.FC<ValidatedRuleComponentProps> = ({
   fieldName,
   placeholder,
+  onFocus = () => {},
   index
 }) => {
   const { rules = [] } = useParserRules();
@@ -141,11 +142,24 @@ const ValidatedRule: React.FC<ValidatedRuleComponentProps> = ({
     [ruleNames]
   );
 
-  return <Wrapper>{formatRules(`${currentRuleDefinition}`)}</Wrapper>;
+  const focusProps = {
+    tabIndex: 0,
+    onFocus: onFocus
+  };
+
+  return (
+    <Wrapper {...(displayContext === 'display' ? {} : { ...focusProps })}>
+      {formatRules(`${currentRuleDefinition}`)}
+    </Wrapper>
+  );
 };
 
 export default ValidatedRule;
-const Wrapper = styled.div``;
+
+const Wrapper = styled.div`
+  position: relative;
+  top: 2px;
+`;
 
 const Label = styled.label`
   margin-right: 2px;

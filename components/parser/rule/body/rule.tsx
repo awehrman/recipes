@@ -11,6 +11,7 @@ import ValidatedRule from './validated-rule';
 import { EmptyComponentProps } from 'components/parser/types';
 
 const Rule: React.FC<EmptyComponentProps> = () => {
+  const [isActiveElement, setIsActiveElement] = React.useState(false);
   const { rules = [] } = useParserRules();
   const {
     state: { index, definitionId, rule }
@@ -20,11 +21,15 @@ const Rule: React.FC<EmptyComponentProps> = () => {
   } = useRuleContext();
   const fieldName = `definitions.${index}.rule`;
   const placeholder = `rule definition`;
-  const isNotActiveElement = false; // TODO
-  const showParsedRule = displayContext === 'display' || isNotActiveElement;
+  const showParsedRule = displayContext === 'display' || !isActiveElement;
 
-  function trimInput(event: React.ChangeEvent<HTMLInputElement>) {
+  function handleOnBlur(event: React.ChangeEvent<HTMLInputElement>) {
     event.target.value = event.target.value.trim();
+    setIsActiveElement(false);
+  }
+
+  function handleOnFocus() {
+    setIsActiveElement(true);
   }
 
   return (
@@ -34,6 +39,7 @@ const Rule: React.FC<EmptyComponentProps> = () => {
           fieldName="rule"
           index={index}
           placeholder={placeholder}
+          onFocus={handleOnFocus}
         />
       ) : (
         <AutoWidthInput
@@ -42,7 +48,8 @@ const Rule: React.FC<EmptyComponentProps> = () => {
           fieldName="rule"
           index={index}
           definitionPath={fieldName}
-          onBlur={trimInput}
+          onFocus={handleOnFocus}
+          onBlur={handleOnBlur}
           placeholder={placeholder}
           validators={{
             isDuplicateRule: (value: string) =>

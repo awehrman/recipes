@@ -14,7 +14,8 @@ const AutoWidthInput: React.FC<AutoWidthInputProps> = ({
   defaultValue = '',
   definitionId = null,
   definitionPath = null,
-  onBlur = _.noop(),
+  onBlur = () => {},
+  onFocus = () => {},
   placeholder = null,
   validators = {},
   spellcheck = true,
@@ -59,6 +60,8 @@ const AutoWidthInput: React.FC<AutoWidthInputProps> = ({
           className={`${displayContext}`}
           defaultValue={defaultValue}
           disabled={displayContext === 'display'}
+          onBlur={(event: React.ChangeEvent<HTMLInputElement>) => onBlur(event)}
+          onFocus={() => onFocus()}
           placeholder={placeholder ?? fieldName}
           spellCheck={isSpellCheck}
           type="text"

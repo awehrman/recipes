@@ -5,6 +5,7 @@ import { useParserContext } from 'contexts/parser-context';
 
 import Rule from './rule';
 import { Button } from 'components/common';
+import PlusIcon from 'public/icons/plus.svg';
 
 type AddRuleProps = {};
 
@@ -21,7 +22,11 @@ const AddRule: React.FC<AddRuleProps> = () => {
   return (
     <Wrapper>
       {isAddButtonDisplayed ? (
-        <AddRuleButton label="Add Rule" onClick={handleAddRuleClick} />
+        <AddRuleButton
+          icon={<PlusIcon />}
+          label="Add Rule"
+          onClick={handleAddRuleClick}
+        />
       ) : (
         <Header>Add New Rule</Header>
       )}
@@ -36,7 +41,7 @@ export default AddRule;
 const Wrapper = styled.div`
   display: flex;
   flex-wrap: wrap;
-  padding: 10px 0;
+  position: relative;
 `;
 
 const Header = styled.h2`
@@ -49,9 +54,20 @@ const Header = styled.h2`
 
 const AddRuleButton = styled(Button)`
   border: 0;
-  background: ${({ theme }) => theme.colors.altGreen};
+  background: transparent;
   font-weight: 600;
-  color: #fff;
-  padding: 4px 6px;
-  border-radius: 5px;
+  color: ${({ theme }) => theme.colors.altGreen}};
+  padding: 4px 0px;
+  position: absolute;
+  right: 110px;
+  top: -31px;
+  font-size: 13px;
+
+  svg {
+    position: relative;
+    height: 12px;
+    fill: ${({ theme }) => theme.colors.altGreen};
+    top: 2px;
+    margin-right: 5px;
+  }
 `;

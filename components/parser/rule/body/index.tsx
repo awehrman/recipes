@@ -8,7 +8,6 @@ import { useRuleContext } from 'contexts/rule-context';
 import { RuleDefinitionProvider } from 'contexts/rule-definition-context';
 import useParserRule from 'hooks/use-parser-rule';
 import PlusIcon from 'public/icons/plus.svg';
-import TrashIcon from 'public/icons/trash-can.svg';
 
 import { EmptyComponentProps } from '../../types';
 import { getDefaultDefinitions, findRuleDefinition } from '../../utils';

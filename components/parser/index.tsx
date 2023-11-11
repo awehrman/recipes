@@ -6,6 +6,7 @@ import useParserRules from 'hooks/use-parser-rules';
 
 import Rules from './rules';
 import Tests from './tests';
+import { ParserProvider } from 'contexts/parser-context';
 
 type ParserProps = {};
 
@@ -15,8 +16,10 @@ const Parser: React.FC<ParserProps> = () => {
 
   return (
     <Wrapper>
-      <Rules />
-      <Tests tests={tests} />
+      <ParserProvider>
+        <Rules />
+        <Tests tests={tests} />
+      </ParserProvider>
     </Wrapper>
   );
 };

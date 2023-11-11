@@ -6,20 +6,24 @@ import React, {
   ReactNode
 } from 'react';
 
-type ParserActionTypes = 'SET_IS_ADD_BUTTON_DISPLAYED';
+type ParserActionTypes =
+  | 'SET_IS_ADD_BUTTON_DISPLAYED'
+  | 'SET_PARSER_VIEW'
+  | 'SET_IS_COLLAPSED';
 
 type ParserState = {
   isAddButtonDisplayed: boolean;
+  isCollapsed: boolean;
+  view: 'rules' | 'grammar';
 };
 
 type ParserAction = {
   type: ParserActionTypes;
-  payload: any; // TODO fix this
+  payload: any; // TODO
 };
 
 type ParserDispatch = (action: ParserAction) => void;
 
-// TODO should test runner stuff live here?
 const ParserContext = createContext<
   { state: ParserState; dispatch: ParserDispatch } | undefined
 >(undefined);
@@ -31,6 +35,16 @@ function ruleReducer(state: ParserState, action: ParserAction): ParserState {
         return state;
       }
       return { ...state, isAddButtonDisplayed: action.payload };
+    case 'SET_PARSER_VIEW':
+      if (action.payload.view === state.view) {
+        return state;
+      }
+      return { ...state, view: action.payload };
+    case 'SET_IS_COLLAPSED':
+      if (action.payload.isCollapsed === state.isCollapsed) {
+        return state;
+      }
+      return { ...state, isCollapsed: action.payload };
     default:
       throw new Error(`Unhandled action type: ${action.type}`);
   }
@@ -39,14 +53,20 @@ function ruleReducer(state: ParserState, action: ParserAction): ParserState {
 type ParserProviderProps = {
   children: ReactNode;
   isAddButtonDisplayed?: boolean;
+  isCollapsed?: boolean;
+  view?: 'rules' | 'grammar';
 };
 
 export function ParserProvider({
   children,
-  isAddButtonDisplayed = true
+  isAddButtonDisplayed = true,
+  isCollapsed = false,
+  view = 'rules'
 }: ParserProviderProps) {
   const [state, dispatch] = useReducer(ruleReducer, {
-    isAddButtonDisplayed
+    isAddButtonDisplayed,
+    isCollapsed,
+    view
   });
   const memoizedContext = useMemo(
     () => ({ state, dispatch }),

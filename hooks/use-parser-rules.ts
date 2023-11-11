@@ -11,6 +11,7 @@ function useParserRules() {
     fetchPolicy: 'cache-and-network'
   });
   const { parserRules = [] } = data;
+
   return {
     loading,
     refetch,

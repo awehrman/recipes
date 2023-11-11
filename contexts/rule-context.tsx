@@ -63,17 +63,19 @@ type RuleProviderProps = {
   children: ReactNode;
   id: string;
   initialContext: DisplayContext;
+  isCollapsed: boolean;
 };
 
 export function RuleProvider({
   children,
   id,
-  initialContext = 'display'
+  initialContext = 'display',
+  isCollapsed = false
 }: RuleProviderProps) {
   const [state, dispatch] = useReducer(ruleReducer, {
     id,
     displayContext: initialContext,
-    isExpanded: true,
+    isExpanded: isCollapsed ? false : true, // TODO wehrman you left off here wiring in isCollapsed
     isFocused: initialContext === 'display' ? false : true
   });
   const memoizedContext = useMemo(

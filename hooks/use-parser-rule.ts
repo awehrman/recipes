@@ -17,6 +17,7 @@ import {
   removeTypename,
   ParserRuleWithRelationsWithTypeName
 } from './helpers/parser-rule';
+
 function useParserRule(id: string) {
   // this should fetch from the cache first since we have a type policy enabled
   const {

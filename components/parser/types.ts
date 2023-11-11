@@ -16,6 +16,7 @@ export type AutoWidthInputProps = {
   definitionId?: string;
   definitionPath?: string;
   onBlur?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onFocus?: () => void;
   placeholder?: string;
   validators?: any; // TODO
   spellcheck?: boolean;
@@ -34,6 +35,7 @@ export type ValidatedRuleComponentProps = {
   fieldName: string;
   placeholder: string;
   index: number;
+  onFocus?: () => void;
 };
 
 export type RuleComponentProps = {

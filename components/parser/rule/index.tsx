@@ -43,23 +43,23 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
     defaultValues,
     mode: 'onBlur'
   });
-  const { handleSubmit } = methods;
+  const { handleSubmit, reset } = methods;
   const { addRule, updateRule } = useParserRule(rule.id);
   const { dispatch: parserDispatch } = useParserContext();
 
   const saveLabel = displayContext === 'add' ? 'Add Rule' : 'Save Rule';
 
-  function handleCancelClick() {
+  function handleCancelClick(event: React.MouseEvent<HTMLButtonElement>) {
     // TODO should any of these useParserRule calls actually be dispatched from the ruleContext?
     // whats the performance difference?
     parserDispatch({ type: 'SET_IS_ADD_BUTTON_DISPLAYED', payload: true });
     dispatch({ type: 'SET_DISPLAY_CONTEXT', payload: 'display' });
-    // reset({
-    //   name: '',
-    //   label: rule.label ?? '',
-    //   definitions: rule.definitions ?? [],
-    //   order: rule.order ?? 0
-    // });
+    reset({
+      name: rule.label ?? '',
+      label: rule.label ?? '',
+      definitions: rule.definitions ?? [],
+      order: rule.order ?? 0
+    });
   }
 
   function handleFormSubmit(data: ParserRuleWithRelations, event: any) {
@@ -107,7 +107,7 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
             <CancelButton
               type="button"
               label="Cancel"
-              onClick={handleCancelClick}
+              onClick={(e) => handleCancelClick(e)}
             />
             <SaveButton type="submit" label={saveLabel} />
           </Buttons>
@@ -119,9 +119,12 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
 
 const Rule: React.FC<RuleComponentProps> = ({ context = 'display', id }) => {
   const { rule } = useParserRule(id);
+  const {
+    state: { isCollapsed }
+  } = useParserContext();
 
   return (
-    <RuleProvider id={id} initialContext={context}>
+    <RuleProvider id={id} initialContext={context} isCollapsed={isCollapsed}>
       <RuleContent rule={rule} />
     </RuleProvider>
   );

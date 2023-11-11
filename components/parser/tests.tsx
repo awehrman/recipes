@@ -115,12 +115,15 @@ export default Tests;
 const TestWrapper = styled.div<TestWrapperProps>`
   font-size: 14px;
   color: ${({ parsed }) => (parsed ? 'MediumSeaGreen' : 'tomato')};
+
   &:hover {
     cursor: pointer;
   }
 `;
 
-const Wrapper = styled.div``;
+const Wrapper = styled.div`
+  margin-top: 32px;
+`;
 
 const Details = styled.div`
   background: ${({ theme }) => theme.colors.headerBackground};
