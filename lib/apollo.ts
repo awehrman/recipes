@@ -7,7 +7,7 @@ const apolloClient = new ApolloClient({
       Query: {
         fields: {
           parserRule: {
-            read(_, { args, toReference }) {
+            read(_init, { args, toReference, fieldName, ...rest }) {
               return toReference({
                 __typename: 'ParserRule',
                 id: args?.id ?? '-1'
@@ -15,7 +15,24 @@ const apolloClient = new ApolloClient({
             }
           },
           parserRules: {
-            merge(_existing, incoming) {
+            merge(_existing, incoming, { fieldName }) {
+              console.log('merge parserRules', {
+                params: {
+                  _existing,
+                  incoming
+                }
+              });
+              return incoming;
+            }
+          },
+          definitions: {
+            merge(_existing, incoming, { fieldName }) {
+              console.log('merge definitions', {
+                params: {
+                  _existing,
+                  incoming
+                }
+              });
               return incoming;
             }
           }

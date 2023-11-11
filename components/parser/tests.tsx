@@ -120,9 +120,7 @@ const TestWrapper = styled.div<TestWrapperProps>`
   }
 `;
 
-const Wrapper = styled.div`
-  flex-basis: calc(30% - 40px);
-`;
+const Wrapper = styled.div``;
 
 const Details = styled.div`
   background: ${({ theme }) => theme.colors.headerBackground};

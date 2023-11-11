@@ -11,6 +11,7 @@ import { useRuleContext } from 'contexts/rule-context';
 import { useRuleDefinitionContext } from 'contexts/rule-definition-context';
 import { ThemeOptionKey, EmptyComponentProps } from 'components/parser/types';
 import { BEAUTIFY_OPTIONS } from 'constants/parser';
+import useParserRule from 'hooks/use-parser-rule';
 
 import {
   getDefaultFormatter,
@@ -31,10 +32,15 @@ const RuleFormatter: React.FC<EmptyComponentProps> = () => {
   } = useRuleContext();
   const { control, getValues, register, setValue } = useFormContext();
   const fieldName = `definitions.${index}.formatter`;
-  const watchedLabel = useWatch({ control, name: 'label', defaultValue: '' });
-  const defaultPlaceholder = getDefaultFormatter(watchedLabel, index);
+  const { rule } = useParserRule(id);
+  const { name = '' } = rule;
+  const watchedName = useWatch({ name: 'name', defaultValue: name });
+
+  const defaultFormatter = getDefaultFormatter(watchedName, index);
   const formattedWithOrder = insertOrder(`${formatter}`, index);
   const uniqueId = `${id}-${fieldName}`;
+  const defaultValue =
+    displayContext === 'display' ? formattedWithOrder : defaultFormatter;
 
   function handleOnChange(value: string, _viewUpdate: ViewUpdate) {
     setValue(fieldName, value);
@@ -44,32 +50,34 @@ const RuleFormatter: React.FC<EmptyComponentProps> = () => {
     blur: () => {
       const value = getValues(fieldName);
       const formatted = js_beautify(value, BEAUTIFY_OPTIONS);
-      setValue(fieldName, formatted);
+      if (value !== formatted) {
+        setValue(fieldName, formatted);
+      }
     }
   });
 
   function getEditorValue() {
     const value = getValues(fieldName);
     if (displayContext !== 'display') {
-      return value;
+      return value.length > 0 ? value : defaultValue;
     }
     const formattedWithOrder = insertOrder(`${value}`, index);
     return formattedWithOrder;
   }
 
-  if (displayContext === 'display' && !formatter?.length) {
+  if (displayContext === 'display' && !formattedWithOrder?.length) {
     return null;
   }
-
+  console.log({ defaultValue });
   return (
     <EditFormatter htmlFor={uniqueId}>
       <HiddenFormInput
         {...register(fieldName)}
         id={uniqueId}
-        defaultValue={formattedWithOrder ?? defaultPlaceholder}
+        defaultValue={defaultValue}
         disabled={displayContext === 'display'}
         name={fieldName}
-        placeholder={displayContext === 'display' ? '' : defaultPlaceholder}
+        placeholder={displayContext === 'display' ? '' : defaultValue}
       />
       <StyledEditor
         basicSetup={formatterSetup}
@@ -78,7 +86,7 @@ const RuleFormatter: React.FC<EmptyComponentProps> = () => {
         height="auto"
         indentWithTab
         onChange={handleOnChange}
-        placeholder={displayContext === 'display' ? '' : defaultPlaceholder}
+        placeholder={displayContext === 'display' ? '' : defaultValue}
         readOnly={displayContext === 'display'}
         theme={themeOptions[displayContext as ThemeOptionKey]}
         width="520px"
@@ -89,6 +97,8 @@ const RuleFormatter: React.FC<EmptyComponentProps> = () => {
 };
 
 export default RuleFormatter;
+
+// RuleFormatter.whyDidYouRender = true;
 
 const LabelWrapper = styled.label`
   display: flex;

@@ -55,7 +55,7 @@ const RuleBody: React.FC<EmptyComponentProps> = () => {
             {showDeleteDefinitionButton() ? (
               <DeleteButton
                 onClick={() => handleRemoveDefinitionClick(index)}
-                label="Remove Definition"
+                label="Delete"
               />
             ) : null}
           </Wrapper>
@@ -65,10 +65,14 @@ const RuleBody: React.FC<EmptyComponentProps> = () => {
   }
 
   function handleAddNewDefinitionClick() {
-    // getting the length itself will increment our order for us
-    const order = (fields ?? []).length;
-    const definitionId = v4();
-    append({ id: definitionId, example: '', rule: '', formatter: '', order });
+    append({
+      id: `OPTIMISTIC-${v4()}`,
+      example: '',
+      rule: '',
+      formatter: '',
+      order: (fields ?? []).length,
+      __typename: 'ParserRuleDefinition'
+    });
   }
 
   function handleRemoveDefinitionClick(index: number) {
@@ -114,11 +118,11 @@ const AddNewDefinition = styled(Button)`
 const DeleteButton = styled(Button)`
   border: 0;
   background: transparent;
-  color: #ccc;
+  color: #aaa;
   font-size: 12px;
   font-weight: 600;
   position: absolute;
-  right: 0;
+  right: -12px;
   top: 4px;
   cursor: pointer;
   z-index: 100;

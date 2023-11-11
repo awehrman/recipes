@@ -17,6 +17,7 @@ const AutoWidthInput: React.FC<AutoWidthInputProps> = ({
   onBlur = _.noop(),
   placeholder = null,
   validators = {},
+  spellcheck = true,
   index,
   ...props
 }) => {
@@ -41,7 +42,7 @@ const AutoWidthInput: React.FC<AutoWidthInputProps> = ({
     displayContext !== 'display' && !dirtyValue?.length
       ? placeholder
       : dirtyValue;
-  const isSpellCheck = displayContext !== 'display';
+  const isSpellCheck = displayContext !== 'display' ? spellcheck : false;
   const uniqueId = `${id}-${registeredFieldName}`;
   const registerField = register(registeredFieldName, {
     required: isRequired,

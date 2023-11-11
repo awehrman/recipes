@@ -167,7 +167,12 @@ const addParserRule = async (
     const result = await prisma.parserRule.create({
       data,
       select: {
-        id: true
+        id: true,
+        definitions: {
+          select: {
+            id: true
+          }
+        }
       }
     });
     response.id = result.id;
@@ -205,7 +210,7 @@ const addParserRuleDefinition = async (
     // }
   };
 
-  console.log({ data });
+  // console.log({ data });
   const response = {};
   try {
     // TODO does this need to be explicitly tied to our parent rule? i mean probably right?
@@ -279,7 +284,14 @@ const updateParserRule = async (
   try {
     const result = await prisma.parserRule.update({
       data,
-      select: { id: true },
+      select: {
+        id: true,
+        definitions: {
+          select: {
+            id: true
+          }
+        }
+      },
       where: { id }
     });
     response.id = result.id;

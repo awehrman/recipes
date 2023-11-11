@@ -43,7 +43,7 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
     defaultValues,
     mode: 'onBlur'
   });
-  const { handleSubmit, reset } = methods;
+  const { handleSubmit } = methods;
   const { addRule, updateRule } = useParserRule(rule.id);
   const { dispatch: parserDispatch } = useParserContext();
 
@@ -118,7 +118,7 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
 };
 
 const Rule: React.FC<RuleComponentProps> = ({ context = 'display', id }) => {
-  const { rule, loading } = useParserRule(id);
+  const { rule } = useParserRule(id);
 
   return (
     <RuleProvider id={id} initialContext={context}>

@@ -49,6 +49,7 @@ const Rule: React.FC<EmptyComponentProps> = () => {
               isDuplicateRule(value, rules, id, fieldName),
             isNotEmpty: (value: string) => isNotEmpty(value, fieldName)
           }}
+          spellcheck={false}
         />
       )}
     </Wrapper>

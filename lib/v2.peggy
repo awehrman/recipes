@@ -37,7 +37,7 @@ ingredientLine "Ingredient Line" =
   	/* strip out any empty values */
   	const values = [amt, ing].flatMap(value => value);
   	return {
-    	rule: '#1_ingredient_line',
+    	rule: `#${ORDER}_ingredient_line`,
     	type: 'ingredient_line',
     	values
     };
@@ -48,7 +48,7 @@ ingredient "Ingredient" =
   ing:$(letter)+
   {
   	return {
-    	rule: '#1_ingredient',
+    	rule: `#${ORDER}_ingredient`,
     	type: 'ingredient',
     	values: [ing.toLowerCase()]
     };
@@ -59,7 +59,7 @@ amount "Amount" =
     amt:amountKeyword
     {
   		return {
-    		rule: `#1_amount >> ${amt.rule}`,
+    		rule: `#${ORDER}_amount >> ${amt.rule}`,
     		type: 'amount',
     		values: [...amt.values]
     	};
@@ -68,7 +68,7 @@ amount "Amount" =
     / amt:digits
     {
   		return {
-    		rule: `#1_amount >> ${amt.rule}`,
+    		rule: `#${ORDER}_amount >> ${amt.rule}`,
     		type: 'amount',
     		values: [...amt.values]
     	};
@@ -78,7 +78,7 @@ digits "Digits" =
   digits:$([0-9])+
   {
     return {
-      rule: `#1_digits`,
+      rule: `#${ORDER}_digits`,
       values: [digits]
     };
   }
@@ -104,7 +104,7 @@ amountKeyword "Amount Keyword" =
   amt:$('three'i / 'one'i / 'two'i)
     {
 	    return {
-    		rule: `#1_amount_keyword`,
+    		rule: `#${ORDER}_amount_keyword`,
     		values: [amt.toLowerCase()]
     	};
   	}

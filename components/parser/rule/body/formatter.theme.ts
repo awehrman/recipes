@@ -5,12 +5,12 @@ import _ from 'lodash';
 
 import { ThemeOptionKey } from 'components/parser/types';
 
-export const getDefaultFormatter = (label: string, order: number): string =>
+export const getDefaultFormatter = (ruleName: string, order: number): string =>
   `{
-  const values = [label].flatMap(value => value);
+  const values = [...].flatMap(value => value);
   return {
-    rule: '#${order}_${_.camelCase(label)}',
-    type: '${_.camelCase(label)}',
+    rule: '#${order}_${_.camelCase(ruleName)}',
+    type: '${_.camelCase(ruleName)}',
     values
   };
 }`;

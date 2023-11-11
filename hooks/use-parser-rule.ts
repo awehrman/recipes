@@ -62,14 +62,8 @@ function useParserRule(id: string) {
   }
 
   function updateRule(data: ParserRuleWithRelationsWithTypeName) {
+    // console.log('updateRule', { data });
     const input = removeTypename(data);
-    console.log({
-      optimisticResponse: {
-        updateParserRule: {
-          ...data // TODO do we have to check or sub id's for any new definitions?
-        }
-      }
-    });
     updateParserRule({
       optimisticResponse: {
         updateParserRule: {
@@ -84,6 +78,7 @@ function useParserRule(id: string) {
   }
 
   function addNewRuleDefinition() {
+    // console.log('addNewRuleDefinition');
     // input: ArgsValue<'Mutation', 'addParserRuleDefinition'>
     const input = {
       example: null,

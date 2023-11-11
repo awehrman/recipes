@@ -43,7 +43,7 @@ const Wrapper = styled.fieldset`
   border: 0;
   padding: 0;
   display: flex;
-  color: #ccc;
+  color: #aaa;
   position: relative;
   width: 100%;
   display: flex;
@@ -53,7 +53,7 @@ const Wrapper = styled.fieldset`
   margin-bottom: 4px;
 
   input {
-    color: #ccc;
+    color: #aaa;
   }
 
   :before {

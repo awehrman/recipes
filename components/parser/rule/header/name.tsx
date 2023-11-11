@@ -16,7 +16,6 @@ const RuleName: React.FC<EmptyComponentProps> = () => {
   const { rules = [] } = useParserRules();
   const { rule } = useParserRule(id);
   const { name = '' } = rule || {};
-
   return (
     <AutoWidthInput
       defaultValue={name}

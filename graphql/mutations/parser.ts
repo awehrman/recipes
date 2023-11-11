@@ -4,6 +4,9 @@ export const ADD_PARSER_RULE_MUTATION = gql`
   mutation ADD_PARSER_RULE_MUTATION($input: ParserRuleInput) {
     addParserRule(input: $input) {
       id
+      definitions {
+        id
+      }
     }
   }
 `;
@@ -22,6 +25,9 @@ export const UPDATE_PARSER_RULE_MUTATION = gql`
   mutation UPDATE_PARSER_RULE_MUTATION($input: ParserRuleInput) {
     updateParserRule(input: $input) {
       id
+      definitions {
+        id
+      }
     }
   }
 `;

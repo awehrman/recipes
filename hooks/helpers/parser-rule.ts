@@ -93,6 +93,9 @@ export const handleUpdateRuleUpdate = (
 
   input.definitions.forEach((definition: any, index: number) => {
     const cacheKey = `ParserRuleDefinition:${definition.id}`;
+    // TODO instead of definition should this pull from res? so that we can have an accurate id?
+    console.log({ cacheKey, definition });
+
     // const existingDef = cache.readFragment({
     //   id: cacheKey,
     //   fragment: gql`

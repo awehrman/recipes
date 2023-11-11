@@ -18,6 +18,7 @@ export type AutoWidthInputProps = {
   onBlur?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   validators?: any; // TODO
+  spellcheck?: boolean;
   index?: number;
 };
 
