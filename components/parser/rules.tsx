@@ -9,19 +9,28 @@ import useParserRules from 'hooks/use-parser-rules';
 import { Button } from 'components/common';
 import Rule from './rule';
 import AddRule from './add-rule';
+import usePEGParser from 'hooks/use-peg-parser';
 
 type RulesProps = {};
 
+// TODO move
 const Grammar: React.FC = () => {
-  return <Wrapper>Grammar</Wrapper>;
+  const { rules = [] } = useParserRules();
+  const { grammar } = usePEGParser(rules);
+
+  return (
+    <Wrapper>
+      <pre>{grammar}</pre>
+    </Wrapper>
+  );
 };
 
-const Wrapper = styled.div``;
+const Wrapper = styled.div`
+  font-size: 14px;
+  tab-size: 2;
+`;
 
 const Rules: React.FC<RulesProps> = () => {
-  // TODO this should move into ParserContext?
-  // const [view, setView] = React.useState('rules');
-  // const [collapseRules, setCollapseRules] = React.useState<boolean>(false);
   const {
     state: { view, isCollapsed },
     dispatch

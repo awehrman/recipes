@@ -19,6 +19,10 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
     dispatch,
     state: { displayContext, isExpanded, isFocused }
   } = useRuleContext();
+  const {
+    state: { isCollapsed },
+    dispatch: parserDispatch
+  } = useParserContext();
   const defaultValues = {
     name: '',
     label: '',
@@ -45,7 +49,6 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
   });
   const { handleSubmit, reset } = methods;
   const { addRule, updateRule } = useParserRule(rule.id);
-  const { dispatch: parserDispatch } = useParserContext();
 
   const saveLabel = displayContext === 'add' ? 'Add Rule' : 'Save Rule';
 
@@ -91,6 +94,10 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
       dispatch({ type: 'SET_IS_FOCUSED', payload: false });
     }
   }, 300);
+
+  React.useEffect(() => {
+    dispatch({ type: 'SET_IS_EXPANDED', payload: !isCollapsed });
+  }, [dispatch, isCollapsed]);
 
   return (
     <Wrapper

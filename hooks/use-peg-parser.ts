@@ -46,23 +46,30 @@ type ParserUtility = {
   grammar: string;
 };
 
+function getStyledGrammar(rule: Rule) {
+  const getFormattedString = (formatter: string) =>
+    formatter.replace(
+      /(\n)(\s*)/g,
+      (_, newline, spaces) => `${newline}\t${spaces}`
+    );
+
+  const grammar = `\n${rule.name} "${rule.label}" = \n${(
+    rule?.definitions ?? []
+  ).map(
+    (def) =>
+      `\t/* '${def.example}' */\n\t${def.rule}\n\t${getFormattedString(
+        def?.formatter ?? ''
+      )}\n`
+  )}`;
+  return grammar;
+}
+
 function usePEGParser(rules: Rule[]) {
   function compileGrammar(): ParserUtility {
     let parser: Parser, parserSource: string;
     const starter = `start = ingredientLine \n`;
     const grammar =
-      starter +
-      rules.map(
-        (rule: Rule) =>
-          `${rule.name} "${rule.label}" =
-        ${(rule?.definitions ?? []).map(
-          (def) =>
-            `// '${def.example}'
-  ${def.rule}
-    ${def?.formatter ?? ''}`
-        )}`
-      ).join(`
-`);
+      starter + rules.map((rule: Rule) => getStyledGrammar(rule)).join(`\n`);
     const grammarErrors: DiagnosticNote[] = [];
     try {
       parserSource = peggy.generate(grammar, {
