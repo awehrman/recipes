@@ -81,7 +81,7 @@ const ToggleView = styled(Button)`
   border: 0;
   background: transparent;
   font-weight: 600;
-  color: ${({ theme }) => theme.colors.altGreen};
+  color: ${({ theme }) => theme.colors.highlight};
   padding: 4px 0px;
   margin-bottom: 8px;
   display: inline-block;
@@ -93,7 +93,7 @@ const CollapseRules = styled(Button)`
   background: transparent;
   font-weight: 600;
   font-size: 13px;
-  color: #222;
+  color: ${({ theme }) => theme.colors.highlight};
   padding: 4px 0px;
   margin-bottom: 8px;
   display: inline-block;

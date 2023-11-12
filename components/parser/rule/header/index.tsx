@@ -32,7 +32,7 @@ const RuleHeader: React.FC<RuleComponentProps> = () => {
 
   return (
     <Header>
-      {displayContext === 'display' && true ? (
+      {displayContext === 'display' && isFocused ? (
         <EditRuleButton icon={<EditIcon />} onClick={handleEditClick} />
       ) : null}
       <Name />

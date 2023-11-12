@@ -21,7 +21,9 @@ const Rule: React.FC<EmptyComponentProps> = () => {
   } = useRuleContext();
   const fieldName = `definitions.${index}.rule`;
   const placeholder = `rule definition`;
-  const showParsedRule = displayContext === 'display' || !isActiveElement;
+  const showParsedRule =
+    (displayContext === 'display' || !isActiveElement) &&
+    (rule?.length ?? 0) > 0;
 
   function handleOnBlur(event: React.ChangeEvent<HTMLInputElement>) {
     event.target.value = event.target.value.trim();
