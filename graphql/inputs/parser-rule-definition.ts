@@ -8,5 +8,7 @@ export default gql`
     order
     rule
     ruleId
+    type
+    list
   }
 `;

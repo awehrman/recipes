@@ -288,9 +288,16 @@ model ParserRuleDefinition {
   formatter String?
   order     Int
   rule      String
+  type      ParserRuleDefinitionType
+  list      String[]
 
   parserRule   ParserRule? @relation(fields: [parserRuleId], references: [id])
   parserRuleId String?
 
   @@map(name: "parser_rule_definition")
+}
+
+enum ParserRuleDefinitionType {
+  RULE
+  LIST
 }

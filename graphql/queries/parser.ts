@@ -13,6 +13,8 @@ export const GET_PARSER_RULE_QUERY = gql`
         formatter
         rule
         order
+        type
+        list
       }
     }
   }
@@ -31,6 +33,8 @@ export const GET_ALL_PARSER_RULES_QUERY = gql`
         formatter
         rule
         order
+        type
+        list
       }
     }
   }

@@ -12,6 +12,8 @@ export default gql`
       formatter
       order
       rule
+      type
+      list
     }
   }
 `;

@@ -1,7 +1,7 @@
 import { Prisma, PrismaClient } from '@prisma/client';
-import { capitalize } from 'lodash';
 import { AppContext } from '../context';
 import {
+  enumType,
   extendType,
   FieldResolver,
   idArg,
@@ -18,7 +18,14 @@ export const ParserRuleDefinition = objectType({
     t.nullable.string('formatter');
     t.nonNull.int('order');
     t.string('rule');
+    t.field('type', { type: ParserRuleDefinitionType });
+    t.list.string('list');
   }
+});
+
+const ParserRuleDefinitionType = enumType({
+  name: 'ParserRuleDefinitionType',
+  members: ['RULE', 'LIST']
 });
 
 export const ParserRule = objectType({
@@ -68,7 +75,9 @@ const getRules = async (
           example: true,
           formatter: true,
           order: true,
-          rule: true
+          rule: true,
+          type: true,
+          list: true
         }
       }
     }
@@ -102,7 +111,9 @@ const getRule = async (
           example: true,
           formatter: true,
           order: true,
-          rule: true
+          rule: true,
+          type: true,
+          list: true
         }
       }
     }
@@ -147,7 +158,9 @@ const addParserRule = async (
         example: def?.example ?? '',
         rule: def?.rule ?? '',
         order: def?.order ?? index,
-        formatter: def?.formatter ?? null
+        formatter: def?.formatter ?? null,
+        type: def?.type ?? 'RULE',
+        list: [...(def?.list ?? []) as string[]]
       }))
     }
   };
@@ -195,13 +208,15 @@ const addParserRuleDefinition = async (
   ctx: PartialAppContext | AppContext
 ) => {
   const { input } = args;
-  const { example, formatter, order, rule, ruleId } = input || {};
+  const { example, formatter, order, rule, type = 'RULE', list = [] } = input || {};
   const { prisma } = ctx;
   const data: Prisma.ParserRuleDefinitionCreateInput = {
     example: example ?? '',
     formatter: formatter ?? '',
     order: order ?? 0,
-    rule: rule ?? ''
+    rule: rule ?? '',
+    type: type ?? 'RULE',
+    list: [...(list ?? []) as string[]]
     // for add we'll need to connect to the created rule on update
     // parserRule: {
     //   connect: {
@@ -209,6 +224,10 @@ const addParserRuleDefinition = async (
     //   }
     // }
   };
+
+  // if ((list ?? []).length > 0) {
+  //   data.list = [...list as string[]];
+  // }
 
   // console.log({ data });
   const response = {};
@@ -259,13 +278,17 @@ const updateParserRule = async (
         example: def?.example ?? '',
         rule: def?.rule ?? '',
         order: parseInt(`${def?.order ?? index}`, 10),
-        formatter: def?.formatter ?? null
+        formatter: def?.formatter ?? null,
+        type: def?.type ?? 'RULE',
+        list: [...(def?.list ?? []) as string[]]
       },
       update: {
         example: def?.example ?? '',
         rule: def?.rule ?? '',
         order: parseInt(`${def?.order ?? index}`, 10),
-        formatter: def?.formatter ?? null
+        formatter: def?.formatter ?? null,
+        type: def?.type ?? 'RULE',
+        list: [...(def?.list ?? []) as string[]]
       }
     }));
   const data: Prisma.ParserRuleUncheckedUpdateInput = {
@@ -431,5 +454,7 @@ export const ParserRuleDefinitionInput = inputObjectType({
     t.string('example');
     t.string('formatter');
     t.nullable.string('ruleId');
+    t.field('type', { type: ParserRuleDefinitionType });
+    t.list.string('list');
   }
 });

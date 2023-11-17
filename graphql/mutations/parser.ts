@@ -42,6 +42,8 @@ export const UPDATE_PARSER_RULE_DEFINITION_MUTATION = gql`
       formatter
       rule
       order
+      type
+      list
     }
   }
 `;

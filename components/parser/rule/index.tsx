@@ -39,7 +39,9 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
         example: '',
         rule: '',
         formatter: defaultFormatter,
-        order: 0
+        order: 0,
+        type: 'RULE',
+        list: []
       }
     ];
   }

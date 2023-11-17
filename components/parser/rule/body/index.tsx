@@ -32,12 +32,14 @@ const RuleBody: React.FC<EmptyComponentProps> = () => {
     return fields.map((field, index: number) => {
       const definitionId = definitions?.[index]?.id ?? '-1';
       const ruleDefinition = findRuleDefinition(definitionId, definitions);
-      const { example, formatter, rule } =
+      const { example, formatter, rule, type } =
         ruleDefinition ?? getDefaultDefinitions(index);
       const defaultValues = {
         example,
         formatter,
-        rule
+        rule,
+        type: 'RULE',
+        list: []
       };
 
       return (
@@ -70,6 +72,7 @@ const RuleBody: React.FC<EmptyComponentProps> = () => {
       rule: '',
       formatter: '',
       order: (fields ?? []).length,
+      type: 'RULE', // vs 'LIST'
       __typename: 'ParserRuleDefinition'
     });
   }

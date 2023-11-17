@@ -14,6 +14,8 @@ type RuleDefinitionState = {
   rule?: string;
   formatter?: string | null;
   index: number;
+  type: string;
+  list: string[];
 };
 
 type RuleDefinitionAction = {
@@ -49,6 +51,8 @@ type RuleDefinitionProviderProps = {
     example?: string;
     rule?: string;
     formatter?: string | null;
+    type: string;
+    list: string[];
   };
   index?: number;
 };

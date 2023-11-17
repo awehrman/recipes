@@ -7,7 +7,9 @@ export const getDefaultDefinitions = (order: number = 0) => ({
   example: '',
   rule: '',
   formatter: '',
-  order
+  order,
+  type: 'RULE',
+  list: []
 });
 
 export const findRuleDefinition = (

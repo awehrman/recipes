@@ -9,6 +9,8 @@ type Definition = {
   formatter: string;
   order: number;
   rule: string;
+  type: string;
+  list: string[];
 };
 
 type Rule = {

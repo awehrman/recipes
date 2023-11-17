@@ -41,6 +41,8 @@ const parserDefinitionFragment = gql`
     rule
     example
     formatter
+    type
+    list
   }
 `;
 
@@ -105,6 +107,8 @@ export const handleUpdateRuleUpdate = (
     //       order
     //       example
     //       formatter
+    //       type
+    //       list
     //     }
     //   `
     // });
@@ -118,6 +122,8 @@ export const handleUpdateRuleUpdate = (
           order
           example
           formatter
+          type
+          list
         }
       `,
       data: {

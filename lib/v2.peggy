@@ -96,7 +96,7 @@ letter "Letter" =
   [a-z]i
 
 digit "Digit" =
-  digit:[0-9]
+  [0-9]
 
 // DICTIONARIES
 

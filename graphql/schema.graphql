@@ -168,17 +168,26 @@ type ParserRuleDefinition {
   example: String
   formatter: String
   id: String
+  list: [String]
   order: Int!
   rule: String
+  type: ParserRuleDefinitionType
 }
 
 input ParserRuleDefinitionInput {
   example: String
   formatter: String
   id: String
+  list: [String]
   order: Int!
   rule: String!
   ruleId: String
+  type: ParserRuleDefinitionType
+}
+
+enum ParserRuleDefinitionType {
+  LIST
+  RULE
 }
 
 input ParserRuleInput {

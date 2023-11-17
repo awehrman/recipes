@@ -86,7 +86,9 @@ function useParserRule(id: string) {
       formatter: null,
       order: 0, // TODO increment this properly
       rule: '', // TODO allow nulls here
-      ruleId: null
+      ruleId: null,
+      type: 'RULE',
+      list: []
     };
     addParserRuleDefinition({
       optimisticResponse: {
