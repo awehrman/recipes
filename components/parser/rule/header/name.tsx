@@ -16,6 +16,7 @@ const RuleName: React.FC<EmptyComponentProps> = () => {
   const { rules = [] } = useParserRules();
   const { rule } = useParserRule(id);
   const { name = '' } = rule || {};
+
   return (
     <AutoWidthInput
       defaultValue={name}
@@ -33,4 +34,4 @@ const RuleName: React.FC<EmptyComponentProps> = () => {
 
 export default RuleName;
 
-RuleName.whyDidYouRender = true;
+// RuleName.whyDidYouRender = true;

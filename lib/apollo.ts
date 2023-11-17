@@ -16,23 +16,23 @@ const apolloClient = new ApolloClient({
           },
           parserRules: {
             merge(_existing, incoming, { fieldName }) {
-              console.log('merge parserRules', {
-                params: {
-                  _existing,
-                  incoming
-                }
-              });
+              // console.log('merge parserRules', {
+              //   params: {
+              //     _existing,
+              //     incoming
+              //   }
+              // });
               return incoming;
             }
           },
           definitions: {
             merge(_existing, incoming, { fieldName }) {
-              console.log('merge definitions', {
-                params: {
-                  _existing,
-                  incoming
-                }
-              });
+              // console.log('merge definitions', {
+              //   params: {
+              //     _existing,
+              //     incoming
+              //   }
+              // });
               return incoming;
             }
           }

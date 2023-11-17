@@ -56,16 +56,25 @@ function getStyledGrammar(rule: Rule) {
   const grammar = `\n${rule.name} "${rule.label}" = \n${(
     rule?.definitions ?? []
   ).map(
-    (def) =>
-      `\t/* '${def.example}' */\n\t${def.rule}\n\t${getFormattedString(
+    (def, index) =>
+      `${index > 0 ? '/' : ''}\t// '${def.example}' \n\t${def.rule}\n\t${getFormattedString(
         def?.formatter ?? ''
       )}\n`
-  )}`;
+  ).join('')
+    } `;
   return grammar;
 }
 
-function usePEGParser(rules: Rule[]) {
+function usePEGParser(rules: Rule[], loading: boolean = false) {
   function compileGrammar(): ParserUtility {
+    if (loading) {
+      return {
+        parser: undefined,
+        errors: [],
+        grammar: ''
+      };
+    }
+
     let parser: Parser, parserSource: string;
     const starter = `start = ingredientLine \n`;
     const grammar =
@@ -76,7 +85,7 @@ function usePEGParser(rules: Rule[]) {
         cache: true,
         output: 'source',
         error: function (_stage, message, location) {
-          if (location) {
+          if (location?.start && !grammarErrors.find((err) => err.message === message)) {
             grammarErrors.push({ message, location });
           }
         }
@@ -88,11 +97,6 @@ function usePEGParser(rules: Rule[]) {
         grammar
       };
     } catch (e) {
-      // TODO keep thinking about this
-      // grammarErrors.push({
-      //   message: e,
-      //   level: 'grammar'
-      // });
       return {
         parser: undefined,
         errors: grammarErrors,
@@ -103,7 +107,7 @@ function usePEGParser(rules: Rule[]) {
 
   function parseTests(parser: Parser | undefined): TestProps[] {
     const tests: TestProps[] = [...defaultTests];
-    if (parser) {
+    if (parser && !loading) {
       tests.forEach((test: TestProps) => {
         try {
           const details = parser.parse(test.reference);

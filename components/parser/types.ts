@@ -48,3 +48,33 @@ export type DisplayContextTypes = 'display' | 'edit' | 'add';
 export type RuleContentProps = {
   rule: ParserRuleWithRelations;
 };
+
+export type GrammarTestProps = {
+  reference: string;
+  parsed: boolean;
+  expected: GrammarExpectedProps[];
+  passed?: boolean;
+  details?: GrammarDetailsProps;
+  error?: {
+    message?: string;
+  };
+};
+
+export type GrammarDetailsProps = {
+  rule?: string;
+  type?: string;
+  values?: GrammarDetailsProps[];
+};
+
+export type GrammarExpectedProps = {
+  type: string;
+  value: string;
+};
+
+export type TestComponentProps = {
+  test: GrammarTestProps;
+};
+
+export type TestWrapperProps = {
+  parsed: boolean;
+};

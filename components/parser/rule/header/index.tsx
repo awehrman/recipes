@@ -50,7 +50,7 @@ const RuleHeader: React.FC<RuleComponentProps> = () => {
 
 export default RuleHeader;
 
-RuleHeader.whyDidYouRender = true;
+// RuleHeader.whyDidYouRender = true;
 
 const Header = styled.div`
   display: flex;

@@ -1,55 +1,14 @@
-import { js_beautify, HTMLBeautifyOptions } from 'js-beautify';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { v4 } from 'uuid';
 
-// TODO move these
-type TestsProps = {
-  tests: TestProps[];
-};
-
-type TestProps = {
-  reference: string;
-  parsed: boolean;
-  expected: ExpectedProps[];
-  passed?: boolean;
-  details?: DetailsProps;
-  error?: {
-    message?: string;
-  };
-};
-
-type DetailsProps = {
-  rule?: string;
-  type?: string;
-  values?: DetailsProps[];
-};
-
-type ExpectedProps = {
-  type: string;
-  value: string;
-};
-
-type TestComponentProps = {
-  test: TestProps;
-};
-
-type TestWrapperProps = {
-  parsed: boolean;
-};
-
-const options: HTMLBeautifyOptions = {
-  indent_size: 2,
-  indent_char: ' ',
-  max_preserve_newlines: 1,
-  preserve_newlines: true,
-  indent_scripts: 'normal',
-  end_with_newline: false,
-  wrap_line_length: 110
-};
+import usePEGParser from 'hooks/use-peg-parser';
+import useParserRules from 'hooks/use-parser-rules';
+import { EmptyComponentProps, TestComponentProps, TestWrapperProps } from './types';
 
 const Test: React.FC<TestComponentProps> = ({ test }) => {
   const [showTestDetails, setShowTestDetails] = useState(false);
+
   function handleDetailsToggle() {
     setShowTestDetails(!showTestDetails);
   }
@@ -81,7 +40,7 @@ const Test: React.FC<TestComponentProps> = ({ test }) => {
                 </NestedDetailsLine>
                 <NestedDetailsLine>
                   <Label>values: </Label>
-                  {js_beautify(`${value.values}`, options)}
+                  {`${JSON.stringify(value.values, null, 2)}`}
                 </NestedDetailsLine>
               </div>
             ))}
@@ -100,14 +59,44 @@ const Test: React.FC<TestComponentProps> = ({ test }) => {
   );
 };
 
-const Tests: React.FC<TestsProps> = ({ tests }) => {
+const Errors: React.FC<EmptyComponentProps> = () => {
+  const { rules = [], loading } = useParserRules();
+  const { errors = [] } = usePEGParser(rules, loading);
+
+  function renderErrors() {
+    return errors.map((error, index) => (
+      <Error key={`error-${index}-${error?.message}-Error`}>{error?.message ?? ''}</Error>
+    ));
+  }
+
+  return <ErrorWrapper>
+    {renderErrors()}
+  </ErrorWrapper>;
+};
+
+const Error = styled.div`
+  color: tomato;
+  font-size: 12px;
+  margin-bottom: 4px;
+`;
+const ErrorWrapper = styled.div`
+  margin-top: 10px;
+`;
+
+const Tests: React.FC<EmptyComponentProps> = () => {
+  const { rules = [], loading } = useParserRules();
+  const { tests, errors = [] } = usePEGParser(rules, loading);
+
   function renderTests() {
     return tests.map((test) => (
       <Test key={`test-${test.reference}`} test={test} />
     ));
   }
 
-  return <Wrapper>{renderTests()}</Wrapper>;
+  return <Wrapper>
+    {renderTests()}
+    {errors.length > 0 && <Errors />}
+  </Wrapper>;
 };
 
 export default Tests;
@@ -123,6 +112,7 @@ const TestWrapper = styled.div<TestWrapperProps>`
 
 const Wrapper = styled.div`
   margin-top: 32px;
+  max-width: 250px;
 `;
 
 const Details = styled.div`
