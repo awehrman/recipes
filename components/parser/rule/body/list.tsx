@@ -1,5 +1,5 @@
 import React from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 
 import { Button } from 'components/common';
@@ -33,34 +33,52 @@ const StyledList = styled.ul`
 
 const ListItem = styled.li`
   font-weight: normal;
-  padding: 4px 0;
+  padding: 0px 0;
   position: relative;
 `;
 
 const KeywordListInput: React.FC<EmptyComponentProps> = () => {
   const {
+    state: { index },  
     dispatch
   } = useRuleDefinitionContext();
-  const [inputValue, setInputValue] = React.useState<string>('');
+  const {
+    control,
+    register,
+    getValues,
+    setValue
+  } = useFormContext();
+  const { definitions = [] } = useWatch({ control });
+  const definition = definitions[index];
+  const fieldName = `definitions.${index}.list`;
+  const inputFieldName = 'listInput';
+  const list = definition?.list ?? [];// getValues(fieldName);
+  const [listItem, setListItem] = React.useState<string>('');
 
   function handleOnChange(event: React.ChangeEvent<HTMLInputElement>) {
-    setInputValue(event.target.value);
-  };
+    const { value } = event.target;
+    setListItem(value);
+  }
 
   function handleOnKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
     if (event.key === 'Enter') {
-      dispatch({ type: 'ADD_KEYWORD', payload: inputValue });
-      setInputValue('');
+      dispatch({ type: 'ADD_KEYWORD', payload: listItem });
+      dispatch({ type: 'SET_SHOW_LIST_INPUT', payload: false });
+      const newList = [...list, listItem];
+      setValue(inputFieldName, '');
+      setValue(fieldName, newList);
+      setListItem('');
     }
   };
 
   return (
     <KeywordInput
-      type="text"
-      value={inputValue}
-      onChange={handleOnChange}
+      {...register(inputFieldName)}
+      defaultValue={listItem}
       onKeyDown={handleOnKeyDown}
+      onChange={handleOnChange}
       placeholder="enter a keyword"
+      type="text"
     />
   );
 }
@@ -68,9 +86,6 @@ const KeywordListInput: React.FC<EmptyComponentProps> = () => {
 const KeywordInput = styled.input``;
 
 const RuleList: React.FC<EmptyComponentProps> = () => {
-  const {
-    register
-  } = useFormContext();
   const {
     state: { displayContext }
   } = useRuleContext();
@@ -86,7 +101,6 @@ const RuleList: React.FC<EmptyComponentProps> = () => {
   }
 
   function handleAddToListClick() {
-    // TODO show input field
     dispatch({ type: 'SET_SHOW_LIST_INPUT', payload: true })
   }
 

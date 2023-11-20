@@ -160,7 +160,9 @@ const addParserRule = async (
         order: def?.order ?? index,
         formatter: def?.formatter ?? null,
         type: def?.type ?? 'RULE',
-        list: [...(def?.list ?? []) as string[]]
+        list: {
+          set: [...(def?.list ?? []) as string[]]
+        }
       }))
     }
   };
