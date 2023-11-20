@@ -12,15 +12,17 @@ const RuleExample: React.FC<EmptyComponentProps> = () => {
     state: { displayContext }
   } = useRuleContext();
   const {
-    state: { index, definitionId, example }
+    state: { index, definitionId, example, type }
   } = useRuleDefinitionContext();
+  const showField = type === 'RULE';
+  console.log('example', { type, showField, return: displayContext === 'display' && !example && showField, a: displayContext === 'display', b: !example, c: !showField })
   const fieldName = `definitions.${index}.example`;
 
   function trimInput(event: React.ChangeEvent<HTMLInputElement>) {
     event.target.value = event.target.value.trim();
   }
 
-  if (displayContext === 'display' && !example) return null;
+  if ((displayContext === 'display' && !example) || !showField) return null;
 
   return (
     <Wrapper>

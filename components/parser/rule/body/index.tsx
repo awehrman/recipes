@@ -14,11 +14,14 @@ import { getDefaultDefinitions, findRuleDefinition } from '../../utils';
 import Example from './example';
 import Formatter from './formatter';
 import Rule from './rule';
+import Type from './type';
+import List from './list';
 
 const RuleBody: React.FC<EmptyComponentProps> = () => {
   const {
     state: { id, displayContext }
   } = useRuleContext();
+  
   const showDeleteDefinitionButton = () => displayContext !== 'display';
   const { control } = useFormContext();
   const { fields, append, remove } = useFieldArray({
@@ -29,17 +32,17 @@ const RuleBody: React.FC<EmptyComponentProps> = () => {
   const { definitions = [] } = rule;
 
   function renderDefinitions() {
-    return fields.map((field, index: number) => {
+    return fields.map((field: any, index: number) => {
       const definitionId = definitions?.[index]?.id ?? '-1';
       const ruleDefinition = findRuleDefinition(definitionId, definitions);
-      const { example, formatter, rule, type } =
+      const { example, formatter, rule, type = 'RULE', list = [] } =
         ruleDefinition ?? getDefaultDefinitions(index);
       const defaultValues = {
         example,
         formatter,
         rule,
-        type: 'RULE',
-        list: []
+        type,
+        list
       };
 
       return (
@@ -59,6 +62,8 @@ const RuleBody: React.FC<EmptyComponentProps> = () => {
                 label="Delete"
               />
             ) : null}
+            <List />
+            <Type />
           </Wrapper>
         </RuleDefinitionProvider>
       );
@@ -72,7 +77,8 @@ const RuleBody: React.FC<EmptyComponentProps> = () => {
       rule: '',
       formatter: '',
       order: (fields ?? []).length,
-      type: 'RULE', // vs 'LIST'
+      type: 'RULE', // vs 'LIST',
+      list: [],
       __typename: 'ParserRuleDefinition'
     });
   }

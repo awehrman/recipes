@@ -14,11 +14,12 @@ const Rule: React.FC<EmptyComponentProps> = () => {
   const [isActiveElement, setIsActiveElement] = React.useState(false);
   const { rules = [] } = useParserRules();
   const {
-    state: { index, definitionId, rule }
+    state: { index, definitionId, rule, type }
   } = useRuleDefinitionContext();
   const {
     state: { id, displayContext }
   } = useRuleContext();
+  const showField = type === 'RULE';
   const fieldName = `definitions.${index}.rule`;
   const placeholder = `rule definition`;
   const showParsedRule =
@@ -33,6 +34,8 @@ const Rule: React.FC<EmptyComponentProps> = () => {
   function handleOnFocus() {
     setIsActiveElement(true);
   }
+
+  if ((displayContext === 'display' && !rule) || !showField) return null;
 
   return (
     <Wrapper>

@@ -25,12 +25,13 @@ const insertOrder = (value: string, index: number) => {
 
 const RuleFormatter: React.FC<EmptyComponentProps> = () => {
   const {
-    state: { index, formatter }
+    state: { index, formatter, type }
   } = useRuleDefinitionContext();
   const {
     state: { id, displayContext }
   } = useRuleContext();
-  const { control, getValues, register, setValue } = useFormContext();
+  const showField = type === 'RULE';
+  const { getValues, register, setValue } = useFormContext();
   const fieldName = `definitions.${index}.formatter`;
   const { rule } = useParserRule(id);
   const { name = '' } = rule;
@@ -65,7 +66,7 @@ const RuleFormatter: React.FC<EmptyComponentProps> = () => {
     return formattedWithOrder;
   }
 
-  if (displayContext === 'display' && !formattedWithOrder?.length) {
+  if ((displayContext === 'display' && !formattedWithOrder?.length) || !showField) {
     return null;
   }
 
@@ -77,7 +78,7 @@ const RuleFormatter: React.FC<EmptyComponentProps> = () => {
         defaultValue={defaultValue}
         disabled={displayContext === 'display'}
         name={fieldName}
-        placeholder={displayContext === 'display' ? '' : defaultValue}
+        placeholder={displayContext === 'display' ? '' : '/* format rule return */'}
       />
       <StyledEditor
         basicSetup={formatterSetup}
@@ -86,7 +87,7 @@ const RuleFormatter: React.FC<EmptyComponentProps> = () => {
         height="auto"
         indentWithTab
         onChange={handleOnChange}
-        placeholder={displayContext === 'display' ? '' : defaultValue}
+        placeholder={displayContext === 'display' ? '' : '/* format rule return */'}
         readOnly={displayContext === 'display'}
         theme={themeOptions[displayContext as ThemeOptionKey]}
         width="520px"

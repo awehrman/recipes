@@ -224,11 +224,7 @@ const addParserRuleDefinition = async (
     //   }
     // }
   };
-
-  // if ((list ?? []).length > 0) {
-  //   data.list = [...list as string[]];
-  // }
-
+  
   // console.log({ data });
   const response = {};
   try {

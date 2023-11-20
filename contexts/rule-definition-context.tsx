@@ -6,7 +6,7 @@ import React, {
   ReactNode
 } from 'react';
 
-type RuleDefinitionActionTypes = 'SET_DEFINITION_ID';
+type RuleDefinitionActionTypes = 'SET_DEFINITION_ID' | 'SET_TYPE';
 
 type RuleDefinitionState = {
   definitionId: string;
@@ -39,6 +39,11 @@ function ruleDefinitionReducer(
         return state;
       }
       return { ...state, definitionId: action.payload };
+    case 'SET_TYPE':
+      if (action.payload.type === state.type) {
+        return state;
+      }
+      return { ...state, type: action.payload };
     default:
       throw new Error(`Unhandled action type: ${action.type}`);
   }
