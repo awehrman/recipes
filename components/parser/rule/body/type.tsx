@@ -39,11 +39,14 @@ const RuleTypeButton = styled(Button)`
   font-weight: 600;
   background: transparent;
   padding: 0;
+  font-size: 12px;
 `;
+
 const Label = styled.label``;
 const Wrapper = styled.fieldset`
   border: 0;
   padding: 0;
   margin: 0;
-  margin-right: 10px;
+  margin-right: -5px;
+  float: right;
 `;

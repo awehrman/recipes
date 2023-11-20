@@ -42,7 +42,8 @@ const RuleBody: React.FC<EmptyComponentProps> = () => {
         formatter,
         rule,
         type,
-        list
+        list,
+        showListInput: false
       };
 
       return (

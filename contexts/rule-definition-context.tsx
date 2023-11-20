@@ -6,7 +6,7 @@ import React, {
   ReactNode
 } from 'react';
 
-type RuleDefinitionActionTypes = 'SET_DEFINITION_ID' | 'SET_TYPE';
+type RuleDefinitionActionTypes = 'SET_DEFINITION_ID' | 'SET_TYPE' | 'SET_SHOW_LIST_INPUT' | 'ADD_KEYWORD';
 
 type RuleDefinitionState = {
   definitionId: string;
@@ -16,6 +16,8 @@ type RuleDefinitionState = {
   index: number;
   type: string;
   list: string[];
+  // TODO should this be nested in something else? this is purely UI so this feels... out of place
+  showListInput: boolean;
 };
 
 type RuleDefinitionAction = {
@@ -44,6 +46,19 @@ function ruleDefinitionReducer(
         return state;
       }
       return { ...state, type: action.payload };
+    case 'SET_SHOW_LIST_INPUT':
+      if (action.payload.showListInput === state.showListInput) {
+        return state;
+      }
+      return { ...state, showListInput: action.payload };
+    case 'ADD_KEYWORD':
+      if (action.payload.list === state.list) {
+        return state;
+      }
+      const list: string[] = [...state.list];
+      list.push(`${action.payload}`);
+      // TODO format and sort new items
+      return { ...state, list };
     default:
       throw new Error(`Unhandled action type: ${action.type}`);
   }
@@ -58,6 +73,7 @@ type RuleDefinitionProviderProps = {
     formatter?: string | null;
     type: string;
     list: string[];
+    showListInput: boolean;
   };
   index?: number;
 };
