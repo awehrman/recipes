@@ -6,7 +6,6 @@ import { Button } from 'components/common';
 import { useRuleContext } from 'contexts/rule-context';
 import { useRuleDefinitionContext } from 'contexts/rule-definition-context';
 import PlusIcon from 'public/icons/plus.svg';
-import useClickOutside from 'hooks/use-click-outside';
 
 import { EmptyComponentProps } from '../../types';
 

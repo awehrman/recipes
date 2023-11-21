@@ -1,19 +1,14 @@
-import _, { set } from 'lodash';
-import { ParserRuleWithRelations } from '@prisma/client';
 import React from 'react';
 import styled from 'styled-components';
 
+import { Button } from 'components/common';
 import { useParserContext } from 'contexts/parser-context';
+import usePEGParser from 'hooks/use-peg-parser';
 import useParserRules from 'hooks/use-parser-rules';
 
-import { Button } from 'components/common';
-import Rule from './rule';
-import AddRule from './add-rule';
-import usePEGParser from 'hooks/use-peg-parser';
+import ParserBuilder from './parser-builder';
+import { EmptyComponentProps } from './types';
 
-type RulesProps = {};
-
-// TODO move
 const Grammar: React.FC = () => {
   const { rules = [] } = useParserRules();
   const { grammar } = usePEGParser(rules);
@@ -30,47 +25,29 @@ const Wrapper = styled.div`
   tab-size: 2;
 `;
 
-const Rules: React.FC<RulesProps> = () => {
+const Rules: React.FC<EmptyComponentProps> = () => {
   const {
-    state: { view, isCollapsed },
+    state: { view },
     dispatch
   } = useParserContext();
 
-  const { loading, rules = [] } = useParserRules();
   const toggleLabel = view === 'rules' ? 'View Grammar' : 'View Rules';
 
-  function renderRules() {
-    return rules.map((rule: ParserRuleWithRelations) => (
-      <Rule key={rule.id} id={rule.id} />
-    ));
-  }
-
-  function handleViewGrammarOnClick() {
+  function handleToggleViewClick() {
     const payload = view === 'rules' ? 'grammar' : 'rules';
     dispatch({ type: 'SET_PARSER_VIEW', payload });
   }
 
-  function handleCollapseRulesOnClick() {
-    dispatch({ type: 'SET_IS_COLLAPSED', payload: !isCollapsed });
-  }
-
-  // TODO split views into their own components
   return (
     <RulesWrapper>
       <Header>Rules</Header>
-      <ToggleView label={toggleLabel} onClick={handleViewGrammarOnClick} />
-      {view === 'rules' && (
-        <CollapseRules
-          label={'Collapse Rules'}
-          onClick={handleCollapseRulesOnClick}
-        />
+      <ToggleView label={toggleLabel} onClick={handleToggleViewClick} />
+      {view === 'rules' ? (
+        <ParserBuilder />
+      ) : (
+        <Grammar />
       )}
-      {view === 'rules' && <AddRule />}
-      {view === 'rules' && loading && !rules.length && (
-        <Loading>Loading rules...</Loading>
-      )}
-      {view === 'rules' && renderRules()}
-      {view === 'grammar' && <Grammar />}
+      
     </RulesWrapper>
   );
 };
@@ -86,24 +63,6 @@ const ToggleView = styled(Button)`
   margin-bottom: 8px;
   display: inline-block;
   font-size: 13px;
-`;
-
-const CollapseRules = styled(Button)`
-  border: 0;
-  background: transparent;
-  font-weight: 600;
-  font-size: 13px;
-  color: #666;
-  padding: 4px 0px;
-  margin-bottom: 8px;
-  display: inline-block;
-  right: 0;
-  position: absolute;
-`;
-
-const Loading = styled.div`
-  font-size: 14px;
-  color: #222;
 `;
 
 const RulesWrapper = styled.div`
