@@ -10,14 +10,14 @@ type RuleDefinitionActionTypes = 'SET_DEFINITION_ID' | 'SET_TYPE' | 'SET_SHOW_LI
 
 type RuleDefinitionState = {
   definitionId: string;
+  showListInput: boolean;
+  // these just act as default values; make sure to useWatch for any active form updates
   example?: string;
   rule?: string;
   formatter?: string | null;
   index: number;
   type: string;
   list: string[];
-  // TODO should this be nested in something else? this is purely UI so this feels... out of place
-  showListInput: boolean;
 };
 
 type RuleDefinitionAction = {

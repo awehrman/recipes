@@ -7,17 +7,18 @@ import React from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 
+import { ThemeOptionKey, EmptyComponentProps } from 'components/parser/types';
+import { getDefaultFormatter } from 'components/parser/utils';
+import { BEAUTIFY_OPTIONS } from 'constants/parser';
 import { useRuleContext } from 'contexts/rule-context';
 import { useRuleDefinitionContext } from 'contexts/rule-definition-context';
-import { ThemeOptionKey, EmptyComponentProps } from 'components/parser/types';
-import { BEAUTIFY_OPTIONS } from 'constants/parser';
 import useParserRule from 'hooks/use-parser-rule';
 
 import {
-  getDefaultFormatter,
   formatterSetup,
   themeOptions
 } from './formatter.theme';
+
 
 const insertOrder = (value: string, index: number) => {
   return value.replace(/\${ORDER}/g, index.toString());
@@ -37,7 +38,7 @@ const RuleFormatter: React.FC<EmptyComponentProps> = () => {
   const { name = '' } = rule;
   const watchedName = useWatch({ name: 'name', defaultValue: name });
 
-  const defaultFormatter = getDefaultFormatter(watchedName, index);
+  const defaultFormatter = getDefaultFormatter(watchedName);
   const formattedWithOrder = insertOrder(`${formatter}`, index);
   const uniqueId = `${id}-${fieldName}`;
   const defaultValue =

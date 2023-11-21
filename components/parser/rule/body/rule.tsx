@@ -1,14 +1,17 @@
 import React from 'react';
+import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 
+import { EmptyComponentProps } from 'components/parser/types';
 import { useRuleContext } from 'contexts/rule-context';
 import { useRuleDefinitionContext } from 'contexts/rule-definition-context';
 import useParserRules from 'hooks/use-parser-rules';
 
+import { getFieldUpdates } from '../../utils';
+
 import AutoWidthInput from '../auto-width-input';
 import { isDuplicateRule, isNotEmpty } from '../validators';
 import ValidatedRule from './validated-rule';
-import { EmptyComponentProps } from 'components/parser/types';
 
 const Rule: React.FC<EmptyComponentProps> = () => {
   const [isActiveElement, setIsActiveElement] = React.useState(false);
@@ -22,9 +25,20 @@ const Rule: React.FC<EmptyComponentProps> = () => {
   const showField = type === 'RULE';
   const fieldName = `definitions.${index}.rule`;
   const placeholder = `rule definition`;
+  const {
+    control
+  } = useFormContext();
+  const formUpdates = useWatch({ control });
+  const updatedFormValue = getFieldUpdates({
+    definitionId,
+    fieldName: 'rule',
+    state: formUpdates,
+    index
+  });
   const showParsedRule =
     (displayContext === 'display' || !isActiveElement) &&
-    (rule?.length ?? 0) > 0;
+    (updatedFormValue?.length ?? 0) > 0;
+
 
   function handleOnBlur(event: React.ChangeEvent<HTMLInputElement>) {
     event.target.value = event.target.value.trim();

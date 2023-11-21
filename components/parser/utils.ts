@@ -39,13 +39,12 @@ export const getFieldUpdates = ({
   return definition?.[fieldName];
 };
 
-export const getDefaultFormatter = (label: string, order: number) => `
-{
-  const values = [label].flatMap(value => value);
+export const getDefaultFormatter = (ruleName: string): string =>
+  `{
+  const values = [...].flatMap(value => value);
   return {
-    rule: '#${order}_${_.camelCase(label)}',
-    type: '${_.camelCase(label)}',
+    rule: '#\${ORDER}_${_.camelCase(ruleName)}',
+    type: '${_.camelCase(ruleName)}',
     values
   };
-}
-`;
+}`;
