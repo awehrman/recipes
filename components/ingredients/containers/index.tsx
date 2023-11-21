@@ -4,7 +4,6 @@ import styled from 'styled-components';
 
 import ViewContext from 'contexts/view-context';
 import useContainers from 'hooks/use-containers';
-
 import Container from './container';
 
 const Containers: React.FC = () => {

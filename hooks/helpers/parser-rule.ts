@@ -1,26 +1,21 @@
-import _ from 'lodash';
 import { ApolloCache, gql } from '@apollo/client';
-import { ParserRuleWithRelations, ParserRuleDefinition } from '@prisma/client';
+import _ from 'lodash';
+import peggy, { Parser, DiagnosticNote } from 'peggy';
 
 import {
   GET_PARSER_RULE_QUERY,
   GET_ALL_PARSER_RULES_QUERY
 } from '../../graphql/queries/parser';
-
-// TODO move these
-// TODO there's probably a smarter way to do this
-export type ParserRules = {
-  parserRules: ParserRuleWithRelations[];
-};
-
-export type ParserRuleDefinitionWithRelationsWithTypeName =
-  ParserRuleDefinition & {
-    __typename: string;
-  };
-
-export type ParserRuleWithRelationsWithTypeName = ParserRuleWithRelations & {
-  __typename: string;
-};
+import {
+  ParserRules,
+  Rule,
+  ParserRuleWithRelationsWithTypeName,
+  ParserRuleDefinitionWithRelationsWithTypeName,
+  TestProps,
+  DetailsProps,
+  ParserUtility
+} from 'components/parser/types';
+import { defaultTests } from 'constants/parser-tests';
 
 export const removeTypename = (data: ParserRuleWithRelationsWithTypeName) => {
   const input = {
@@ -33,18 +28,6 @@ export const removeTypename = (data: ParserRuleWithRelationsWithTypeName) => {
   };
   return input;
 };
-
-const parserDefinitionFragment = gql`
-  fragment ParserDefinitionFragment on ParserRuleDefinition {
-    id
-    order
-    rule
-    example
-    formatter
-    type
-    list
-  }
-`;
 
 export const handleAddRuleUpdate = (
   cache: ApolloCache<any>,
@@ -198,3 +181,89 @@ export const handleDeleteRuleUpdate = (
 
   refetch();
 };
+
+const getFormattedString = (formatter: string) =>
+  formatter.replace(
+    /(\n)(\s*)/g,
+    (_, newline, spaces) => `${newline}\t${spaces}`
+  );
+
+export const getStyledGrammar = (rule: Rule) => {
+  const grammar = `\n${rule.name} "${rule.label}" = \n${(
+    rule?.definitions ?? []
+  ).map(
+    (def, index) =>
+      `${index > 0 ? '/' : ''}\t// '${def.example}' \n\t${def.rule}\n\t${getFormattedString(
+        def?.formatter ?? ''
+      )}\n`
+  ).join('')
+    } `;
+  return grammar;
+};
+
+export const compileGrammar = (rules: Rule[], loading: boolean = false): ParserUtility => {
+  if (loading) {
+    return {
+      parser: undefined,
+      errors: [],
+      grammar: ''
+    };
+  }
+
+  let parser: Parser, parserSource: string;
+  const starter = `start = ingredientLine \n`;
+  const grammar =
+    starter + rules.map((rule: Rule) => getStyledGrammar(rule)).join(`\n`);
+  const grammarErrors: DiagnosticNote[] = [];
+  try {
+    parserSource = peggy.generate(grammar, {
+      cache: true,
+      output: 'source',
+      error: function (_stage, message, location) {
+        if (location?.start && !grammarErrors.find((err) => err.message === message)) {
+          grammarErrors.push({ message, location });
+        }
+      }
+    });
+    parser = eval(parserSource.toString());
+    return {
+      parser,
+      errors: grammarErrors,
+      grammar
+    };
+  } catch (e) {
+    return {
+      parser: undefined,
+      errors: grammarErrors,
+      grammar
+    };
+  }
+}
+
+export const parseTests = (parser: Parser | undefined, loading: boolean = false): TestProps[] => {
+  const tests: TestProps[] = [...defaultTests];
+  if (parser && !loading) {
+    tests.forEach((test: TestProps) => {
+      try {
+        const details = parser.parse(test.reference);
+        test.parsed = true;
+        test.details = details;
+        test.passed = test.expected.every((exp) => {
+          const matchingDetail = details.values.find(
+            (detail: DetailsProps) =>
+              detail.type === exp.type &&
+              detail?.values &&
+              detail.values[0] === exp.value
+          );
+          return matchingDetail !== undefined;
+        });
+      } catch (e: any) {
+        test.parsed = false;
+        test.error = {
+          message: `${e}`
+        };
+      }
+    });
+  }
+  return tests;
+}

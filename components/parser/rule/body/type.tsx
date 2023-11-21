@@ -12,11 +12,18 @@ const RuleType: React.FC<EmptyComponentProps> = () => {
     state: { displayContext }
   } = useRuleContext();
   const {
-    state: { type },
+    state: { type, list = [] },
     dispatch
   } = useRuleDefinitionContext();
 
+  React.useEffect(() => {
+    if (type === 'RULE' && list.length > 0) {
+      dispatch({ type: 'SET_TYPE', payload: 'LIST' });
+    }
+  }, [type, list]);
+
   if (displayContext === 'display') return null;
+
 
   function handleRuleTypeButtonClick() {
     dispatch({ type: 'SET_TYPE', payload: type === 'RULE' ? 'LIST' : 'RULE' });

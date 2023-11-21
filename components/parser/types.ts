@@ -1,5 +1,6 @@
 import { Extension } from '@codemirror/state';
-import { ParserRuleWithRelations } from '@prisma/client';
+import { ParserRuleWithRelations, ParserRuleDefinition } from '@prisma/client';
+import { Parser, DiagnosticNote } from 'peggy';
 
 export type ThemeOptionKey = 'add' | 'display' | 'edit';
 
@@ -77,4 +78,53 @@ export type TestComponentProps = {
 
 export type TestWrapperProps = {
   parsed: boolean;
+};
+
+// TODO grab from prisma instead
+export type Rule = {
+  id: string;
+  name: string;
+  label: string;
+  definitions: ParserRuleDefinition[];
+};
+
+export type TestProps = {
+  reference: string;
+  parsed: boolean;
+  passed?: boolean;
+  expected: ExpectedProps[];
+  details?: DetailsProps;
+  error?: {
+    message?: string;
+  };
+};
+
+export type DetailsProps = {
+  rule?: string;
+  type?: string;
+  values?: DetailsProps[];
+};
+
+export type ExpectedProps = {
+  type: string;
+  value: string;
+};
+
+export type ParserUtility = {
+  parser: Parser | undefined;
+  errors: DiagnosticNote[] | undefined;
+  grammar: string;
+};
+
+export type ParserRules = {
+  parserRules: ParserRuleWithRelations[];
+};
+
+export type ParserRuleDefinitionWithRelationsWithTypeName =
+  ParserRuleDefinition & {
+    __typename: string;
+  };
+
+export type ParserRuleWithRelationsWithTypeName = ParserRuleWithRelations & {
+  __typename: string;
 };

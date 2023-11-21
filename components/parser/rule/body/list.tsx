@@ -6,6 +6,7 @@ import { Button } from 'components/common';
 import { useRuleContext } from 'contexts/rule-context';
 import { useRuleDefinitionContext } from 'contexts/rule-definition-context';
 import PlusIcon from 'public/icons/plus.svg';
+import useClickOutside from 'hooks/use-click-outside';
 
 import { EmptyComponentProps } from '../../types';
 
@@ -81,7 +82,7 @@ const KeywordListInput: React.FC<EmptyComponentProps> = () => {
       type="text"
     />
   );
-}
+};
 
 const KeywordInput = styled.input``;
 
@@ -94,25 +95,25 @@ const RuleList: React.FC<EmptyComponentProps> = () => {
     dispatch
   } = useRuleDefinitionContext();
   const showField = type === 'LIST';
-  const showButton = showField && displayContext !== 'display';
-
-  if ((displayContext === 'display' && !list?.length) || !showField) {
-    return null;
-  }
+  const showButton = showField && displayContext !== 'display' && !showListInput;
 
   function handleAddToListClick() {
-    dispatch({ type: 'SET_SHOW_LIST_INPUT', payload: true })
+    dispatch({ type: 'SET_SHOW_LIST_INPUT', payload: true });
+  }
+
+  const displayModeWithNoLength = displayContext === 'display' && list.length === 0;
+
+   if (displayModeWithNoLength || !showField) {
+    return null;
   }
 
   return (
     <Wrapper>
-      <Label>Keywords</Label>
-      
+      <ListItems list={list} />
+
       {showButton ? (
         <AddToListButton onClick={handleAddToListClick} icon={<PlusIcon />} />
       ) : null}
-
-      <ListItems list={list} />
 
       {showListInput ? <KeywordListInput /> : null}
     </Wrapper>
@@ -126,7 +127,7 @@ const AddToListButton = styled(Button)`
   display: inline-block;
   border: 0;
   height: 15px;
-  margin: 0 0 0 5px;
+  margin: 0 5px 0 0px;
   padding: 0;
   top: 2px;
   width: 16px;

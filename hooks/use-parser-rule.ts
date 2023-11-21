@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { useQuery, useMutation } from '@apollo/client';
 
+import { ParserRuleWithRelationsWithTypeName } from 'components/parser/types';
 import { GET_PARSER_RULE_QUERY } from '../graphql/queries/parser';
 import {
   ADD_PARSER_RULE_MUTATION,
@@ -15,7 +16,6 @@ import {
   handleDeleteRuleUpdate,
   handleUpdateRuleUpdate,
   removeTypename,
-  ParserRuleWithRelationsWithTypeName
 } from './helpers/parser-rule';
 
 function useParserRule(id: string) {
