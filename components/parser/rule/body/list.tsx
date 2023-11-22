@@ -5,26 +5,88 @@ import styled from 'styled-components';
 import { Button } from 'components/common';
 import { useRuleContext } from 'contexts/rule-context';
 import { useRuleDefinitionContext } from 'contexts/rule-definition-context';
-import PlusIcon from 'public/icons/plus.svg';
 import useClickOutside from 'hooks/use-click-outside';
+import PlusIcon from 'public/icons/plus.svg';
+import TrashIcon from 'public/icons/trash-can.svg';
 
+type FocusProps = {
+  [key: number]: boolean;
+}
 const ListItems: React.FC = () => {
+  const {
+    state: { displayContext }
+  } = useRuleContext();
   const {
     state: { index }
   } = useRuleDefinitionContext();
-  const { control } = useFormContext();
-  const list = useWatch({ control, name: `definitions.${index}.list`});
+  const { control, setValue } = useFormContext();
+  const fieldName = `definitions.${index}.list`;
+  const list = useWatch({ control, name: fieldName });
+  const [focusState, setFocusState] = React.useState<FocusProps>({});
+  
+  function handleMouseOver(index: number) {
+    const updated = {
+      [index]: true
+    };
+    // only enable one focused item at a time
+    setFocusState(updated);
+  }
+
+  function handleMouseLeave(index: number) {
+    // shut off all focus as once
+    setFocusState({});
+  }
+
+  function handleRemoveKeyword(index: number) {
+    const newList = [...list]
+    newList.splice(index, 1);
+    setValue(fieldName, newList);
+  }
 
   function renderList() {
     return list.map((keyword: string, listIndex: number) => (
-      <ListItem key={`parser-rule-${listIndex}-${keyword}`}>{keyword}</ListItem>
+      <ListItem
+        key={`parser-rule-${listIndex}-${keyword}`}
+        onMouseOver={() => handleMouseOver(listIndex)}
+        onMouseLeave={() => handleMouseLeave(listIndex)}
+      >
+        {keyword}
+        {displayContext !== 'display' && (focusState?.[listIndex] ?? false) && (
+          <DeleteButton
+            onClick={() => handleRemoveKeyword(listIndex)}
+            icon={<TrashIcon />}
+          />
+        )}
+      </ListItem>
     ));
   }
   return <StyledList>{renderList()}</StyledList>;
 };
 
+const DeleteButton = styled(Button)`
+  border: 0;
+  background: transparent;
+  color: #aaa;
+  font-size: 12px;
+  font-weight: 600;
+  position: relative;
+  right: -12px;
+  cursor: pointer;
+  z-index: 100;
+
+  svg {
+    position: relative;
+    height: 12px;
+    top: 1px;
+    fill: tomato;
+    margin-right: 5px;
+  }
+`;
+
+
 const StyledList = styled.ul`
   margin: 0;
+  margin-bottom: 4px;
   padding: 0;
   list-style-type: none;
   font-size: 13px;
