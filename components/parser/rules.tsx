@@ -7,7 +7,6 @@ import usePEGParser from 'hooks/use-peg-parser';
 import useParserRules from 'hooks/use-parser-rules';
 
 import ParserBuilder from './parser-builder';
-import { EmptyComponentProps } from './types';
 
 const Grammar: React.FC = () => {
   const { rules = [] } = useParserRules();
@@ -25,7 +24,7 @@ const Wrapper = styled.div`
   tab-size: 2;
 `;
 
-const Rules: React.FC<EmptyComponentProps> = () => {
+const Rules: React.FC = () => {
   const {
     state: { view },
     dispatch

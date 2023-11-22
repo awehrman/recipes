@@ -5,10 +5,9 @@ import styled from 'styled-components';
 import { useRuleContext } from 'contexts/rule-context';
 import { useRuleDefinitionContext } from 'contexts/rule-definition-context';
 
-import { EmptyComponentProps } from '../../types';
 import AutoWidthInput from '../auto-width-input';
 
-const RuleExample: React.FC<EmptyComponentProps> = () => {
+const RuleExample: React.FC = () => {
   const {
     state: { displayContext }
   } = useRuleContext();

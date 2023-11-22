@@ -11,7 +11,7 @@ type DisplayContext = 'add' | 'edit' | 'display';
 type RuleActionTypes =
   | 'SET_DISPLAY_CONTEXT'
   | 'SET_IS_EXPANDED'
-  | 'SET_ID'
+  // | 'SET_ID'
   | 'SET_IS_FOCUSED';
 
 type RuleState = {
@@ -39,11 +39,11 @@ function ruleReducer(state: RuleState, action: RuleAction): RuleState {
         return state;
       }
       return { ...state, displayContext: action.payload };
-    case 'SET_ID':
-      if (action.payload.id === state.id) {
-        return state;
-      }
-      return { ...state, id: action.payload };
+    // case 'SET_ID':
+    //   if (action.payload.id === state.id) {
+    //     return state;
+    //   }
+    //   return { ...state, id: action.payload };
     case 'SET_IS_EXPANDED':
       if (action.payload.isExpanded === state.isExpanded) {
         return state;

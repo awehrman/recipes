@@ -9,7 +9,6 @@ import { useRuleDefinitionContext, RuleDefinitionProvider } from 'contexts/rule-
 import useParserRule from 'hooks/use-parser-rule';
 import PlusIcon from 'public/icons/plus.svg';
 
-import { EmptyComponentProps } from '../../types';
 import { getDefaultDefinitions, findRuleDefinition } from '../../utils';
 import Example from './example';
 import Formatter from './formatter';
@@ -60,7 +59,7 @@ const RuleBodyContent: React.FC = () => {
   )
 }
 
-const RuleBody: React.FC<EmptyComponentProps> = () => {
+const RuleBody: React.FC = () => {
   const {
     state: { id, displayContext }
   } = useRuleContext();

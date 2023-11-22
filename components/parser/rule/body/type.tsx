@@ -5,10 +5,9 @@ import styled from 'styled-components';
 import { useRuleContext } from 'contexts/rule-context';
 import { useRuleDefinitionContext } from 'contexts/rule-definition-context';
 
-import { EmptyComponentProps } from '../../types';
 import { Button } from 'components/common';
 
-const RuleType: React.FC<EmptyComponentProps> = () => {
+const RuleType: React.FC = () => {
   const {
     state: { displayContext }
   } = useRuleContext();

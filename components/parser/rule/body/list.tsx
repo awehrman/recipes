@@ -6,14 +6,9 @@ import { Button } from 'components/common';
 import { useRuleContext } from 'contexts/rule-context';
 import { useRuleDefinitionContext } from 'contexts/rule-definition-context';
 import PlusIcon from 'public/icons/plus.svg';
+import useClickOutside from 'hooks/use-click-outside';
 
-import { EmptyComponentProps } from '../../types';
-
-// TODO move
-type ListItemsComponentProps = {
-}
-
-const ListItems: React.FC<ListItemsComponentProps> = () => {
+const ListItems: React.FC = () => {
   const {
     state: { index }
   } = useRuleDefinitionContext();
@@ -30,7 +25,6 @@ const ListItems: React.FC<ListItemsComponentProps> = () => {
 
 const StyledList = styled.ul`
   margin: 0;
-  margin-bottom: 10px;
   padding: 0;
   list-style-type: none;
   font-size: 13px;
@@ -42,7 +36,9 @@ const ListItem = styled.li`
   position: relative;
 `;
 
-const KeywordListInput: React.FC<EmptyComponentProps> = () => {
+type KeywordListInputProps = {};
+
+const KeywordListInput = React. forwardRef((props: KeywordListInputProps, ref: React.ForwardedRef<HTMLInputElement>) => {
   const {
     state: { index, listItemEntryValue },  
     dispatch
@@ -71,6 +67,7 @@ const KeywordListInput: React.FC<EmptyComponentProps> = () => {
 
   return (
     <KeywordInput
+      ref={ref}
       defaultValue={listItemEntryValue}
       onKeyDown={handleOnKeyDown}
       onChange={handleOnChange}
@@ -78,11 +75,11 @@ const KeywordListInput: React.FC<EmptyComponentProps> = () => {
       type="text"
     />
   );
-};
+});
 
 const KeywordInput = styled.input``;
 
-const RuleList: React.FC<EmptyComponentProps> = () => {
+const RuleList: React.FC = () => {
   const {
     state: { displayContext }
   } = useRuleContext();
@@ -91,17 +88,24 @@ const RuleList: React.FC<EmptyComponentProps> = () => {
     dispatch
   } = useRuleDefinitionContext();
   const { control } = useFormContext();
-  const type = useWatch({ control, name: `definitions.${index}.type` });
-  const showField = type === 'LIST';
-  const showButton = showField && displayContext !== 'display' && !showListInput;
+
+  function handleOuterInputClick() {
+    dispatch({ type: 'SET_SHOW_LIST_INPUT', payload: false });
+  }
 
   function handleAddToListClick() {
     dispatch({ type: 'SET_SHOW_LIST_INPUT', payload: true });
   }
 
+  const { inputRef } = useClickOutside(() => handleOuterInputClick());
+  const type = useWatch({ control, name: `definitions.${index}.type` });
+  const showField = type === 'LIST';
+
+  const showButton = showField && displayContext !== 'display' && !showListInput;
+
   const displayModeWithNoLength = displayContext === 'display' && defaultValue.list.length === 0;
 
-   if (displayModeWithNoLength || !showField) {
+  if (displayModeWithNoLength || !showField) {
     return null;
   }
 
@@ -110,10 +114,10 @@ const RuleList: React.FC<EmptyComponentProps> = () => {
       <ListItems />
 
       {showButton ? (
-        <AddToListButton onClick={handleAddToListClick} icon={<PlusIcon />} />
+        <AddToListButton id="add-new-keyword-button" label="Add Keyword" onClick={handleAddToListClick} icon={<PlusIcon />} />
       ) : null}
 
-      {showListInput ? <KeywordListInput /> : null}
+      {showListInput ? <KeywordListInput ref={inputRef} /> : null}
     </Wrapper>
   );
 };
@@ -128,24 +132,19 @@ const AddToListButton = styled(Button)`
   margin: 0 5px 0 0px;
   padding: 0;
   top: 2px;
-  width: 16px;
   position: relative;
   background: transparent;
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.highlight};
+  font-size: 12px;
 
   svg {
-    height: 13px;
+    height: 10px;
     color: ${({ theme }) => theme.colors.altGreen};
-    top: 0px;
+    margin-right: 5px;
   }
 `;
 
-const Label = styled.label`
-  flex-direction: column;
-  font-size: 13px;
-  font-weight: 600;
-  min-width: 50px;
-  margin: 0 0 10px 0;
-`;
 const Wrapper = styled.fieldset`
   border: 0;
   padding: 0;

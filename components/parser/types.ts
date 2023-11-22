@@ -8,8 +8,6 @@ export interface ParserThemeSettings {
   [key: string]: Extension;
 }
 
-export type EmptyComponentProps = {};
-
 export type AutoWidthInputProps = {
   fieldName?: string;
   isRequired?: boolean;

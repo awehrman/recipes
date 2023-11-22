@@ -1,14 +1,17 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-const useClickOutside = (cb: () => void): React.RefObject<HTMLDivElement> => {
-  const elementRef = useRef<HTMLDivElement>(null);
+type UseClickOutsideProps<T extends HTMLInputElement> = {
+  inputRef: React.RefObject<T>;
+}
+
+// TODO rename or separate out visibility logic
+const useClickOutside = <T extends HTMLInputElement>(cb: () => void): UseClickOutsideProps<T> => {
+  const inputRef = useRef<T>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        elementRef.current &&
-        !elementRef.current.contains(event.target as Node)
-      ) {
+      const isAddNewButton = (event.target as HTMLElement).id === 'add-new-keyword-button';
+      if (!isAddNewButton && inputRef.current && !inputRef.current.contains(event.target as Node)) {
         cb();
       }
     };
@@ -18,9 +21,9 @@ const useClickOutside = (cb: () => void): React.RefObject<HTMLDivElement> => {
     return () => {
       document.removeEventListener('click', handleClickOutside);
     };
-  }, [cb]);
+  }, []);
 
-  return elementRef;
+  return { inputRef };
 };
 
 export default useClickOutside;

@@ -2,7 +2,6 @@ import React from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 
-import { EmptyComponentProps } from 'components/parser/types';
 import { useRuleContext } from 'contexts/rule-context';
 import { useRuleDefinitionContext } from 'contexts/rule-definition-context';
 import useParserRules from 'hooks/use-parser-rules';
@@ -13,7 +12,7 @@ import AutoWidthInput from '../auto-width-input';
 import { isDuplicateRule, isNotEmpty } from '../validators';
 import ValidatedRule from './validated-rule';
 
-const Rule: React.FC<EmptyComponentProps> = () => {
+const Rule: React.FC = () => {
   const [isActiveElement, setIsActiveElement] = React.useState(false);
   const { rules = [] } = useParserRules();
   const {

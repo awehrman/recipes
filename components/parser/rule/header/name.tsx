@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import React from 'react';
 
-import { EmptyComponentProps } from 'components/parser/types';
 import { useRuleContext } from 'contexts/rule-context';
 import useParserRule from 'hooks/use-parser-rule';
 import useParserRules from 'hooks/use-parser-rules';
@@ -9,7 +8,7 @@ import useParserRules from 'hooks/use-parser-rules';
 import AutoWidthInput from '../auto-width-input';
 import { isDuplicateRule, isNotEmpty } from '../validators';
 
-const RuleName: React.FC<EmptyComponentProps> = () => {
+const RuleName: React.FC = () => {
   const {
     state: { id }
   } = useRuleContext();

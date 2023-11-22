@@ -4,7 +4,7 @@ import { v4 } from 'uuid';
 
 import usePEGParser from 'hooks/use-peg-parser';
 import useParserRules from 'hooks/use-parser-rules';
-import { EmptyComponentProps, TestComponentProps, TestWrapperProps } from './types';
+import { TestComponentProps, TestWrapperProps } from './types';
 
 const Test: React.FC<TestComponentProps> = ({ test }) => {
   const [showTestDetails, setShowTestDetails] = useState(false);
@@ -59,7 +59,7 @@ const Test: React.FC<TestComponentProps> = ({ test }) => {
   );
 };
 
-const Errors: React.FC<EmptyComponentProps> = () => {
+const Errors: React.FC = () => {
   const { rules = [], loading } = useParserRules();
   const { errors = [] } = usePEGParser(rules, loading);
 
@@ -83,7 +83,7 @@ const ErrorWrapper = styled.div`
   margin-top: 10px;
 `;
 
-const Tests: React.FC<EmptyComponentProps> = () => {
+const Tests: React.FC = () => {
   const { rules = [], loading } = useParserRules();
   const { tests, errors = [] } = usePEGParser(rules, loading);
 

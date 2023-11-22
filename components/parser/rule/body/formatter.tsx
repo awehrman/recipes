@@ -7,7 +7,7 @@ import React from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 
-import { ThemeOptionKey, EmptyComponentProps } from 'components/parser/types';
+import { ThemeOptionKey } from 'components/parser/types';
 import { getDefaultFormatter } from 'components/parser/utils';
 import { BEAUTIFY_OPTIONS } from 'constants/parser';
 import { useRuleContext } from 'contexts/rule-context';
@@ -24,7 +24,7 @@ const insertOrder = (value: string, index: number) => {
   return value.replace(/\${ORDER}/g, index.toString());
 };
 
-const RuleFormatter: React.FC<EmptyComponentProps> = () => {
+const RuleFormatter: React.FC = () => {
   const {
     state: { index, defaultValue }
   } = useRuleDefinitionContext();
