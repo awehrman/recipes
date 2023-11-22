@@ -1,4 +1,5 @@
 import React from 'react';
+import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 
 import { useRuleContext } from 'contexts/rule-context';
@@ -12,26 +13,28 @@ const RuleType: React.FC<EmptyComponentProps> = () => {
     state: { displayContext }
   } = useRuleContext();
   const {
-    state: { type, list = [] },
-    dispatch
+    state: { index, defaultValue }
   } = useRuleDefinitionContext();
-
-  React.useEffect(() => {
-    if (type === 'RULE' && list.length > 0) {
-      dispatch({ type: 'SET_TYPE', payload: 'LIST' });
-    }
-  }, [type, list]);
+  const fieldName = `definitions.${index}.type`;
+  const { control, register, setValue } = useFormContext();
+  const type = useWatch({ control, name: `definitions.${index}.type` });
 
   if (displayContext === 'display') return null;
 
-
   function handleRuleTypeButtonClick() {
-    dispatch({ type: 'SET_TYPE', payload: type === 'RULE' ? 'LIST' : 'RULE' });
+    setValue(fieldName, type === 'RULE' ? 'LIST' : 'RULE')
   }
 
   return (
     <Wrapper>
       <Label>
+        <HiddenFormInput
+          {...register(fieldName)}
+          defaultValue={defaultValue.type}
+          disabled={displayContext === 'display'}
+          name={fieldName}
+          type="hidden"
+        />
         <RuleTypeButton label={type === 'RULE' ? 'Use List' : 'Use Rule'} onClick={handleRuleTypeButtonClick} />
       </Label>
     </Wrapper>
@@ -39,6 +42,10 @@ const RuleType: React.FC<EmptyComponentProps> = () => {
 };
 
 export default RuleType;
+
+const HiddenFormInput = styled.input`
+  display: none;
+`;
 
 const RuleTypeButton = styled(Button)`
   border: 0;

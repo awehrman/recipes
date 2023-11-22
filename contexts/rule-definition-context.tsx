@@ -6,18 +6,26 @@ import React, {
   ReactNode
 } from 'react';
 
-type RuleDefinitionActionTypes = 'SET_DEFINITION_ID' | 'SET_TYPE' | 'SET_SHOW_LIST_INPUT' | 'ADD_KEYWORD';
+type RuleDefinitionActionTypes =
+  | 'SET_DEFINITION_ID'
+  | 'SET_SHOW_LIST_INPUT'
+  | 'SET_LIST_ITEM_ENTRY_VALUE';
 
 type RuleDefinitionState = {
-  definitionId: string;
-  showListInput: boolean;
-  // these just act as default values; make sure to useWatch for any active form updates
-  example?: string;
-  rule?: string;
-  formatter?: string | null;
   index: number;
-  type: string;
-  list: string[];
+  definitionId: string;
+  listItemEntryValue?: string;
+  showListInput?: boolean; // this should never be in RHF
+  // default values for RHF
+  defaultValue: {
+    // id?: string;
+    example?: string;
+    formatter?: string | null;
+    list: string[];
+    rule?: string;
+    type: string;
+    // order: number; // TODO keep thinking about if this should be separate from index
+  }
 };
 
 type RuleDefinitionAction = {
@@ -41,53 +49,47 @@ function ruleDefinitionReducer(
         return state;
       }
       return { ...state, definitionId: action.payload };
-    case 'SET_TYPE':
-      if (action.payload.type === state.type) {
-        return state;
-      }
-      return { ...state, type: action.payload };
     case 'SET_SHOW_LIST_INPUT':
       if (action.payload.showListInput === state.showListInput) {
         return state;
       }
       return { ...state, showListInput: action.payload };
-    case 'ADD_KEYWORD':
-      if (action.payload.list === state.list) {
+    case 'SET_LIST_ITEM_ENTRY_VALUE':
+      if (action.payload.listItemEntryValue === state.listItemEntryValue) {
         return state;
       }
-      const list: string[] = [...state.list];
-      list.push(`${action.payload}`);
-      // TODO format and sort new items
-      return { ...state, list };
+      return { ...state, listItemEntryValue: action.payload };
     default:
       throw new Error(`Unhandled action type: ${action.type}`);
   }
 }
 
-type RuleDefinitionProviderProps = {
+type RuleDefinitionProviderProps = RuleDefinitionState & {
   children: ReactNode;
-  definitionId: string;
-  defaultValues: {
-    example?: string;
-    rule?: string;
-    formatter?: string | null;
-    type: string;
-    list: string[];
-    showListInput: boolean;
-  };
-  index?: number;
 };
 
 export function RuleDefinitionProvider({
   children,
-  definitionId,
-  defaultValues,
-  index = 0
+  index = 0,
+  definitionId = '-1',
+  listItemEntryValue = '',
+  showListInput = false,
+  defaultValue = {
+    // id: '-1',
+    example: '',
+    formatter: '',
+    list: [],
+    rule: '',
+    type: 'RULE',
+    // order: 0
+  }
 }: RuleDefinitionProviderProps) {
   const [state, dispatch] = useReducer(ruleDefinitionReducer, {
-    definitionId,
     index,
-    ...defaultValues
+    definitionId,
+    listItemEntryValue,
+    showListInput,
+    defaultValue
   });
   const memoizedContext = useMemo(
     () => ({ state, dispatch }),

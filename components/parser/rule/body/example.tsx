@@ -1,4 +1,5 @@
 import React from 'react';
+import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 
 import { useRuleContext } from 'contexts/rule-context';
@@ -12,8 +13,12 @@ const RuleExample: React.FC<EmptyComponentProps> = () => {
     state: { displayContext }
   } = useRuleContext();
   const {
-    state: { index, definitionId, example, type }
+    state: { index, definitionId, defaultValue }
   } = useRuleDefinitionContext();
+  const { control } = useFormContext();
+  // TODO it would be dope to put this in a helper
+  // something like getWatchedValue('type', index)
+  const type = useWatch({ control, name: `definitions.${index}.type` });
   const showField = type === 'RULE';
   const fieldName = `definitions.${index}.example`;
 
@@ -21,13 +26,13 @@ const RuleExample: React.FC<EmptyComponentProps> = () => {
     event.target.value = event.target.value.trim();
   }
 
-  if ((displayContext === 'display' && !example) || !showField) return null;
+  if ((displayContext === 'display' && !defaultValue.example) || !showField) return null;
 
   return (
     <Wrapper>
       <AutoWidthInput
         definitionId={definitionId}
-        defaultValue={example}
+        defaultValue={defaultValue.example}
         fieldName="example"
         definitionPath={fieldName}
         onBlur={trimInput}

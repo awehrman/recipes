@@ -17,17 +17,16 @@ const Rule: React.FC<EmptyComponentProps> = () => {
   const [isActiveElement, setIsActiveElement] = React.useState(false);
   const { rules = [] } = useParserRules();
   const {
-    state: { index, definitionId, rule, type }
+    state: { index, definitionId, defaultValue }
   } = useRuleDefinitionContext();
   const {
     state: { id, displayContext }
   } = useRuleContext();
+  const { control } = useFormContext();
+  const type = useWatch({ control, name: `definitions.${index}.type` });
   const showField = type === 'RULE';
   const fieldName = `definitions.${index}.rule`;
   const placeholder = `rule definition`;
-  const {
-    control
-  } = useFormContext();
   const formUpdates = useWatch({ control });
   const updatedFormValue = getFieldUpdates({
     definitionId,
@@ -49,7 +48,7 @@ const Rule: React.FC<EmptyComponentProps> = () => {
     setIsActiveElement(true);
   }
 
-  if ((displayContext === 'display' && !rule) || !showField) return null;
+  if ((displayContext === 'display' && !defaultValue.rule) || !showField) return null;
 
   return (
     <Wrapper>
@@ -63,7 +62,7 @@ const Rule: React.FC<EmptyComponentProps> = () => {
       ) : (
         <AutoWidthInput
           definitionId={definitionId}
-          defaultValue={rule}
+          defaultValue={defaultValue.rule}
           fieldName="rule"
           index={index}
           definitionPath={fieldName}

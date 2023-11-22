@@ -154,16 +154,21 @@ const addParserRule = async (
 
   const definitionsCreateMany = {
     createMany: {
-      data: (definitions ?? []).map((def, index) => ({
-        example: def?.example ?? '',
-        rule: def?.rule ?? '',
-        order: def?.order ?? index,
-        formatter: def?.formatter ?? null,
-        type: def?.type ?? 'RULE',
-        list: {
-          set: [...(def?.list ?? []) as string[]]
-        }
-      }))
+      data: (definitions ?? []).map((def, index) => {
+        const type = def?.type ?? 'RULE';
+        const list = type === 'RULE' ? [] : [...(def?.list ?? []) as string[]];
+        
+        return ({
+          example: def?.example ?? '',
+          rule: def?.rule ?? '',
+          order: def?.order ?? index,
+          formatter: def?.formatter ?? null,
+          type,
+          list: {
+            set: [...list]
+          }
+        });
+      })
     }
   };
 
@@ -269,32 +274,35 @@ const updateParserRule = async (
     }
   });
 
+
   const upsert: Prisma.ParserRuleDefinitionUpsertWithWhereUniqueWithoutParserRuleInput[] =
-    (definitions ?? []).map((def, index) => ({
-      where: { id: def?.id ?? undefined },
-      create: {
+    (definitions ?? []).map((def, index) => {
+      const type = def?.type ?? 'RULE';
+      const list = type === 'RULE' ? [] : [...(def?.list ?? []) as string[]];
+      const upsertData = {
         example: def?.example ?? '',
         rule: def?.rule ?? '',
         order: parseInt(`${def?.order ?? index}`, 10),
         formatter: def?.formatter ?? null,
-        type: def?.type ?? 'RULE',
-        list: [...(def?.list ?? []) as string[]]
-      },
-      update: {
-        example: def?.example ?? '',
-        rule: def?.rule ?? '',
-        order: parseInt(`${def?.order ?? index}`, 10),
-        formatter: def?.formatter ?? null,
-        type: def?.type ?? 'RULE',
-        list: [...(def?.list ?? []) as string[]]
-      }
-    }));
+        type,
+        list
+      };
+      console.log({ upsertData });
+
+      return ({
+        where: { id: def?.id ?? undefined },
+        create: { ...upsertData },
+        update: { ...upsertData }
+      });
+  });
+
   const data: Prisma.ParserRuleUncheckedUpdateInput = {
     name,
     definitions: {
       upsert
     }
   };
+
   if (label) {
     data.label = label;
   }
@@ -302,6 +310,8 @@ const updateParserRule = async (
     data.order = order;
   }
   const response = { id };
+  console.log(JSON.stringify(data, null, 2));
+
   try {
     const result = await prisma.parserRule.update({
       data,

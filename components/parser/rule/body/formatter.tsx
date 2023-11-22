@@ -26,22 +26,23 @@ const insertOrder = (value: string, index: number) => {
 
 const RuleFormatter: React.FC<EmptyComponentProps> = () => {
   const {
-    state: { index, formatter, type }
+    state: { index, defaultValue }
   } = useRuleDefinitionContext();
   const {
     state: { id, displayContext }
   } = useRuleContext();
+  const { control, getValues, register, setValue } = useFormContext();
+  const type = useWatch({ control, name: `definitions.${index}.type` });
   const showField = type === 'RULE';
-  const { getValues, register, setValue } = useFormContext();
   const fieldName = `definitions.${index}.formatter`;
   const { rule } = useParserRule(id);
   const { name = '' } = rule;
   const watchedName = useWatch({ name: 'name', defaultValue: name });
 
   const defaultFormatter = getDefaultFormatter(watchedName);
-  const formattedWithOrder = insertOrder(`${formatter}`, index);
+  const formattedWithOrder = insertOrder(`${defaultValue.formatter}`, index);
   const uniqueId = `${id}-${fieldName}`;
-  const defaultValue =
+  const defaultComputedValue =
     displayContext === 'display' ? formattedWithOrder : defaultFormatter;
 
   function handleOnChange(value: string, _viewUpdate: ViewUpdate) {
@@ -61,7 +62,7 @@ const RuleFormatter: React.FC<EmptyComponentProps> = () => {
   function getEditorValue() {
     const value = getValues(fieldName);
     if (displayContext !== 'display') {
-      return value.length > 0 ? value : defaultValue;
+      return value.length > 0 ? value : defaultComputedValue;
     }
     const formattedWithOrder = insertOrder(`${value}`, index);
     return formattedWithOrder;
@@ -76,7 +77,7 @@ const RuleFormatter: React.FC<EmptyComponentProps> = () => {
       <HiddenFormInput
         {...register(fieldName)}
         id={uniqueId}
-        defaultValue={defaultValue}
+        defaultValue={defaultComputedValue}
         disabled={displayContext === 'display'}
         name={fieldName}
         placeholder={displayContext === 'display' ? '' : '/* format rule return */'}

@@ -22,7 +22,7 @@ const ValidatedRule: React.FC<ValidatedRuleComponentProps> = ({
     state: { displayContext }
   } = useRuleContext();
   const {
-    state: { definitionId, rule }
+    state: { definitionId, defaultValue }
   } = useRuleDefinitionContext();
 
   const {
@@ -40,7 +40,7 @@ const ValidatedRule: React.FC<ValidatedRuleComponentProps> = ({
     state: formUpdates,
     index
   });
-  const dirtyValue = !isDirty ? rule : updatedFormValue;
+  const dirtyValue = !isDirty ? defaultValue.rule : updatedFormValue;
 
   const currentRuleDefinition =
     displayContext !== 'display' && !dirtyValue?.length

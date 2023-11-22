@@ -1,11 +1,11 @@
 import React from 'react';
-import { useFieldArray, useFormContext } from 'react-hook-form';
+import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 import { v4 } from 'uuid';
 
 import { Button } from 'components/common';
 import { useRuleContext } from 'contexts/rule-context';
-import { RuleDefinitionProvider } from 'contexts/rule-definition-context';
+import { useRuleDefinitionContext, RuleDefinitionProvider } from 'contexts/rule-definition-context';
 import useParserRule from 'hooks/use-parser-rule';
 import PlusIcon from 'public/icons/plus.svg';
 
@@ -17,59 +17,60 @@ import Rule from './rule';
 import Type from './type';
 import List from './list';
 
+const RuleBodyContent: React.FC = () => {
+  const {
+    state: { displayContext }
+  } = useRuleContext();
+  const showDeleteDefinitionButton = () => displayContext !== 'display';
+  const { control, setValue } = useFormContext();
+  const { remove } = useFieldArray({
+    control,
+    name: 'definitions'
+  });
+  const {
+    state: { index }
+  } = useRuleDefinitionContext();
+  const type = useWatch({ control, name: `definitions.${index}.type` });
+
+
+  function handleRemoveDefinitionClick(index: number) {
+    if (type === 'RULE') {
+      // then we can just remove this from the field array
+      remove(index);
+    } else {
+      // otherwise we have to remove the list itself
+      setValue(`definitions.${index}.list`, []);
+    }
+  }
+
+  return (
+    <Wrapper>
+      <Example />
+      <Rule />
+      <Formatter />
+      {showDeleteDefinitionButton() ? (
+        <DeleteButton
+          onClick={() => handleRemoveDefinitionClick(index)}
+          label="Delete"
+        />
+      ) : null}
+      <List />
+      <Type />
+    </Wrapper>
+  )
+}
+
 const RuleBody: React.FC<EmptyComponentProps> = () => {
   const {
     state: { id, displayContext }
   } = useRuleContext();
-  
-  const showDeleteDefinitionButton = () => displayContext !== 'display';
   const { control } = useFormContext();
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append } = useFieldArray({
     control,
     name: 'definitions'
   });
   const { rule } = useParserRule(id);
   const { definitions = [] } = rule;
-
-  function renderDefinitions() {
-    return fields.map((field: any, index: number) => {
-      const definitionId = definitions?.[index]?.id ?? '-1';
-      const ruleDefinition = findRuleDefinition(definitionId, definitions);
-      const { example, formatter, rule, type = 'RULE', list = [] } =
-        ruleDefinition ?? getDefaultDefinitions(index);
-      const defaultValues = {
-        example,
-        formatter,
-        rule,
-        type,
-        list,
-        showListInput: false
-      };
-
-      return (
-        <RuleDefinitionProvider
-          key={field.id}
-          definitionId={definitionId}
-          defaultValues={defaultValues}
-          index={index}
-        >
-          <Wrapper>
-            <Example />
-            <Rule />
-            <Formatter />
-            {showDeleteDefinitionButton() ? (
-              <DeleteButton
-                onClick={() => handleRemoveDefinitionClick(index)}
-                label="Delete"
-              />
-            ) : null}
-            <List />
-            <Type />
-          </Wrapper>
-        </RuleDefinitionProvider>
-      );
-    });
-  }
 
   function handleAddNewDefinitionClick() {
     append({
@@ -84,8 +85,33 @@ const RuleBody: React.FC<EmptyComponentProps> = () => {
     });
   }
 
-  function handleRemoveDefinitionClick(index: number) {
-    remove(index);
+  function renderDefinitions() {
+    return fields.map((field: any, index: number) => {
+      const definitionId = definitions?.[index]?.id ?? '-1';
+      const ruleDefinition = findRuleDefinition(definitionId, definitions);
+      const { example, formatter, rule, type = 'RULE', list = [] } =
+        ruleDefinition ?? getDefaultDefinitions(index);
+      const defaultValue = {
+        // id
+        example,
+        formatter,
+        list,
+        rule,
+        type,
+        // order
+      };
+
+      return (
+        <RuleDefinitionProvider
+          key={field.id}
+          index={index}
+          definitionId={definitionId}
+          defaultValue={defaultValue}
+        >
+          <RuleBodyContent />
+        </RuleDefinitionProvider>
+      );
+    });
   }
 
   return (

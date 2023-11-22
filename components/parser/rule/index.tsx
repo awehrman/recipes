@@ -68,9 +68,7 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
   }
 
   function handleFormSubmit(data: ParserRuleWithRelations, event: any) {
-    if (data.hasOwnProperty('listInput')) {
-      delete data.listInput;
-    }
+    console.log('formSubmit', { data });
 
     // TODO resetting screws with our default width
     event.target.reset();

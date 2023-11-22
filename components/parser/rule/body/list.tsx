@@ -11,13 +11,18 @@ import { EmptyComponentProps } from '../../types';
 
 // TODO move
 type ListItemsComponentProps = {
-  list: string[];
 }
 
-const ListItems: React.FC<ListItemsComponentProps> = ({ list = [] }) => {
+const ListItems: React.FC<ListItemsComponentProps> = () => {
+  const {
+    state: { index }
+  } = useRuleDefinitionContext();
+  const { control } = useFormContext();
+  const list = useWatch({ control, name: `definitions.${index}.list`});
+
   function renderList() {
-    return list.map((keyword: string, index) => (
-      <ListItem key={`parser-rule-${index}-${keyword}`}>{keyword}</ListItem>
+    return list.map((keyword: string, listIndex: number) => (
+      <ListItem key={`parser-rule-${listIndex}-${keyword}`}>{keyword}</ListItem>
     ));
   }
   return <StyledList>{renderList()}</StyledList>;
@@ -39,42 +44,34 @@ const ListItem = styled.li`
 
 const KeywordListInput: React.FC<EmptyComponentProps> = () => {
   const {
-    state: { index },  
+    state: { index, listItemEntryValue },  
     dispatch
   } = useRuleDefinitionContext();
   const {
     control,
     register,
-    getValues,
     setValue
   } = useFormContext();
-  const { definitions = [] } = useWatch({ control });
-  const definition = definitions[index];
   const fieldName = `definitions.${index}.list`;
-  const inputFieldName = 'listInput';
-  const list = definition?.list ?? [];// getValues(fieldName);
-  const [listItem, setListItem] = React.useState<string>('');
+  const list = useWatch({ control, name: fieldName });
 
   function handleOnChange(event: React.ChangeEvent<HTMLInputElement>) {
     const { value } = event.target;
-    setListItem(value);
+    dispatch({ type: 'SET_LIST_ITEM_ENTRY_VALUE', payload: value });
   }
 
   function handleOnKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
     if (event.key === 'Enter') {
-      dispatch({ type: 'ADD_KEYWORD', payload: listItem });
       dispatch({ type: 'SET_SHOW_LIST_INPUT', payload: false });
-      const newList = [...list, listItem];
-      setValue(inputFieldName, '');
+      const newList = [...list, listItemEntryValue];
       setValue(fieldName, newList);
-      setListItem('');
+      dispatch({ type: 'SET_LIST_ITEM_ENTRY_VALUE', payload: '' });
     }
   };
 
   return (
     <KeywordInput
-      {...register(inputFieldName)}
-      defaultValue={listItem}
+      defaultValue={listItemEntryValue}
       onKeyDown={handleOnKeyDown}
       onChange={handleOnChange}
       placeholder="enter a keyword"
@@ -90,9 +87,11 @@ const RuleList: React.FC<EmptyComponentProps> = () => {
     state: { displayContext }
   } = useRuleContext();
   const {
-    state: { list = [], type, showListInput },
+    state: { index, showListInput, defaultValue },
     dispatch
   } = useRuleDefinitionContext();
+  const { control } = useFormContext();
+  const type = useWatch({ control, name: `definitions.${index}.type` });
   const showField = type === 'LIST';
   const showButton = showField && displayContext !== 'display' && !showListInput;
 
@@ -100,7 +99,7 @@ const RuleList: React.FC<EmptyComponentProps> = () => {
     dispatch({ type: 'SET_SHOW_LIST_INPUT', payload: true });
   }
 
-  const displayModeWithNoLength = displayContext === 'display' && list.length === 0;
+  const displayModeWithNoLength = displayContext === 'display' && defaultValue.list.length === 0;
 
    if (displayModeWithNoLength || !showField) {
     return null;
@@ -108,7 +107,7 @@ const RuleList: React.FC<EmptyComponentProps> = () => {
 
   return (
     <Wrapper>
-      <ListItems list={list} />
+      <ListItems />
 
       {showButton ? (
         <AddToListButton onClick={handleAddToListClick} icon={<PlusIcon />} />

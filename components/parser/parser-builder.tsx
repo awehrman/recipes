@@ -44,7 +44,7 @@ const ParserBuilder: React.FC = () => {
   return (
     <Wrapper>
       <RuleActions>
-        {loading && !rules.length && (<CollapseRules
+        {!loading && rules.length > 0 && (<CollapseRules
           label={'Collapse Rules'}
           onClick={handleCollapseRulesOnClick}
         />)}
