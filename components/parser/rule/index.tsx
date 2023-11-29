@@ -19,7 +19,7 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
   const defaultFormatter = ''; // getDefaultFormatter(rule.label ?? '', 1);
   const {
     dispatch,
-    state: { displayContext, isExpanded, isFocused }
+    state: { displayContext, index, isExpanded, isFocused }
   } = useRuleContext();
   const {
     state: { isCollapsed },
@@ -91,13 +91,13 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
 
   const debouncedHandleMouseEnter = _.debounce(() => {
     if (!isFocused) {
-      dispatch({ type: 'SET_IS_FOCUSED', payload: true });
+      parserDispatch({ type: 'SET_FOCUSED_RULE_INDEX', payload: index });
     }
   }, 100);
 
   const debouncedHandleMouseLeave = _.debounce(() => {
     if (isFocused) {
-      dispatch({ type: 'SET_IS_FOCUSED', payload: false });
+      parserDispatch({ type: 'SET_FOCUSED_RULE_INDEX', payload: null });
     }
   }, 300);
 

@@ -9,12 +9,14 @@ import React, {
 type ParserActionTypes =
   | 'SET_IS_ADD_BUTTON_DISPLAYED'
   | 'SET_PARSER_VIEW'
-  | 'SET_IS_COLLAPSED';
+  | 'SET_IS_COLLAPSED'
+  | 'SET_FOCUSED_RULE_INDEX';
 
 type ParserState = {
   isAddButtonDisplayed: boolean;
   isCollapsed: boolean;
   view: 'rules' | 'grammar';
+  focusedRuleIndex: number | null;
 };
 
 type ParserAction = {
@@ -45,6 +47,11 @@ function ruleReducer(state: ParserState, action: ParserAction): ParserState {
         return state;
       }
       return { ...state, isCollapsed: action.payload };
+    case 'SET_FOCUSED_RULE_INDEX':
+      if (action.payload.focusedRuleIndex === state.focusedRuleIndex) {
+        return state;
+      }
+      return { ...state, focusedRuleIndex: action.payload };
     default:
       throw new Error(`Unhandled action type: ${action.type}`);
   }
@@ -55,18 +62,21 @@ type ParserProviderProps = {
   isAddButtonDisplayed?: boolean;
   isCollapsed?: boolean;
   view?: 'rules' | 'grammar';
+  focusedRuleIndex?: number | null;
 };
 
 export function ParserProvider({
   children,
   isAddButtonDisplayed = true,
   isCollapsed = false,
-  view = 'rules'
+  view = 'rules',
+  focusedRuleIndex = null
 }: ParserProviderProps) {
   const [state, dispatch] = useReducer(ruleReducer, {
     isAddButtonDisplayed,
     isCollapsed,
-    view
+    view,
+    focusedRuleIndex
   });
   const memoizedContext = useMemo(
     () => ({ state, dispatch }),
