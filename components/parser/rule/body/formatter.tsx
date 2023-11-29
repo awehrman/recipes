@@ -92,7 +92,7 @@ const RuleFormatter: React.FC = () => {
         placeholder={displayContext === 'display' ? '' : '/* format rule return */'}
         readOnly={displayContext === 'display'}
         theme={themeOptions[displayContext as ThemeOptionKey]}
-        width="520px"
+        width="526px"
         value={getEditorValue()}
       />
     </EditFormatter>

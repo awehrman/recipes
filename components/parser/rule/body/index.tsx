@@ -47,12 +47,12 @@ const RuleBodyContent: React.FC = () => {
       <Example />
       <Rule />
       <Formatter />
-      {showDeleteDefinitionButton() ? (
+      {showDeleteDefinitionButton() && (
         <DeleteButton
           onClick={() => handleRemoveDefinitionClick(index)}
           label="Delete"
         />
-      ) : null}
+      )}
       <List />
       <Type />
     </Wrapper>
@@ -155,12 +155,12 @@ const DeleteButton = styled(Button)`
   color: #aaa;
   font-size: 12px;
   font-weight: 600;
-  position: absolute;
-  right: -12px;
-  top: 4px;
   cursor: pointer;
-  z-index: 100;
-
+  position: absolute;
+  top: 24px;
+  right: -6px;
+  padding: 0;
+  
   svg {
     position: relative;
     height: 12px;

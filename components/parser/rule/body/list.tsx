@@ -83,7 +83,6 @@ const DeleteButton = styled(Button)`
   }
 `;
 
-
 const StyledList = styled.ul`
   margin: 0;
   margin-bottom: 4px;
@@ -98,9 +97,16 @@ const ListItem = styled.li`
   position: relative;
 `;
 
-type KeywordListInputProps = {};
+// TODO move
+function sortByLength(list: string[]) {
+  function compareByLengthDesc(a: string, b: string) {
+    return b.length - a.length;
+  }
 
-const KeywordListInput = React. forwardRef((props: KeywordListInputProps, ref: React.ForwardedRef<HTMLInputElement>) => {
+  return list.sort(compareByLengthDesc);
+}
+
+const KeywordListInput = React.forwardRef((_props, ref: React.ForwardedRef<HTMLInputElement>) => {
   const {
     state: { index, listItemEntryValue },  
     dispatch
@@ -121,7 +127,15 @@ const KeywordListInput = React. forwardRef((props: KeywordListInputProps, ref: R
   function handleOnKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
     if (event.key === 'Enter') {
       dispatch({ type: 'SET_SHOW_LIST_INPUT', payload: false });
-      const newList = [...list, listItemEntryValue];
+
+      // TODO throw this all in a helper function
+      // if listItemEntryValue starts with a \' or a $( we'll take it as is
+      // otherwise we'll wrap the string in quotes ('xyz'i)
+      const withQuote = /^\\'/.test(listItemEntryValue ?? '');
+      const withSign = /^\$/.test(listItemEntryValue ?? '');
+      const autoFormatted = withQuote || withSign ? listItemEntryValue : `\`${listItemEntryValue}\`i`
+      const newList = sortByLength([...list, autoFormatted]);
+
       setValue(fieldName, newList);
       dispatch({ type: 'SET_LIST_ITEM_ENTRY_VALUE', payload: '' });
     }
