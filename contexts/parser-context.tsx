@@ -33,22 +33,22 @@ const ParserContext = createContext<
 function ruleReducer(state: ParserState, action: ParserAction): ParserState {
   switch (action.type) {
     case 'SET_IS_ADD_BUTTON_DISPLAYED':
-      if (action.payload.isAddButtonDisplayed === state.isAddButtonDisplayed) {
+      if (action.payload === state.isAddButtonDisplayed) {
         return state;
       }
       return { ...state, isAddButtonDisplayed: action.payload };
     case 'SET_PARSER_VIEW':
-      if (action.payload.view === state.view) {
+      if (action.payload === state.view) {
         return state;
       }
       return { ...state, view: action.payload };
     case 'SET_IS_COLLAPSED':
-      if (action.payload.isCollapsed === state.isCollapsed) {
+      if (action.payload === state.isCollapsed) {
         return state;
       }
       return { ...state, isCollapsed: action.payload };
     case 'SET_FOCUSED_RULE_INDEX':
-      if (action.payload.focusedRuleIndex === state.focusedRuleIndex) {
+      if (action.payload === state.focusedRuleIndex) {
         return state;
       }
       return { ...state, focusedRuleIndex: action.payload };

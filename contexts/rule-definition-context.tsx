@@ -45,17 +45,17 @@ function ruleDefinitionReducer(
 ): RuleDefinitionState {
   switch (action.type) {
     case 'SET_DEFINITION_ID':
-      if (action.payload.definitionId === state.definitionId) {
+      if (action.payload === state.definitionId) {
         return state;
       }
       return { ...state, definitionId: action.payload };
     case 'SET_SHOW_LIST_INPUT':
-      if (action.payload.showListInput === state.showListInput) {
+      if (action.payload === state.showListInput) {
         return state;
       }
       return { ...state, showListInput: action.payload };
     case 'SET_LIST_ITEM_ENTRY_VALUE':
-      if (action.payload.listItemEntryValue === state.listItemEntryValue) {
+      if (action.payload === state.listItemEntryValue) {
         return state;
       }
       return { ...state, listItemEntryValue: action.payload };

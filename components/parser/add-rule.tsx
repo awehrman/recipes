@@ -11,7 +11,6 @@ type AddRuleProps = {};
 const AddRule: React.FC<AddRuleProps> = () => {
   const {
     state: { isAddButtonDisplayed },
-    dispatch: parserDispatch
   } = useParserContext();
 
   if (isAddButtonDisplayed) {
@@ -20,8 +19,8 @@ const AddRule: React.FC<AddRuleProps> = () => {
 
   return (
     <Wrapper>
-      <Header>Add New Rule </Header>
-      <Rule context="add" id="add-rule" />
+      <Header>Add New Rule</Header>
+      <Rule index={0} context="add" id="add-rule" />
     </Wrapper>
   );
 };

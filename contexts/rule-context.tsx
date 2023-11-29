@@ -35,22 +35,22 @@ const RuleContext = createContext<
 function ruleReducer(state: RuleState, action: RuleAction): RuleState {
   switch (action.type) {
     case 'SET_DISPLAY_CONTEXT':
-      if (action.payload.displayContext === state.displayContext) {
+      if (action.payload === state.displayContext) {
         return state;
       }
       return { ...state, displayContext: action.payload };
     case 'SET_IS_EXPANDED':
-      if (action.payload.isExpanded === state.isExpanded) {
+      if (action.payload === state.isExpanded) {
         return state;
       }
       return { ...state, isExpanded: !!action.payload };
     case 'SET_IS_FOCUSED':
-      if (action.payload.isFocused === state.isFocused) {
+      if (action.payload === state.isFocused) {
         return state;
       }
       return { ...state, isFocused: !!action.payload };
     case 'SET_INDEX':
-      if (action.payload.index === state.index) {
+      if (action.payload === state.index) {
         return state;
       }
       return { ...state, index: action.payload };

@@ -19,7 +19,7 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
   const defaultFormatter = ''; // getDefaultFormatter(rule.label ?? '', 1);
   const {
     dispatch,
-    state: { displayContext, index, isExpanded, isFocused }
+    state: { displayContext, id, index, isExpanded, isFocused }
   } = useRuleContext();
   const {
     state: { isCollapsed },
@@ -51,7 +51,7 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
     defaultValues,
     mode: 'onBlur'
   });
-  const { handleSubmit, reset } = methods;
+  const { handleSubmit, reset, setFocus } = methods;
   const { addRule, updateRule } = useParserRule(rule.id);
 
   const saveLabel = displayContext === 'add' ? 'Add Rule' : 'Save Rule';
@@ -90,20 +90,28 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
   }
 
   const debouncedHandleMouseEnter = _.debounce(() => {
-    if (!isFocused) {
+    if (!isFocused && displayContext === 'display') {
+      dispatch({ type: 'SET_IS_FOCUSED', payload: true });
       parserDispatch({ type: 'SET_FOCUSED_RULE_INDEX', payload: index });
     }
   }, 100);
 
   const debouncedHandleMouseLeave = _.debounce(() => {
     if (isFocused) {
+      dispatch({ type: 'SET_IS_FOCUSED', payload: false });
       parserDispatch({ type: 'SET_FOCUSED_RULE_INDEX', payload: null });
     }
-  }, 300);
+  }, 200);
 
   React.useEffect(() => {
     dispatch({ type: 'SET_IS_EXPANDED', payload: !isCollapsed });
   }, [dispatch, isCollapsed]);
+
+  React.useEffect(() => {
+    if (displayContext !== 'display') {
+      setFocus('name');
+    }
+  });
 
   return (
     <Wrapper
