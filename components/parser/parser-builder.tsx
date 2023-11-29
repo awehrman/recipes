@@ -36,8 +36,8 @@ const ParserBuilder: React.FC = () => {
       return <Message>No parsing rules exist.</Message>;
     }
 
-    return rules.map((rule: ParserRuleWithRelations) => (
-      <Rule key={rule.id} id={rule.id} />
+    return rules.map((rule: ParserRuleWithRelations, index: number) => (
+      <Rule key={rule.id} index={index} id={rule.id} />
     ));
   }
 

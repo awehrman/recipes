@@ -6,19 +6,19 @@ import React, {
   ReactNode
 } from 'react';
 
-// TODO where should this live? in hooks? in a new compound folder?
 type DisplayContext = 'add' | 'edit' | 'display';
 type RuleActionTypes =
   | 'SET_DISPLAY_CONTEXT'
   | 'SET_IS_EXPANDED'
-  // | 'SET_ID'
-  | 'SET_IS_FOCUSED';
+  | 'SET_IS_FOCUSED'
+  | 'SET_INDEX';
 
 type RuleState = {
   id: string;
   displayContext: string;
   isExpanded: boolean;
   isFocused: boolean;
+  index: number;
 };
 
 type RuleAction = {
@@ -39,11 +39,6 @@ function ruleReducer(state: RuleState, action: RuleAction): RuleState {
         return state;
       }
       return { ...state, displayContext: action.payload };
-    // case 'SET_ID':
-    //   if (action.payload.id === state.id) {
-    //     return state;
-    //   }
-    //   return { ...state, id: action.payload };
     case 'SET_IS_EXPANDED':
       if (action.payload.isExpanded === state.isExpanded) {
         return state;
@@ -54,6 +49,11 @@ function ruleReducer(state: RuleState, action: RuleAction): RuleState {
         return state;
       }
       return { ...state, isFocused: !!action.payload };
+    case 'SET_INDEX':
+      if (action.payload.index === state.index) {
+        return state;
+      }
+      return { ...state, index: action.payload };
     default:
       throw new Error(`Unhandled action type: ${action.type}`);
   }
@@ -64,19 +64,22 @@ type RuleProviderProps = {
   id: string;
   initialContext: DisplayContext;
   isCollapsed: boolean;
+  index: number;
 };
 
 export function RuleProvider({
   children,
   id,
   initialContext = 'display',
-  isCollapsed = false
+  isCollapsed = false,
+  index = 0
 }: RuleProviderProps) {
   const [state, dispatch] = useReducer(ruleReducer, {
     id,
     displayContext: initialContext,
     isExpanded: isCollapsed ? false : true, // TODO wehrman you left off here wiring in isCollapsed
-    isFocused: initialContext === 'display' ? false : true
+    isFocused: initialContext === 'display' ? false : true,
+    index
   });
   const memoizedContext = useMemo(
     () => ({ state, dispatch }),

@@ -8,12 +8,14 @@ import { RuleProvider, useRuleContext } from 'contexts/rule-context';
 import { useParserContext } from 'contexts/parser-context';
 import { Button } from 'components/common';
 import useParserRule from 'hooks/use-parser-rule';
+import useParserRules from 'hooks/use-parser-rules';
 
 import RuleBody from './body';
 import RuleHeader from './header';
 import { RuleComponentProps, RuleContentProps } from '../types';
 
 const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
+  const { rules = [] } = useParserRules();
   const defaultFormatter = ''; // getDefaultFormatter(rule.label ?? '', 1);
   const {
     dispatch,
@@ -68,7 +70,8 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
   }
 
   function handleFormSubmit(data: ParserRuleWithRelations, event: any) {
-    console.log('formSubmit', { data });
+    // TODO we'll probably pass this explicitly in, but for now just throw it at the bottom
+    data.order = rules?.length ?? 0;
 
     // TODO resetting screws with our default width
     event.target.reset();
@@ -127,14 +130,14 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
   );
 };
 
-const Rule: React.FC<RuleComponentProps> = ({ context = 'display', id }) => {
+const Rule: React.FC<RuleComponentProps> = ({ context = 'display', index = 0, id }) => {
   const { rule } = useParserRule(id);
   const {
     state: { isCollapsed }
   } = useParserContext();
 
   return (
-    <RuleProvider id={id} initialContext={context} isCollapsed={isCollapsed}>
+    <RuleProvider id={id} index={index} initialContext={context} isCollapsed={isCollapsed}>
       <RuleContent rule={rule} />
     </RuleProvider>
   );

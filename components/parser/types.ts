@@ -40,6 +40,7 @@ export type ValidatedRuleComponentProps = {
 export type RuleComponentProps = {
   context?: DisplayContextTypes;
   id: string;
+  index: number;
 };
 
 export type DisplayContextTypes = 'display' | 'edit' | 'add';
