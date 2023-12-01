@@ -20,7 +20,7 @@ const AddRule: React.FC<AddRuleProps> = () => {
   return (
     <Wrapper>
       <Header>Add New Rule</Header>
-      <Rule index={0} context="add" id="add-rule" />
+      <Rule index={0} context="add" id="-1" />
     </Wrapper>
   );
 };

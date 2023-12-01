@@ -40,27 +40,52 @@ export const handleAddRuleUpdate = (
     query: GET_ALL_PARSER_RULES_QUERY
   });
 
-  if (!(input?.definitions ?? []).length) {
-    input.definitions = [];
-  }
-
-  const parserRules = (rules?.parserRules ?? []).map((rule: any) => ({
-    ...rule,
-    __typename: 'ParserRule',
-    // if we find our optimistic response, replace it with our actual response id
-    ...(!isOptimisticResponse && rule.id === '-1'
-      ? { id: res.data.addParserRule.id }
-      : {})
-  }));
+  let parserRules = [...rules?.parserRules ?? []];
+  const optimisticDefinitionIds: string[] = [];
   if (isOptimisticResponse) {
-    parserRules.push({ ...input, id: '-1', __typename: 'ParserRule' });
-  }
+    parserRules.push({
+      ...input,
+      definitions: input.definitions.map((def: any) => ({ ...def, __typename: 'ParserRuleDefinition' })),
+      __typename: 'ParserRule' });
+  } else {
+    parserRules = parserRules.map((rule: any) => {
+      if (rule.id === '-1') {
+        return {
+          ...rule,
+          definitions: rule.definitions.map((def: any, index: number) => {
+            if (def.id.includes(`OPTIMISTIC`)) {
+              optimisticDefinitionIds.push(def.id);
+              return ({
+                ...def,
+                id: res.data.addParserRule.definitions[index].id
+              });
+            }
+            return def;
+          }),
+          id: res.data.addParserRule.id
+        }
+      }
+      return rule;
+    });
+  }    
 
   const data = { parserRules };
   cache.writeQuery({
     query: GET_ALL_PARSER_RULES_QUERY,
     data
   });
+
+  if (!isOptimisticResponse) {
+    // evict any optimism trails from the cache
+    cache.evict({
+      id: 'ParserRule:-1'
+    });
+    optimisticDefinitionIds.forEach((id) => {
+      cache.evict({
+        id: `ParserRuleDefinitionId:${id}`
+      })
+    })
+  }
 };
 
 export const handleUpdateRuleUpdate = (
@@ -129,15 +154,6 @@ export const handleUpdateRuleUpdate = (
     query: GET_ALL_PARSER_RULES_QUERY,
     data
   });
-};
-
-// TODO fix any types
-export const handleAddNewRuleDefinitionRuleUpdate = (
-  cache: ApolloCache<any>,
-  res: any,
-  input: any
-) => {
-  console.log('TODO handleAddNewRuleDefinitionRuleUpdate', { res, input });
 };
 
 export const handleDeleteRuleUpdate = (

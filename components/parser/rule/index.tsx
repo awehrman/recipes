@@ -1,10 +1,10 @@
 import { ParserRuleWithRelations } from '@prisma/client';
 import _ from 'lodash';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import styled from 'styled-components';
 
-import { RuleProvider, useRuleContext } from 'contexts/rule-context';
+import { getDefaultRuleValuesForIndex, RuleProvider, useRuleContext } from 'contexts/rule-context';
 import { useParserContext } from 'contexts/parser-context';
 import { Button } from 'components/common';
 import useParserRule from 'hooks/use-parser-rule';
@@ -15,45 +15,22 @@ import RuleHeader from './header';
 import { RuleComponentProps, RuleContentProps } from '../types';
 
 const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
+  const [isInit, setIsInit] = React.useState(false);
   const { rules = [] } = useParserRules();
-  const defaultFormatter = ''; // getDefaultFormatter(rule.label ?? '', 1);
   const {
     dispatch,
-    state: { displayContext, id, index, isExpanded, isFocused }
+    state: { defaultValues, displayContext, index, isExpanded, isFocused }
   } = useRuleContext();
   const {
     state: { isCollapsed },
     dispatch: parserDispatch
   } = useParserContext();
-  const defaultValues = {
-    name: '',
-    label: '',
-    order: 0,
-    ...rule
-  };
-
-  if (displayContext === 'add' && !rule?.definitions?.length) {
-    // tack on a starting value
-    defaultValues.definitions = [
-      {
-        id: '-1',
-        ruleId: '-1',
-        example: '',
-        rule: '',
-        formatter: defaultFormatter,
-        order: 0,
-        type: 'RULE',
-        list: []
-      }
-    ];
-  }
   const methods = useForm<ParserRuleWithRelations>({
     defaultValues,
     mode: 'onBlur'
   });
   const { handleSubmit, reset, setFocus } = methods;
-  const { addRule, updateRule } = useParserRule(rule.id);
-
+  const { addRule, updateRule } = useParserRule(rule?.id ?? '-1');
   const saveLabel = displayContext === 'add' ? 'Add Rule' : 'Save Rule';
 
   function handleCancelClick(event: React.MouseEvent<HTMLButtonElement>) {
@@ -61,27 +38,18 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
     // whats the performance difference?
     parserDispatch({ type: 'SET_IS_ADD_BUTTON_DISPLAYED', payload: true });
     dispatch({ type: 'SET_DISPLAY_CONTEXT', payload: 'display' });
-    reset({
-      name: rule.label ?? '',
-      label: rule.label ?? '',
-      definitions: rule.definitions ?? [],
-      order: rule.order ?? 0
-    });
   }
 
   function handleFormSubmit(data: ParserRuleWithRelations, event: any) {
     // TODO we'll probably pass this explicitly in, but for now just throw it at the bottom
     data.order = rules?.length ?? 0;
 
-    // TODO resetting screws with our default width
-    event.target.reset();
     if (displayContext === 'edit') {
       updateRule(data);
     } else if (displayContext === 'add') {
       addRule(data);
-      // reset({
-      //   defaultValues
-      // });
+      dispatch({ type: 'RESET_DEFAULT_VALUES', payload: getDefaultRuleValuesForIndex(0)});
+   
     }
     // TODO on success only? where to handle validation?
     // seems like these should happen on update
@@ -103,13 +71,14 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
     }
   }, 200);
 
-  React.useEffect(() => {
+  useEffect(() => {
     dispatch({ type: 'SET_IS_EXPANDED', payload: !isCollapsed });
   }, [dispatch, isCollapsed]);
 
-  React.useEffect(() => {
-    if (displayContext !== 'display') {
+  useEffect(() => {
+    if (displayContext !== 'display' && !isInit) {
       setFocus('name');
+      setIsInit(true);
     }
   });
 
@@ -145,7 +114,7 @@ const Rule: React.FC<RuleComponentProps> = ({ context = 'display', index = 0, id
   } = useParserContext();
 
   return (
-    <RuleProvider id={id} index={index} initialContext={context} isCollapsed={isCollapsed}>
+    <RuleProvider rule={rule} id={id} index={index} initialContext={context} isCollapsed={isCollapsed}>
       <RuleContent rule={rule} />
     </RuleProvider>
   );

@@ -100,7 +100,6 @@ type InstructionLine {
 
 type Mutation {
   addParserRule(input: ParserRuleInput): ParserRule
-  addParserRuleDefinition(input: ParserRuleDefinitionInput): ParserRuleDefinition
   authenticateEvernote(oauthVerifier: String, userId: String): EvernoteSession
   clearEvernoteSession(userId: String): EvernoteSession
   deleteParserRule(id: ID): ParserRule
@@ -180,8 +179,8 @@ input ParserRuleDefinitionInput {
   id: String
   list: [String]
   order: Int!
+  parserRuleId: String
   rule: String!
-  ruleId: String
   type: ParserRuleDefinitionType
 }
 

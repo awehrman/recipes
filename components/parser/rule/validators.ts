@@ -3,12 +3,12 @@ import { ParserRuleWithRelations } from '@prisma/client';
 export const isDuplicateRule = (
   value: string,
   rules: ParserRuleWithRelations[],
-  ruleId: string,
+  parserRuleId: string,
   fieldName: string
 ) => {
   const existingRule = rules.find(
     (rule: ParserRuleWithRelations) =>
-      rule[fieldName] === value && rule.id !== ruleId
+      rule[fieldName] === value && rule.id !== parserRuleId
   );
   return !existingRule || 'This rule already exists.';
 };

@@ -5,16 +5,19 @@ import React, {
   useReducer,
   ReactNode
 } from 'react';
+import { v4 } from 'uuid';
 
 type DisplayContext = 'add' | 'edit' | 'display';
 type RuleActionTypes =
   | 'SET_DISPLAY_CONTEXT'
   | 'SET_IS_EXPANDED'
   | 'SET_IS_FOCUSED'
-  | 'SET_INDEX';
+  | 'SET_INDEX'
+  | 'RESET_DEFAULT_VALUES';
 
 type RuleState = {
   id: string;
+  defaultValues: any; // TODO fix type
   displayContext: string;
   isExpanded: boolean;
   isFocused: boolean;
@@ -54,6 +57,11 @@ function ruleReducer(state: RuleState, action: RuleAction): RuleState {
         return state;
       }
       return { ...state, index: action.payload };
+    case 'RESET_DEFAULT_VALUES':
+      if (action.payload === state.defaultValues) {
+        return state;
+      }
+      return { ...state, defaultValues: action.payload };
     default:
       throw new Error(`Unhandled action type: ${action.type}`);
   }
@@ -65,19 +73,45 @@ type RuleProviderProps = {
   initialContext: DisplayContext;
   isCollapsed: boolean;
   index: number;
+  rule: any; // TODO fix
 };
+
+export const getDefaultRuleValuesForIndex = (order = 0) => ({
+  id: '-1',
+  name: '',
+  label: '',
+  order,
+  definitions: [
+    {
+      id: `OPTIMISTIC-0`,
+      parserRuleId: '-1',
+      example: '',
+      rule: '',
+      formatter: '',
+      order: 0,
+      type: 'RULE',
+      list: []
+    }
+  ]
+});
 
 export function RuleProvider({
   children,
   id,
   initialContext = 'display',
   isCollapsed = false,
-  index = 0
+  index = 0,
+  rule = {}
 }: RuleProviderProps) {
+  const defaultValues = {
+    ...getDefaultRuleValuesForIndex(index),
+    ...initialContext !== 'add' ? rule : {}
+  };
   const [state, dispatch] = useReducer(ruleReducer, {
     id,
     displayContext: initialContext,
-    isExpanded: isCollapsed ? false : true, // TODO wehrman you left off here wiring in isCollapsed
+    defaultValues,
+    isExpanded: isCollapsed ? false : true,
     isFocused: initialContext === 'display' ? false : true,
     index
   });

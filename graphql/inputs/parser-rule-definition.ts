@@ -7,7 +7,7 @@ export default gql`
     formatter
     order
     rule
-    ruleId
+    parserRuleId
     type
     list
   }

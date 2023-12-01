@@ -7,12 +7,10 @@ import {
   ADD_PARSER_RULE_MUTATION,
   DELETE_PARSER_RULE_MUTATION,
   UPDATE_PARSER_RULE_MUTATION,
-  ADD_PARSER_RULE_DEFINITION_MUTATION
 } from '../graphql/mutations/parser';
 
 import {
   handleAddRuleUpdate,
-  handleAddNewRuleDefinitionRuleUpdate,
   handleDeleteRuleUpdate,
   handleUpdateRuleUpdate,
   removeTypename,
@@ -32,20 +30,17 @@ function useParserRule(id: string) {
   const [addParserRule] = useMutation(ADD_PARSER_RULE_MUTATION);
   const [deleteParserRule] = useMutation(DELETE_PARSER_RULE_MUTATION);
   const [updateParserRule] = useMutation(UPDATE_PARSER_RULE_MUTATION);
-  const [addParserRuleDefinition] = useMutation(
-    ADD_PARSER_RULE_DEFINITION_MUTATION
-  );
 
   function addRule(data: ParserRuleWithRelationsWithTypeName): void {
-    const input = removeTypename(data);
+    // const input = removeTypename(data); // lost the typename here
     addParserRule({
       optimisticResponse: {
         addParserRule: {
           ...data,
-          id: '-1'
+          __typename: 'ParserRule'
         }
       },
-      variables: { input },
+      variables: { input: data },
       update: (cache, res) => handleAddRuleUpdate(cache, res, data)
     });
   }
@@ -68,7 +63,7 @@ function useParserRule(id: string) {
     updateParserRule({
       optimisticResponse: {
         updateParserRule: {
-          ...data // TODO do we have to check or sub id's for any new definitions?
+          ...data
         }
       },
       variables: {
@@ -78,36 +73,7 @@ function useParserRule(id: string) {
     });
   }
 
-  function addNewRuleDefinition() {
-    // console.log('addNewRuleDefinition');
-    // input: ArgsValue<'Mutation', 'addParserRuleDefinition'>
-    const input = {
-      example: null,
-      formatter: null,
-      order: 0, // TODO increment this properly
-      rule: '', // TODO allow nulls here
-      ruleId: null,
-      type: 'RULE',
-      list: []
-    };
-    addParserRuleDefinition({
-      optimisticResponse: {
-        addParserRuleDefinition: {
-          ...input,
-          id: '-1',
-          __typename: 'ParserRuleDefinition'
-        }
-      },
-      variables: {
-        ...input
-      },
-      update: (cache, res) =>
-        handleAddNewRuleDefinitionRuleUpdate(cache, res, input)
-    });
-  }
-
   return {
-    addNewRuleDefinition,
     addRule,
     updateRule,
     deleteRule,

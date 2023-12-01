@@ -5,6 +5,7 @@ import React, {
   useReducer,
   ReactNode
 } from 'react';
+import { v4 } from 'uuid';
 
 type RuleDefinitionActionTypes =
   | 'SET_DEFINITION_ID'
@@ -18,13 +19,13 @@ type RuleDefinitionState = {
   showListInput?: boolean; // this should never be in RHF
   // default values for RHF
   defaultValue: {
-    // id?: string;
+    id?: string;
     example?: string;
     formatter?: string | null;
     list: string[];
     rule?: string;
     type: string;
-    // order: number; // TODO keep thinking about if this should be separate from index
+    order: number; // TODO keep thinking about if this should be separate from index
   }
 };
 
@@ -64,32 +65,39 @@ function ruleDefinitionReducer(
   }
 }
 
-type RuleDefinitionProviderProps = RuleDefinitionState & {
+type RuleDefinitionProviderProps = {
   children: ReactNode;
+  index: number;
+  definitionId: string;
+  listItemEntryValue?: string;
+  showListInput?: boolean;
+  defaultValue?: any; // TODO fix type
 };
 
 export function RuleDefinitionProvider({
   children,
   index = 0,
-  definitionId = '-1',
+  definitionId,
   listItemEntryValue = '',
   showListInput = false,
-  defaultValue = {
-    // id: '-1',
-    example: '',
-    formatter: '',
-    list: [],
-    rule: '',
-    type: 'RULE',
-    // order: 0
-  }
+  defaultValue
 }: RuleDefinitionProviderProps) {
+  const newDefault = {
+    id: definitionId ?? `OPTIMISTIC-${index}`,
+    parserRuleId: '-1',
+    example: '',
+    rule: '',
+    formatter: '',
+    order: index,
+    type: 'RULE',
+    list: []
+  };
   const [state, dispatch] = useReducer(ruleDefinitionReducer, {
     index,
     definitionId,
     listItemEntryValue,
     showListInput,
-    defaultValue
+    defaultValue: defaultValue ?? newDefault
   });
   const memoizedContext = useMemo(
     () => ({ state, dispatch }),

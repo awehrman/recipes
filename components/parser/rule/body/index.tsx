@@ -1,7 +1,6 @@
 import React from 'react';
 import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
-import { v4 } from 'uuid';
 
 import { Button } from 'components/common';
 import { useRuleContext } from 'contexts/rule-context';
@@ -9,7 +8,6 @@ import { useRuleDefinitionContext, RuleDefinitionProvider } from 'contexts/rule-
 import useParserRule from 'hooks/use-parser-rule';
 import PlusIcon from 'public/icons/plus.svg';
 
-import { getDefaultDefinitions, findRuleDefinition } from '../../utils';
 import Example from './example';
 import Formatter from './formatter';
 import Rule from './rule';
@@ -61,7 +59,7 @@ const RuleBodyContent: React.FC = () => {
 
 const RuleBody: React.FC = () => {
   const {
-    state: { id, displayContext }
+    state: { id, defaultValues, displayContext }
   } = useRuleContext();
   const { control } = useFormContext();
   const { fields, append } = useFieldArray({
@@ -73,7 +71,8 @@ const RuleBody: React.FC = () => {
 
   function handleAddNewDefinitionClick() {
     append({
-      id: `OPTIMISTIC-${v4()}`,
+      id: `OPTIMISTIC-${(fields ?? []).length}`,
+      parserRuleId: id,
       example: '',
       rule: '',
       formatter: '',
@@ -86,20 +85,8 @@ const RuleBody: React.FC = () => {
 
   function renderDefinitions() {
     return fields.map((field: any, index: number) => {
-      const definitionId = definitions?.[index]?.id ?? '-1';
-      const ruleDefinition = findRuleDefinition(definitionId, definitions);
-      const { example, formatter, rule, type = 'RULE', list = [] } =
-        ruleDefinition ?? getDefaultDefinitions(index);
-      const defaultValue = {
-        // id
-        example,
-        formatter,
-        list,
-        rule,
-        type,
-        // order
-      };
-
+      const definitionId = definitions?.[index]?.id ?? `OPTIMISTIC-${index}`;
+      const defaultValue = defaultValues.definitions?.[index]; // pull the first default out of the rule provider
       return (
         <RuleDefinitionProvider
           key={field.id}

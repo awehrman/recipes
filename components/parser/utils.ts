@@ -25,7 +25,6 @@ export const getFieldUpdates = ({
 }: WatchParserForm): string | null => {
   const { definitions = [] } = state;
   const isTopLevelFormField = fieldName === 'name' || fieldName === 'label';
-
   // if this is a top-level field, we can directly get the values off the form
   if (isTopLevelFormField) {
     return state[fieldName];
@@ -34,7 +33,7 @@ export const getFieldUpdates = ({
   // otherwise we'll need to find the definition first, then the value
   const definition = definitions.find(
     (def: ParserRuleDefinition) =>
-      def.id === definitionId && def.order === index
+      def.id === definitionId
   );
   return definition?.[fieldName];
 };

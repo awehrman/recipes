@@ -182,24 +182,21 @@ const addParserRule = async (
     data.definitions = definitionsCreateMany;
   }
 
-  const response = { id };
+  // TODO fix type
+  const response: any = { id };
   try {
     const result = await prisma.parserRule.create({
       data,
       select: {
         id: true,
-        definitions: {
-          select: {
-            id: true
-          }
-        }
+        definitions: true
       }
     });
     response.id = result.id;
+    response.definitions = result.definitions.map((def) => ({ id: def.id }));
   } catch (e) {
     console.log({ e });
   }
-
   return response;
 };
 
@@ -227,7 +224,7 @@ const addParserRuleDefinition = async (
     // for add we'll need to connect to the created rule on update
     // parserRule: {
     //   connect: {
-    //     id: ruleId
+    //     id: parserRuleId
     //   }
     // }
   };
@@ -369,9 +366,6 @@ const deleteParserRule = async (
 
   try {
     await prisma.parserRule.delete({
-      // include: {
-      //   definitions: true
-      // },
       where: {
         id
       }
@@ -393,20 +387,6 @@ export const AddParserRuleMutation = extendType({
       resolve: addParserRule as unknown as FieldResolver<
         'Mutation',
         'addParserRule'
-      >
-    });
-  }
-});
-
-export const AddParserRuleDefinitionMutation = extendType({
-  type: 'Mutation',
-  definition(t) {
-    t.field('addParserRuleDefinition', {
-      type: 'ParserRuleDefinition',
-      args: { input: ParserRuleDefinitionInput },
-      resolve: addParserRuleDefinition as unknown as FieldResolver<
-        'Mutation',
-        'addParserRuleDefinition'
       >
     });
   }
@@ -461,7 +441,7 @@ export const ParserRuleDefinitionInput = inputObjectType({
     t.nonNull.int('order');
     t.string('example');
     t.string('formatter');
-    t.nullable.string('ruleId');
+    t.nullable.string('parserRuleId');
     t.field('type', { type: ParserRuleDefinitionType });
     t.list.string('list');
   }
