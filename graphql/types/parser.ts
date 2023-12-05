@@ -177,7 +177,7 @@ const addParserRule = async (
     label: `${label}`,
     order
   };
-
+  console.log(JSON.stringify({ data }, null, 2))
   if ((definitions ?? []).length > 0) {
     data.definitions = definitionsCreateMany;
   }

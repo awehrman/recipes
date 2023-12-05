@@ -34,6 +34,7 @@ export const handleAddRuleUpdate = (
   res: any, // TODO fix type
   input: any // TODO fix type
 ) => {
+  console.log('handleAddRuleUpdate', { res, input });
   const isOptimisticResponse = res.data.addParserRule.id === '-1';
   // TODO read/write fragment vs read/write all rules query vs read/write just this rule?
   const rules: ParserRules | null = cache.readQuery({

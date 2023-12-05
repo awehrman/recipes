@@ -18,8 +18,8 @@ const RuleBodyContent: React.FC = () => {
   const {
     state: { displayContext }
   } = useRuleContext();
-  const showDeleteDefinitionButton = () => displayContext !== 'display';
-  const { control, setValue } = useFormContext();
+ 
+  const { control } = useFormContext();
   const { remove } = useFieldArray({
     control,
     name: 'definitions'
@@ -27,17 +27,17 @@ const RuleBodyContent: React.FC = () => {
   const {
     state: { index }
   } = useRuleDefinitionContext();
+  const list = useWatch({ control, name: `definitions.${index}.list` });
   const type = useWatch({ control, name: `definitions.${index}.type` });
 
+  // TODO move this to a utlity helper
+  const showDeleteDefinitionButton = () => displayContext !== 'display' && ((type === 'LIST' && list.length > 0) || (type === 'RULE'));
 
   function handleRemoveDefinitionClick(index: number) {
-    if (type === 'RULE') {
-      // then we can just remove this from the field array
-      remove(index);
-    } else {
-      // otherwise we have to remove the list itself
-      setValue(`definitions.${index}.list`, []);
-    }
+    console.log('removing', index);
+    remove(index);
+    // setValue(`definitions.${index}.list`, []);
+    console.log({ list })
   }
 
   return (
@@ -45,14 +45,14 @@ const RuleBodyContent: React.FC = () => {
       <Example />
       <Rule />
       <Formatter />
+      <List />
+      <Type onTypeSwitch={() => handleRemoveDefinitionClick(index)} />
       {showDeleteDefinitionButton() && (
         <DeleteButton
           onClick={() => handleRemoveDefinitionClick(index)}
-          label="Delete"
+          label="Remove"
         />
       )}
-      <List />
-      <Type />
     </Wrapper>
   )
 }
@@ -70,6 +70,7 @@ const RuleBody: React.FC = () => {
   const { definitions = [] } = rule;
 
   function handleAddNewDefinitionClick() {
+    // TODO throw this into a constants file
     append({
       id: `OPTIMISTIC-${(fields ?? []).length}`,
       parserRuleId: id,
@@ -77,7 +78,7 @@ const RuleBody: React.FC = () => {
       rule: '',
       formatter: '',
       order: (fields ?? []).length,
-      type: 'RULE', // vs 'LIST',
+      type: 'RULE',
       list: [],
       __typename: 'ParserRuleDefinition'
     });
@@ -86,7 +87,8 @@ const RuleBody: React.FC = () => {
   function renderDefinitions() {
     return fields.map((field: any, index: number) => {
       const definitionId = definitions?.[index]?.id ?? `OPTIMISTIC-${index}`;
-      const defaultValue = defaultValues.definitions?.[index]; // pull the first default out of the rule provider
+      const defaultValue = defaultValues.definitions?.[index];
+
       return (
         <RuleDefinitionProvider
           key={field.id}
@@ -144,8 +146,8 @@ const DeleteButton = styled(Button)`
   font-weight: 600;
   cursor: pointer;
   position: absolute;
-  top: 24px;
   right: -6px;
+  top: 10px;
   padding: 0;
   
   svg {

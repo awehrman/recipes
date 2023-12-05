@@ -32,7 +32,6 @@ function useParserRule(id: string) {
   const [updateParserRule] = useMutation(UPDATE_PARSER_RULE_MUTATION);
 
   function addRule(data: ParserRuleWithRelationsWithTypeName): void {
-    // const input = removeTypename(data); // lost the typename here
     addParserRule({
       optimisticResponse: {
         addParserRule: {
@@ -59,16 +58,13 @@ function useParserRule(id: string) {
 
   function updateRule(data: ParserRuleWithRelationsWithTypeName) {
     // console.log('updateRule', { data });
-    const input = removeTypename(data);
     updateParserRule({
       optimisticResponse: {
         updateParserRule: {
           ...data
         }
       },
-      variables: {
-        input
-      },
+      variables: { input: data },
       update: (cache, res) => handleUpdateRuleUpdate(cache, res, input)
     });
   }

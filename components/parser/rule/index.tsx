@@ -13,6 +13,7 @@ import useParserRules from 'hooks/use-parser-rules';
 import RuleBody from './body';
 import RuleHeader from './header';
 import { RuleComponentProps, RuleContentProps } from '../types';
+import { removeTypename } from 'hooks/helpers/parser-rule';
 
 const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
   const [isInit, setIsInit] = React.useState(false);
@@ -34,22 +35,24 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
   const saveLabel = displayContext === 'add' ? 'Add Rule' : 'Save Rule';
 
   function handleCancelClick(event: React.MouseEvent<HTMLButtonElement>) {
+    event.preventDefault();
     // TODO should any of these useParserRule calls actually be dispatched from the ruleContext?
     // whats the performance difference?
     parserDispatch({ type: 'SET_IS_ADD_BUTTON_DISPLAYED', payload: true });
     dispatch({ type: 'SET_DISPLAY_CONTEXT', payload: 'display' });
+    reset({ ...defaultValues });
   }
 
-  function handleFormSubmit(data: ParserRuleWithRelations, event: any) {
+  function handleFormSubmit(data: ParserRuleWithRelations) {
     // TODO we'll probably pass this explicitly in, but for now just throw it at the bottom
     data.order = rules?.length ?? 0;
+    const input = removeTypename(data);
 
     if (displayContext === 'edit') {
       updateRule(data);
     } else if (displayContext === 'add') {
-      addRule(data);
+      addRule(input);
       dispatch({ type: 'RESET_DEFAULT_VALUES', payload: getDefaultRuleValuesForIndex(0)});
-   
     }
     // TODO on success only? where to handle validation?
     // seems like these should happen on update
@@ -76,7 +79,7 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
   }, [dispatch, isCollapsed]);
 
   useEffect(() => {
-    if (displayContext !== 'display' && !isInit) {
+    if (displayContext === 'add' && !isInit) {
       setFocus('name');
       setIsInit(true);
     }

@@ -7,7 +7,12 @@ import { useRuleDefinitionContext } from 'contexts/rule-definition-context';
 
 import { Button } from 'components/common';
 
-const RuleType: React.FC = () => {
+// TODO move
+type RuleTypeComponentProps = {
+  onTypeSwitch: any;
+};
+
+const RuleType: React.FC<RuleTypeComponentProps> = ({ onTypeSwitch }) => {
   const {
     state: { displayContext }
   } = useRuleContext();
@@ -21,7 +26,9 @@ const RuleType: React.FC = () => {
   if (displayContext === 'display') return null;
 
   function handleRuleTypeButtonClick() {
-    setValue(fieldName, type === 'RULE' ? 'LIST' : 'RULE')
+    setValue(fieldName, type === 'RULE' ? 'LIST' : 'RULE');
+    // clear out any previous entries
+    onTypeSwitch();
   }
 
   return (
@@ -34,7 +41,7 @@ const RuleType: React.FC = () => {
           name={fieldName}
           type="hidden"
         />
-        <RuleTypeButton label={type === 'RULE' ? 'Use List' : 'Use Rule'} onClick={handleRuleTypeButtonClick} />
+        <RuleTypeButton label={type === 'RULE' ? 'Switch to List' : 'Switch to Rule'} onClick={handleRuleTypeButtonClick} />
       </Label>
     </Wrapper>
   );
@@ -61,7 +68,6 @@ const Wrapper = styled.fieldset`
   padding: 0;
   margin: 0;
   margin-right: -5px;
+  margin-top: 5px;
   float: right;
-  top: -30px;
-  position:relative;
-`;
+  `;

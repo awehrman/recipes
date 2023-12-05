@@ -51,37 +51,37 @@ const ListItems: React.FC = () => {
         onMouseLeave={() => handleMouseLeave(listIndex)}
       >
         {keyword}
-        {displayContext !== 'display' && (focusState?.[listIndex] ?? false) && (
+        {/* {displayContext !== 'display' && (focusState?.[listIndex] ?? false) && (
           <DeleteButton
             onClick={() => handleRemoveKeyword(listIndex)}
             icon={<TrashIcon />}
           />
-        )}
+        )} */}
       </ListItem>
     ));
   }
   return <StyledList>{renderList()}</StyledList>;
 };
 
-const DeleteButton = styled(Button)`
-  border: 0;
-  background: transparent;
-  color: #aaa;
-  font-size: 12px;
-  font-weight: 600;
-  position: relative;
-  right: -12px;
-  cursor: pointer;
-  z-index: 100;
+// const DeleteButton = styled(Button)`
+//   border: 0;
+//   background: transparent;
+//   color: #aaa;
+//   font-size: 12px;
+//   font-weight: 600;
+//   position: relative;
+//   cursor: pointer;
+//   z-index: 100;
+//   padding-right: 0px;
 
-  svg {
-    position: relative;
-    height: 12px;
-    top: 1px;
-    fill: tomato;
-    margin-right: 5px;
-  }
-`;
+//   svg {
+//     position: relative;
+//     height: 12px;
+//     top: 1px;
+//     fill: tomato;
+//     margin-right: 5px;
+//   }
+// `;
 
 const StyledList = styled.ul`
   margin: 0;
@@ -95,6 +95,14 @@ const ListItem = styled.li`
   font-weight: normal;
   padding: 0px 0;
   position: relative;
+  display: inline-block;
+  font-family: Menlo, Monaco, 'Courier New', monospace;
+
+  :not(:last-child)::after {
+    content: '/';
+    padding: 0 5px;
+    color: #666;
+  }
 `;
 
 // TODO move

@@ -44,6 +44,7 @@ const RuleFormatter: React.FC = () => {
   const uniqueId = `${id}-${fieldName}`;
   const defaultComputedValue =
     displayContext === 'display' ? formattedWithOrder : defaultFormatter;
+  const currentValue = getEditorValue();
 
   function handleOnChange(value: string, _viewUpdate: ViewUpdate) {
     setValue(fieldName, value);
@@ -60,7 +61,7 @@ const RuleFormatter: React.FC = () => {
   });
 
   function getEditorValue() {
-    const value = getValues(fieldName);
+    const value = getValues(fieldName) ?? '';
     if (displayContext !== 'display') {
       return value.length > 0 ? value : defaultComputedValue;
     }
@@ -82,6 +83,7 @@ const RuleFormatter: React.FC = () => {
         name={fieldName}
         placeholder={displayContext === 'display' ? '' : '/* format rule return */'}
       />
+      {/* TODO this is a focus trap */}
       <StyledEditor
         basicSetup={formatterSetup}
         editable={displayContext !== 'display'}
@@ -92,8 +94,8 @@ const RuleFormatter: React.FC = () => {
         placeholder={displayContext === 'display' ? '' : '/* format rule return */'}
         readOnly={displayContext === 'display'}
         theme={themeOptions[displayContext as ThemeOptionKey]}
-        width="526px"
-        value={getEditorValue()}
+        width="525px"
+        value={currentValue}
       />
     </EditFormatter>
   );
@@ -108,8 +110,7 @@ const LabelWrapper = styled.label`
   flex-direction: column;
   font-size: 14px;
   font-weight: 600;
-  min-width: 50px;
-  margin: 0 0 10px 0;
+  margin: 0;
 `;
 
 const HiddenFormInput = styled.textarea`
@@ -124,16 +125,7 @@ const EditFormatter = styled(LabelWrapper)`
 const StyledEditor = styled(CodeMirror)`
   * {
     font-size: 12px;
-    // font-family: 'Source Sans Pro', Verdana, sans-serif;
     font-family: Menlo, Monaco, 'Courier New', monospace;
     font-weight: 400;
-  }
-
-  .cm-line:first-child {
-    // padding-top: 10px;
-  }
-
-  .cm-line:last-child {
-    // padding-bottom: 10px;
   }
 `;
