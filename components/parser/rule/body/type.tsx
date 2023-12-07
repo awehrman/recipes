@@ -26,7 +26,7 @@ const RuleType: React.FC<RuleTypeComponentProps> = ({ onTypeSwitch }) => {
   if (displayContext === 'display') return null;
 
   function handleRuleTypeButtonClick() {
-    setValue(fieldName, type === 'RULE' ? 'LIST' : 'RULE');
+    // setValue(fieldName, type === 'RULE' ? 'LIST' : 'RULE');
     // clear out any previous entries
     onTypeSwitch();
   }
@@ -69,5 +69,6 @@ const Wrapper = styled.fieldset`
   margin: 0;
   margin-right: -5px;
   margin-top: 5px;
-  float: right;
-  `;
+  float: left;
+  display: block;
+`;

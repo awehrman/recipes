@@ -19,25 +19,32 @@ const RuleBodyContent: React.FC = () => {
     state: { displayContext }
   } = useRuleContext();
  
-  const { control } = useFormContext();
+  const { control, setValue } = useFormContext();
   const { remove } = useFieldArray({
     control,
     name: 'definitions'
   });
   const {
-    state: { index }
+    state: { index, defaultValue: { list: defaultList, type: defaultType } }
   } = useRuleDefinitionContext();
-  const list = useWatch({ control, name: `definitions.${index}.list` });
-  const type = useWatch({ control, name: `definitions.${index}.type` });
+  const list = useWatch({ control, name: `definitions.${index}.list`, defaultValue: defaultList });
+  const type = useWatch({ control, name: `definitions.${index}.type`, defaultValue: defaultType });
+  const definitions = useWatch({ control, name: 'definitions' });
 
   // TODO move this to a utlity helper
   const showDeleteDefinitionButton = () => displayContext !== 'display' && ((type === 'LIST' && list.length > 0) || (type === 'RULE'));
 
   function handleRemoveDefinitionClick(index: number) {
-    console.log('removing', index);
-    remove(index);
-    // setValue(`definitions.${index}.list`, []);
-    console.log({ list })
+    const updatedDefinitions = [...definitions.slice(0, index), ...definitions.slice(index + 1)];
+    setValue('definitions', updatedDefinitions);
+  }
+
+  function handleTypeChange(index: number, type: 'RULE' | 'LIST') {
+    setValue(`definitions.${index}.type`, type === 'RULE' ? 'LIST' : 'RULE');
+    setValue(`definitions.${index}.list`, []);
+    setValue(`definitions.${index}.example`, '');
+    setValue(`definitions.${index}.rule`, '');
+    setValue(`definitions.${index}.formatter`, '');
   }
 
   return (
@@ -46,7 +53,7 @@ const RuleBodyContent: React.FC = () => {
       <Rule />
       <Formatter />
       <List />
-      <Type onTypeSwitch={() => handleRemoveDefinitionClick(index)} />
+      <Type onTypeSwitch={() => handleTypeChange(index, type)} />
       {showDeleteDefinitionButton() && (
         <DeleteButton
           onClick={() => handleRemoveDefinitionClick(index)}
@@ -124,9 +131,9 @@ const AddNewDefinition = styled(Button)`
   color: ${({ theme }) => theme.colors.altGreen};
   border: 0;
   padding: 0;
-  top: 2px;
   position: relative;
   top: 30px;
+  left: -87px;
   font-size: 12px;
 
   svg {
@@ -145,10 +152,10 @@ const DeleteButton = styled(Button)`
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  position: absolute;
-  right: -6px;
-  top: 10px;
   padding: 0;
+  float: right;
+  display: block;
+  margin-top: 8px;
   
   svg {
     position: relative;
@@ -159,11 +166,11 @@ const DeleteButton = styled(Button)`
   }
 `;
 
-const Body = styled.div``;
+const Body = styled.div`
+`;
 
 const Wrapper = styled.div`
   margin: 6px 20px;
   font-size: 14px;
   flex-basis: 100%;
-  position: relative;
 `;

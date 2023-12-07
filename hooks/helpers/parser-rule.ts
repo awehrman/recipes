@@ -26,6 +26,7 @@ export const removeTypename = (data: ParserRuleWithRelationsWithTypeName) => {
       })
     )
   };
+  
   return input;
 };
 
@@ -150,7 +151,6 @@ export const handleUpdateRuleUpdate = (
   }));
 
   const data = { parserRules };
-  console.log({ data });
   cache.writeQuery({
     query: GET_ALL_PARSER_RULES_QUERY,
     data

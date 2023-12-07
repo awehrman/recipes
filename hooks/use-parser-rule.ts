@@ -57,7 +57,6 @@ function useParserRule(id: string) {
   }
 
   function updateRule(data: ParserRuleWithRelationsWithTypeName) {
-    // console.log('updateRule', { data });
     updateParserRule({
       optimisticResponse: {
         updateParserRule: {
@@ -65,7 +64,7 @@ function useParserRule(id: string) {
         }
       },
       variables: { input: data },
-      update: (cache, res) => handleUpdateRuleUpdate(cache, res, input)
+      update: (cache, res) => handleUpdateRuleUpdate(cache, res, data)
     });
   }
 

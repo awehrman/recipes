@@ -17,11 +17,11 @@ const ListItems: React.FC = () => {
     state: { displayContext }
   } = useRuleContext();
   const {
-    state: { index }
+    state: { index, defaultValue: { list: defaultList } }
   } = useRuleDefinitionContext();
   const { control, setValue } = useFormContext();
   const fieldName = `definitions.${index}.list`;
-  const list = useWatch({ control, name: fieldName });
+  const list = useWatch({ control, name: fieldName, defaultValue: defaultList });
   const [focusState, setFocusState] = React.useState<FocusProps>({});
   
   function handleMouseOver(index: number) {

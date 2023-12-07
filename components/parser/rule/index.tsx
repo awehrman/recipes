@@ -47,9 +47,8 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
     // TODO we'll probably pass this explicitly in, but for now just throw it at the bottom
     data.order = rules?.length ?? 0;
     const input = removeTypename(data);
-
     if (displayContext === 'edit') {
-      updateRule(data);
+      updateRule(input);
     } else if (displayContext === 'add') {
       addRule(input);
       dispatch({ type: 'RESET_DEFAULT_VALUES', payload: getDefaultRuleValuesForIndex(0)});
@@ -127,11 +126,6 @@ export default Rule;
 
 // RuleContent.whyDidYouRender = true;
 
-const Loading = styled.div`
-  font-size: 14px;
-  color: #222;
-`;
-
 const Buttons = styled.div`
   margin: 10px 15px;
   align-self: flex-end;
@@ -164,6 +158,8 @@ const Wrapper = styled.form`
   margin-left: -40px;
   padding-left: 40px;
   margin-bottom: 10px;
+  /* keep some kind of background so we can maintain hover */
+  background: transparent;
 
   &.edit {
     left: -40px;

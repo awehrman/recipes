@@ -62,12 +62,16 @@ const RuleFormatter: React.FC = () => {
 
   function getEditorValue() {
     const value = getValues(fieldName) ?? '';
-    if (displayContext !== 'display') {
+    if (displayContext === 'add') {
       return value.length > 0 ? value : defaultComputedValue;
+    }
+    if (displayContext === 'edit') {
+      return value;
     }
     const formattedWithOrder = insertOrder(`${value}`, index);
     return formattedWithOrder;
   }
+
 
   if ((displayContext === 'display' && !formattedWithOrder?.length) || !showField) {
     return null;
