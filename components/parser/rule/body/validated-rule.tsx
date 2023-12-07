@@ -1,8 +1,7 @@
 import { ParserRuleWithRelations } from '@prisma/client';
-import React, { ReactNode, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
-import { v4 } from 'uuid';
 
 import { ValidatedRuleComponentProps } from 'components/parser/types';
 import { getFieldUpdates } from 'components/parser/utils';
@@ -20,7 +19,8 @@ const ValidatedRule: React.FC<ValidatedRuleComponentProps> = ({
 }) => {
   const { rules = [] } = useParserRules();
   const {
-    state: { displayContext }
+    state: { displayContext },
+    dispatch
   } = useRuleContext();
   const {
     state: { definitionId, defaultValue }
@@ -49,18 +49,24 @@ const ValidatedRule: React.FC<ValidatedRuleComponentProps> = ({
       : dirtyValue;
 
   const formatRules = useCallback(
-    (ruleString: string) => generateParsedRule(ruleString, ruleNames),
+    (ruleString: string) => 
+      generateParsedRule(ruleString, ruleNames),
     [ruleNames]
   );
+  const { hasWarning, components } = formatRules(`${currentRuleDefinition}`);
 
   const focusProps = {
     tabIndex: 0,
     onFocus: onFocus
   };
 
+  React.useEffect(() => {
+    dispatch({ type: 'SET_HAS_WARNING', payload: hasWarning });
+  }, [hasWarning])
+
   return (
     <Wrapper {...(displayContext === 'display' ? {} : { ...focusProps })}>
-      {formatRules(`${currentRuleDefinition}`)}
+      {components}
     </Wrapper>
   );
 };
@@ -71,27 +77,3 @@ const Wrapper = styled.div`
   position: relative;
   top: 2px;
 `;
-
-const Label = styled.label`
-  margin-right: 2px;
-`;
-
-const Rule = styled.span`
-  margin-right: 2px;
-  font-weight: 600;
-`;
-
-const MissingRule = styled.span`
-  color: tomato;
-  font-weight: 600;
-`;
-
-const SplitPiece = styled.span`
-  font-weight: 400;
-`;
-
-const DefinedRule = styled.span`
-  color: ${({ theme }) => theme.colors.highlight};
-`;
-
-const RuleList = styled.span``;

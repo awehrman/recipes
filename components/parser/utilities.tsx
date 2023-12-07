@@ -3,8 +3,9 @@ import styled from 'styled-components';
 import { v4 } from 'uuid';
 
 import { PEG_CHARACTERS } from 'constants/parser';
+import { useRuleContext } from 'contexts/rule-context';
 
-import { formatEmbeddedList, validateIndividualRule } from './utils';
+import { formatEmbeddedList } from './utils';
 
 const defaultValue = `{
   function formatOutput(parsed = []) {
@@ -72,8 +73,10 @@ const generateEmbeddedList = (ruleString: string): React.ReactNode => {
   return <RuleList key={embeddedListKey}>{formattedListString}</RuleList>;
 }
 
-const generateUnlabeledRule = (ruleString: string, ruleNames: string[] = []): React.ReactNode[] => {
+// TODO return type
+const generateUnlabeledRule = (ruleString: string, ruleNames: string[] = []): any => {
   const components: React.ReactNode[] = [];
+  let hasWarning = false;
   // TODO use a constant here
   const instances = ruleString.split(/([*!+$|()[\]])/).filter(Boolean);
   instances.forEach((name, index) => {
@@ -82,52 +85,65 @@ const generateUnlabeledRule = (ruleString: string, ruleNames: string[] = []): Re
     );
     const isMissingRule = !ruleNames.includes(name) && !isSpecialCharacter;
     if (isMissingRule) {
+      hasWarning = true;
       components.push(
         <MissingRule key={`${index}-${name}`}>
           {name}
         </MissingRule>
       );
     }
-    const isDefinedRule = !ruleNames.includes(name) && !isSpecialCharacter;
-    if (isDefinedRule) {
-      return (
+
+    const isDefinedRule = ruleNames.includes(name) && !isSpecialCharacter;
+    if (isDefinedRule && !isMissingRule) {
+      components.push(
         <DefinedRule key={`piece-${index}-${name}`}>
           {name}
         </DefinedRule>
       );
     }
 
-    return (
-      <SplitPiece key={`piece-${index}-${name}`}>
-        {name}
-      </SplitPiece>
-    );
+    if (!isDefinedRule && !isMissingRule) {
+      components.push(
+        <SplitPiece key={`piece-${index}-${name}`}>
+          {name}
+        </SplitPiece>
+      );
+    }
   });
 
-  return components;
+  return {
+    components,
+    hasWarning
+  };
 };
 
-const generateLabeledRule = (ruleString: string, ruleNames: string[] = []): React.ReactNode[] => {
+// TODO fix return type
+const generateLabeledRule = (ruleString: string, ruleNames: string[] = []): any => {
   const components: React.ReactNode[] = [];
-  // TODO use constant here
   const [label, rule] = ruleString.split(':');
   const key = v4();
+  const { hasWarning, components: unlabeledComponents} = generateUnlabeledRule(rule, ruleNames);
 
   components.push(<Label key={`label-${key}`}>{label}:</Label>);
   components.push(
     <Rule key={key}>
-      {generateUnlabeledRule(rule, ruleNames)}
+      {[...unlabeledComponents]}
     </Rule>
   );
-  return components;
+  
+  return {
+    components,
+    hasWarning
+  };
 };
 
+// TODO fix return type
 export const generateParsedRule = (
   ruleString: string = '',
   ruleNames: string[] = []
-): React.ReactNode[] => {
+): any => {
   const components: React.ReactNode[] = [];
-
+  let hasWarning = false;
   const isEmbeddedList = ruleString.startsWith('[') && ruleString.endsWith(']');
   if (isEmbeddedList) {
     const embeddedList = generateEmbeddedList(ruleString);
@@ -139,14 +155,19 @@ export const generateParsedRule = (
     const isUnlabeledRule = !ruleInstance.includes(':');
     if (isUnlabeledRule) {
       const unlabeledRule = generateUnlabeledRule(ruleString, ruleNames);
-      components.push([ ...unlabeledRule ]);
+      hasWarning = unlabeledRule.hasWarning ?? hasWarning;
+      components.push([ ...unlabeledRule.components ]);
     }
 
     const labeledRule = generateLabeledRule(ruleString, ruleNames);
-    components.push([ ...labeledRule ]);
+    hasWarning = labeledRule.hasWarning ?? hasWarning;
+    components.push([ ...labeledRule.components ]);
   });
 
-  return components.flatMap((c) => (c)); // may need to flatMap this
+  return {
+    components: components.flatMap((c) => (c)),
+    hasWarning
+  };
 };
 
 const Label = styled.label`
