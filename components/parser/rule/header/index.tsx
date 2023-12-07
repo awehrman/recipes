@@ -7,6 +7,7 @@ import { useParserContext } from 'contexts/parser-context';
 import useParserRule from 'hooks/use-parser-rule';
 import EditIcon from 'public/icons/edit.svg';
 import TrashIcon from 'public/icons/trash-can.svg';
+import WarningIcon from 'public/icons/exclamation.svg';
 
 import ExpandButton from './expand-button';
 import Name from './name';
@@ -17,7 +18,7 @@ type RuleComponentProps = {};
 const RuleHeader: React.FC<RuleComponentProps> = () => {
   const {
     dispatch,
-    state: { id, displayContext, index }
+    state: { id, displayContext, hasWarning, index }
   } = useRuleContext();
   const { state: { focusedRuleIndex } } = useParserContext();
   const isFocusedRule = focusedRuleIndex !== null && index === focusedRuleIndex;
@@ -39,6 +40,7 @@ const RuleHeader: React.FC<RuleComponentProps> = () => {
       ) : null}
       <Name />
       <Label />
+      {displayContext === 'display' && hasWarning && <StyledWarningIcon />}
       {displayContext === 'display' ? <ExpandButton /> : null}
       {displayContext === 'edit' ? (
         <RemoveRuleButton
@@ -53,6 +55,12 @@ const RuleHeader: React.FC<RuleComponentProps> = () => {
 export default RuleHeader;
 
 // RuleHeader.whyDidYouRender = true;
+
+const StyledWarningIcon = styled(WarningIcon)`
+  fill: tomato;
+  height: 13px;
+  margin-top: 5px;
+`; 
 
 const Header = styled.div`
   display: flex;

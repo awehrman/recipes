@@ -1,6 +1,9 @@
 import { ParserRuleDefinition } from '@prisma/client';
 import _ from 'lodash';
+import styled from 'styled-components';
+import { v4 } from 'uuid';
 
+import { PEG_CHARACTERS } from 'constants/parser';
 import { WatchParserForm } from './types';
 
 export const getDefaultDefinitions = (order: number = 0) => ({
@@ -47,3 +50,42 @@ export const getDefaultFormatter = (ruleName: string): string =>
     values
   };
 }`;
+
+export const formatEmbeddedList = (rule: string): string => {
+  const keywords = rule.slice(1, rule.length - 1).split(',');
+  return keywords.join(', ');
+};
+
+// TODO fix return type
+export const validateIndividualRule = (ruleInstanceName: string, rules: string[]): any => {
+  const undefinedRules: any = [];
+  const definedRules: any = [];
+  const syntax: any = [];
+  const ordered: any = [];
+
+  const splitArray = ruleInstanceName.split(/([*!+$|()[\]])/).filter(Boolean);
+  splitArray.forEach((splitPiece, index) => {
+    const isSpecialCharacter = PEG_CHARACTERS.find(
+      (char) => char === splitPiece
+    );
+    const isMissingRule = !rules.includes(splitPiece) && !isSpecialCharacter;
+    if (isMissingRule) {
+      ordered.push({ index, name: splitPiece, type: 'undefined' });
+      return undefinedRules.push({ index, name: splitPiece });
+    }
+    const isDefinedRule = !rules.includes(splitPiece) && !isSpecialCharacter;
+    if (isDefinedRule) {
+      ordered.push({ index, name: splitPiece, type: 'defined' });
+      return definedRules.push({ index, name: splitPiece });
+    }
+    ordered.push({ index, name: splitPiece, type: 'syntax' });
+    return syntax.push({ index, name: splitPiece });
+  });
+
+  return {
+    undefinedRules,
+    definedRules,
+    syntax,
+    ordered
+  };
+};

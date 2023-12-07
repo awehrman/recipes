@@ -13,7 +13,8 @@ type RuleActionTypes =
   | 'SET_IS_EXPANDED'
   | 'SET_IS_FOCUSED'
   | 'SET_INDEX'
-  | 'RESET_DEFAULT_VALUES';
+  | 'RESET_DEFAULT_VALUES'
+  | 'SET_HAS_WARNING';
 
 type RuleState = {
   id: string;
@@ -22,6 +23,7 @@ type RuleState = {
   isExpanded: boolean;
   isFocused: boolean;
   index: number;
+  hasWarning: boolean;
 };
 
 type RuleAction = {
@@ -62,6 +64,11 @@ function ruleReducer(state: RuleState, action: RuleAction): RuleState {
         return state;
       }
       return { ...state, defaultValues: action.payload };
+    case 'SET_HAS_WARNING':
+      if (action.payload === state.hasWarning) {
+        return state;
+      }
+      return { ...state, hasWarning: !!action.payload };
     default:
       throw new Error(`Unhandled action type: ${action.type}`);
   }
@@ -113,7 +120,8 @@ export function RuleProvider({
     defaultValues,
     isExpanded: isCollapsed ? false : true,
     isFocused: initialContext === 'display' ? false : true,
-    index
+    index,
+    hasWarning: false
   });
   const memoizedContext = useMemo(
     () => ({ state, dispatch }),

@@ -1,7 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
+import { v4 } from 'uuid';
 
-type UtilitiesProps = {};
+import { PEG_CHARACTERS } from 'constants/parser';
+
+import { formatEmbeddedList, validateIndividualRule } from './utils';
 
 const defaultValue = `{
   function formatOutput(parsed = []) {
@@ -20,7 +23,7 @@ const defaultValue = `{
   }
 }`;
 
-const Utilities: React.FC<UtilitiesProps> = () => (
+const Utilities: React.FC = () => (
   <Wrapper>
     <Header>Utility Functions</Header>
     <Collapse>...</Collapse>
@@ -62,3 +65,110 @@ const UtilityTextArea = styled.textarea`
   background: ${({ theme }) => theme.colors.headerBackground};
   font-family: monospace;
 `;
+
+const generateEmbeddedList = (ruleString: string): React.ReactNode => {
+  const embeddedListKey = v4();
+  const formattedListString = formatEmbeddedList(ruleString);
+  return <RuleList key={embeddedListKey}>{formattedListString}</RuleList>;
+}
+
+const generateUnlabeledRule = (ruleString: string, ruleNames: string[] = []): React.ReactNode[] => {
+  const components: React.ReactNode[] = [];
+  // TODO use a constant here
+  const instances = ruleString.split(/([*!+$|()[\]])/).filter(Boolean);
+  instances.forEach((name, index) => {
+    const isSpecialCharacter = PEG_CHARACTERS.find(
+      (char) => char === name
+    );
+    const isMissingRule = !ruleNames.includes(name) && !isSpecialCharacter;
+    if (isMissingRule) {
+      components.push(
+        <MissingRule key={`${index}-${name}`}>
+          {name}
+        </MissingRule>
+      );
+    }
+    const isDefinedRule = !ruleNames.includes(name) && !isSpecialCharacter;
+    if (isDefinedRule) {
+      return (
+        <DefinedRule key={`piece-${index}-${name}`}>
+          {name}
+        </DefinedRule>
+      );
+    }
+
+    return (
+      <SplitPiece key={`piece-${index}-${name}`}>
+        {name}
+      </SplitPiece>
+    );
+  });
+
+  return components;
+};
+
+const generateLabeledRule = (ruleString: string, ruleNames: string[] = []): React.ReactNode[] => {
+  const components: React.ReactNode[] = [];
+  // TODO use constant here
+  const [label, rule] = ruleString.split(':');
+  const key = v4();
+
+  components.push(<Label key={`label-${key}`}>{label}:</Label>);
+  components.push(
+    <Rule key={key}>
+      {generateUnlabeledRule(rule, ruleNames)}
+    </Rule>
+  );
+  return components;
+};
+
+export const generateParsedRule = (
+  ruleString: string = '',
+  ruleNames: string[] = []
+): React.ReactNode[] => {
+  const components: React.ReactNode[] = [];
+
+  const isEmbeddedList = ruleString.startsWith('[') && ruleString.endsWith(']');
+  if (isEmbeddedList) {
+    const embeddedList = generateEmbeddedList(ruleString);
+    components.push(embeddedList);
+  }
+
+  const rules = ruleString.split(' ');
+  rules.forEach((ruleInstance) => {
+    const isUnlabeledRule = !ruleInstance.includes(':');
+    if (isUnlabeledRule) {
+      const unlabeledRule = generateUnlabeledRule(ruleString, ruleNames);
+      components.push([ ...unlabeledRule ]);
+    }
+
+    const labeledRule = generateLabeledRule(ruleString, ruleNames);
+    components.push([ ...labeledRule ]);
+  });
+
+  return components.flatMap((c) => (c)); // may need to flatMap this
+};
+
+const Label = styled.label`
+  margin-right: 2px;
+`;
+
+const Rule = styled.span`
+  margin-right: 2px;
+  font-weight: 600;
+`;
+
+const MissingRule = styled.span`
+  color: tomato;
+  font-weight: 600;
+`;
+
+const SplitPiece = styled.span`
+  font-weight: 400;
+`;
+
+const DefinedRule = styled.span`
+  color: ${({ theme }) => theme.colors.highlight};
+`;
+
+const RuleList = styled.span``;

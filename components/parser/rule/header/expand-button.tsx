@@ -2,8 +2,8 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { useRuleContext } from 'contexts/rule-context';
-import AngleUpIcon from 'public/icons/angle-up.svg';
 import AngleDownIcon from 'public/icons/angle-down.svg';
+import WindowMinimize from 'public/icons/window-minimize.svg';
 
 import { Button } from 'components/common';
 
@@ -21,7 +21,7 @@ const RuleExpandButton: React.FC<RuleComponentProps> = () => {
 
   return (
     <StyledButton
-      icon={!isExpanded ? <AngleUpIcon /> : <AngleDownIcon />}
+      icon={!isExpanded ? <WindowMinimize /> : <AngleDownIcon />}
       onClick={handleOnClick}
     />
   );

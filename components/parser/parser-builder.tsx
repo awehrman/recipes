@@ -45,7 +45,7 @@ const ParserBuilder: React.FC = () => {
     <Wrapper>
       <RuleActions>
         {!loading && rules.length > 0 && (<CollapseRules
-          label={'Collapse Rules'}
+          label={!isCollapsed ? 'Collapse Rules' : 'Expand Rules'}
           onClick={handleCollapseRulesOnClick}
         />)}
         {isAddButtonDisplayed && (
