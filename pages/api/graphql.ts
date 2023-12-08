@@ -15,12 +15,11 @@ const apolloServer = new ApolloServer({
   schema,
   context: async (ctx: { req: MicroRequest }): Promise<AppContext> => {
     const session: Session | null = (await getSession(ctx)) ?? null;
-
     // an unauthorized client used to fetch our auth keys
     const evernoteClient = new Evernote.Client({
       consumerKey: process.env.NEXT_PUBLIC_EVERNOTE_API_CONSUMER_KEY,
       consumerSecret: process.env.NEXT_PUBLIC_EVERNOTE_API_CONSUMER_SECRET,
-      sandbox: process.env.NEXT_PUBLIC_EVERNOTE_ENVIRONMENT === 'sandbox',
+      sandbox: false, // process.env.NEXT_PUBLIC_EVERNOTE_ENVIRONMENT === 'sandbox',
       china: false
     });
 

@@ -26,6 +26,9 @@ import { addNewTags } from './tag';
 import { formatInstructionLinesUpsert } from './ingredient/instruction-line';
 import { formatIngredientLinesUpsert } from './ingredient/ingredient-line';
 
+// TODO move to constants file
+const EVERNOTE_PROD_BOOKMARK_GUID = `f4deaa34-0e7e-4d1a-9ebf-d6c0b04900ed`;
+
 export const fetchNotesMeta = async (
   ctx: AppContext,
   offset?: number
@@ -36,7 +39,6 @@ export const fetchNotesMeta = async (
   }
   const store = await getEvernoteStore(session.user.evernote);
   const { noteImportOffset = 0 } = session?.user;
-
   const notes: NoteMeta[] = await store
     .findNotesMetadata(
       NOTE_FILTER,
@@ -132,10 +134,19 @@ const verifyNotes = async (
   const { prisma, session } = ctx;
   const { noteImportOffset = 0 } = session?.user;
 
+  // get just the GUIDs that aren't in bookmarked (note: this may take a while...)
+  const evernoteGUIDs = notes.filter(
+    (note: Evernote.NoteStore.NoteMetadata) => `${note.notebookGuid}` !== EVERNOTE_PROD_BOOKMARK_GUID
+  ).map((note: Evernote.NoteStore.NoteMetadata) => `${note.guid}`);
+  
+  // TODO or less than the import number
+  if (evernoteGUIDs.length < 1) {
+    const offset = noteImportOffset + 1;
+    await incrementOffset(ctx, offset);
+    return await fetchNotesMeta(ctx, offset);
+  }
+
   // check if we've already imported any of these notes
-  const evernoteGUIDs = notes.map(
-    (note: Evernote.NoteStore.NoteMetadata) => `${note.guid}`
-  );
   const existingNotes = await prisma.note.findMany({
     where: {
       evernoteGUID: {
@@ -148,10 +159,8 @@ const verifyNotes = async (
     return notes;
   }
   const offset = noteImportOffset + existingNotes.length;
-  console.log('incrementing', offset);
   await incrementOffset(ctx, offset);
   const moreNotes = await fetchNotesMeta(ctx, offset);
-  console.log('moreNotes', moreNotes.length);
   return [...moreNotes, ...notes];
 };
 
@@ -162,7 +171,6 @@ const incrementOffset = async (
   const { prisma, session } = ctx;
 
   if (session) {
-    console.log('updating offset for user', noteImportOffset);
     await prisma.user.update({
       where: { id: session.user.id },
       data: {
@@ -521,7 +529,7 @@ const getNoteContent = async (
     const folder = { folder: 'recipes' };
     image = await uploadImage(buffer, folder).then((data) => data?.secure_url);
   }
-
+  
   const note: NoteWithRelations = {
     ...noteMeta,
     content: `${content}`,

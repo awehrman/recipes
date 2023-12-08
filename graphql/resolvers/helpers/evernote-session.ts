@@ -29,7 +29,7 @@ export const getAuthorizedClient = (
     token,
     consumerKey: process.env.NEXT_PUBLIC_EVERNOTE_API_CONSUMER_KEY,
     consumerSecret: process.env.NEXT_PUBLIC_EVERNOTE_API_CONSUMER_SECRET,
-    sandbox: process.env.NEXT_PUBLIC_EVERNOTE_ENVIRONMENT === 'sandbox',
+    sandbox: false, // process.env.NEXT_PUBLIC_EVERNOTE_ENVIRONMENT === 'sandbox',
     china: false
   });
 

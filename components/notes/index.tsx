@@ -29,7 +29,7 @@ const Notes: React.FC<NotesProps> = ({
         image = null,
         title
       } = note;
-      const domain = note?.source ? new URL(note.source) : { hostname: '' };
+      const domain = note?.source?.length > 0 && note.source.includes('www.') ? new URL(note.source) : { hostname: '' };
       const source = domain.hostname.replace('www.', '');
       const margin = !!image || ingredients?.length ? '0 0 20px' : '0';
 
