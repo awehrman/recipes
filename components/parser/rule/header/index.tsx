@@ -7,7 +7,7 @@ import { useParserContext } from 'contexts/parser-context';
 import useParserRule from 'hooks/use-parser-rule';
 import EditIcon from 'public/icons/edit.svg';
 import TrashIcon from 'public/icons/trash-can.svg';
-import WarningIcon from 'public/icons/exclamation.svg';
+import WarningIcon from 'public/icons/exclamation-triangle.svg';
 
 import ExpandButton from './expand-button';
 import Name from './name';

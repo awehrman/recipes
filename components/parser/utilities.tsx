@@ -74,7 +74,7 @@ const generateEmbeddedList = (ruleString: string): React.ReactNode => {
 }
 
 // TODO return type
-const generateUnlabeledRule = (ruleString: string, ruleNames: string[] = []): any => {
+const generateUnlabeledRule = (ruleString: string = '', ruleNames: string[] = []): any => {
   const components: React.ReactNode[] = [];
   let hasWarning = false;
   // TODO use a constant here
@@ -118,12 +118,11 @@ const generateUnlabeledRule = (ruleString: string, ruleNames: string[] = []): an
 };
 
 // TODO fix return type
-const generateLabeledRule = (ruleString: string, ruleNames: string[] = []): any => {
+const generateLabeledRule = (ruleString: string = '', ruleNames: string[] = []): any => {
   const components: React.ReactNode[] = [];
   const [label, rule] = ruleString.split(':');
   const key = v4();
   const { hasWarning, components: unlabeledComponents} = generateUnlabeledRule(rule, ruleNames);
-
   components.push(<Label key={`label-${key}`}>{label}:</Label>);
   components.push(
     <Rule key={key}>
@@ -154,14 +153,14 @@ export const generateParsedRule = (
   rules.forEach((ruleInstance) => {
     const isUnlabeledRule = !ruleInstance.includes(':');
     if (isUnlabeledRule) {
-      const unlabeledRule = generateUnlabeledRule(ruleString, ruleNames);
+      const unlabeledRule = generateUnlabeledRule(ruleInstance, ruleNames);
       hasWarning = unlabeledRule.hasWarning ?? hasWarning;
       components.push([ ...unlabeledRule.components ]);
+    } else {
+      const labeledRule = generateLabeledRule(ruleInstance, ruleNames);
+      hasWarning = labeledRule.hasWarning ?? hasWarning;
+      components.push([ ...labeledRule.components ]);
     }
-
-    const labeledRule = generateLabeledRule(ruleString, ruleNames);
-    hasWarning = labeledRule.hasWarning ?? hasWarning;
-    components.push([ ...labeledRule.components ]);
   });
 
   return {
