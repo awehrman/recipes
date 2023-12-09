@@ -1,7 +1,5 @@
 import { ParserRuleDefinition } from '@prisma/client';
 import _ from 'lodash';
-import styled from 'styled-components';
-import { v4 } from 'uuid';
 
 import { PEG_CHARACTERS } from 'constants/parser';
 import { WatchParserForm } from './types';

@@ -83,11 +83,12 @@ const generateUnlabeledRule = (ruleString: string = '', ruleNames: string[] = []
     const isSpecialCharacter = PEG_CHARACTERS.find(
       (char) => char === name
     );
+    const keyRoot = `${v4()}-${index}`
     const isMissingRule = !ruleNames.includes(name) && !isSpecialCharacter;
     if (isMissingRule) {
       hasWarning = true;
       components.push(
-        <MissingRule key={`${index}-${name}`}>
+        <MissingRule key={`missing-${keyRoot}-${name}`}>
           {name}
         </MissingRule>
       );
@@ -96,7 +97,7 @@ const generateUnlabeledRule = (ruleString: string = '', ruleNames: string[] = []
     const isDefinedRule = ruleNames.includes(name) && !isSpecialCharacter;
     if (isDefinedRule && !isMissingRule) {
       components.push(
-        <DefinedRule key={`piece-${index}-${name}`}>
+        <DefinedRule key={`defined-${keyRoot}-${name}`}>
           {name}
         </DefinedRule>
       );
@@ -104,7 +105,7 @@ const generateUnlabeledRule = (ruleString: string = '', ruleNames: string[] = []
 
     if (!isDefinedRule && !isMissingRule) {
       components.push(
-        <SplitPiece key={`piece-${index}-${name}`}>
+        <SplitPiece key={`piece-${keyRoot}-${name}`}>
           {name}
         </SplitPiece>
       );
@@ -147,6 +148,11 @@ export const generateParsedRule = (
   if (isEmbeddedList) {
     const embeddedList = generateEmbeddedList(ruleString);
     components.push(embeddedList);
+    
+    return {
+      components,
+      hasWarning
+    };
   }
 
   const rules = ruleString.split(' ');

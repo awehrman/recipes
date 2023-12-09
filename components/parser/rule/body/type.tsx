@@ -67,8 +67,9 @@ const Wrapper = styled.fieldset`
   border: 0;
   padding: 0;
   margin: 0;
-  margin-right: -5px;
-  margin-top: 5px;
-  float: left;
-  display: block;
+  position: absolute;
+  top: 2px;
+  right: 0;
+  float: right;
+  z-index: 100;
 `;

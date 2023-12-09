@@ -49,11 +49,11 @@ const RuleBodyContent: React.FC = () => {
 
   return (
     <Wrapper>
+      <Type onTypeSwitch={() => handleTypeChange(index, type)} />
       <Example />
       <Rule />
       <Formatter />
       <List />
-      <Type onTypeSwitch={() => handleTypeChange(index, type)} />
       {showDeleteDefinitionButton() && (
         <DeleteButton
           onClick={() => handleRemoveDefinitionClick(index)}
@@ -131,9 +131,6 @@ const AddNewDefinition = styled(Button)`
   color: ${({ theme }) => theme.colors.altGreen};
   border: 0;
   padding: 0;
-  position: relative;
-  top: 30px;
-  left: -87px;
   font-size: 12px;
 
   svg {
@@ -145,6 +142,9 @@ const AddNewDefinition = styled(Button)`
   }
 `;
 
+const Body = styled.div`
+`;
+
 const DeleteButton = styled(Button)`
   border: 0;
   background: transparent;
@@ -153,24 +153,16 @@ const DeleteButton = styled(Button)`
   font-weight: 600;
   cursor: pointer;
   padding: 0;
-  float: right;
-  display: block;
-  margin-top: 8px;
-  
-  svg {
-    position: relative;
-    height: 12px;
-    top: 1px;
-    fill: tomato;
-    margin-right: 5px;
-  }
-`;
-
-const Body = styled.div`
+  display: flex;
+  flex-basis: 100%;
+  align-self: flex-end;
+  margin-top: 6px;
 `;
 
 const Wrapper = styled.div`
   margin: 6px 20px;
   font-size: 14px;
-  flex-basis: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
 `;

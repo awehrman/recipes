@@ -64,14 +64,14 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
       dispatch({ type: 'SET_IS_FOCUSED', payload: true });
       parserDispatch({ type: 'SET_FOCUSED_RULE_INDEX', payload: index });
     }
-  }, 100);
+  }, 50);
 
   const debouncedHandleMouseLeave = _.debounce(() => {
     if (isFocused) {
       dispatch({ type: 'SET_IS_FOCUSED', payload: false });
       parserDispatch({ type: 'SET_FOCUSED_RULE_INDEX', payload: null });
     }
-  }, 200);
+  }, 50);
 
   useEffect(() => {
     dispatch({ type: 'SET_IS_EXPANDED', payload: !isCollapsed });
@@ -82,7 +82,14 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
       setFocus('name');
       setIsInit(true);
     }
-  });
+  }, [displayContext, isInit]);
+
+  useEffect(() => {
+    return () => {
+      debouncedHandleMouseEnter.cancel();
+      debouncedHandleMouseLeave.cancel();
+    };
+  }, [debouncedHandleMouseEnter, debouncedHandleMouseLeave]);
 
   return (
     <Wrapper

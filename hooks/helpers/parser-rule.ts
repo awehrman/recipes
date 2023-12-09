@@ -106,7 +106,6 @@ export const handleUpdateRuleUpdate = (
   input.definitions.forEach((definition: any, index: number) => {
     const cacheKey = `ParserRuleDefinition:${definition.id}`;
     // TODO instead of definition should this pull from res? so that we can have an accurate id?
-    console.log({ cacheKey, definition });
 
     // const existingDef = cache.readFragment({
     //   id: cacheKey,
@@ -199,23 +198,40 @@ export const handleDeleteRuleUpdate = (
   refetch();
 };
 
-const getFormattedString = (formatter: string) =>
-  formatter.replace(
+const getFormattedString = (formatter: string, index: number = 0) =>
+  formatter
+  .replace(/\${ORDER}/g, `${index}`)
+  .replace(
     /(\n)(\s*)/g,
     (_, newline, spaces) => `${newline}\t${spaces}`
   );
 
-export const getStyledGrammar = (rule: Rule) => {
-  const grammar = `\n${rule.name} "${rule.label}" = \n${(
-    rule?.definitions ?? []
-  ).map(
-    (def, index) =>
-      `${index > 0 ? '/' : ''}\t// '${def.example}' \n\t${def.rule}\n\t${getFormattedString(
-        def?.formatter ?? ''
-      )}\n`
-  ).join('')
-    } `;
-  return grammar;
+const styleRuleName = (name = '', label = '') => `\n${name} "${label}" = \n`;
+// TODO fix types
+const styleDefinitions = (defintions: any[] = []) => 
+  defintions.map((def: any, index: number) => {
+    const prefix = `${index > 0 ? '/' : ''}`;
+    if (def.type === 'LIST') {
+      return `${prefix}${styleList(def.list)}`;
+    } else {
+      return `${prefix}${styleRuleChunk(def.example, def.rule, def.formatter, index)}`;
+    }
+  }).join(``);
+
+const styleRuleChunk = (example = '', rule = '', formatter = '', index = 0) => {
+ const exampleString = `${example.length > 0 ? styleExample(example) : ''}`;
+ const ruleString = `${rule.length > 0 ? styleRule(rule) : ''}`;
+ const formatterString = `${formatter.length > 0 ? styleFormatter(formatter, index) : ''}`;
+ return `${exampleString}${ruleString}${formatterString}`;
+};
+const styleExample = (example = '') =>`\t// '${example}'\n`;
+const styleRule = (rule = '') => `\t${rule}\n`;
+const styleFormatter = (formatter = '', index = 0) => `\t${getFormattedString(formatter, index)}\n`;
+const styleList = (list = []) => `\t${list.join(` /\ `)}\n`;
+
+export const getStyledParserRule = (rule: Rule) => {
+  const parserRuleString = `${styleRuleName(rule.name, rule.label)}${styleDefinitions(rule.definitions)}`;
+  return parserRuleString;
 };
 
 export const compileGrammar = (rules: Rule[], loading: boolean = false): ParserUtility => {
@@ -230,7 +246,7 @@ export const compileGrammar = (rules: Rule[], loading: boolean = false): ParserU
   let parser: Parser, parserSource: string;
   const starter = `start = ingredientLine \n`;
   const grammar =
-    starter + rules.map((rule: Rule) => getStyledGrammar(rule)).join(`\n`);
+    starter + rules.map((rule: Rule) => getStyledParserRule(rule)).join(`\n`);
   const grammarErrors: DiagnosticNote[] = [];
   try {
     parserSource = peggy.generate(grammar, {

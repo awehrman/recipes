@@ -13,16 +13,16 @@ type FocusProps = {
   [key: number]: boolean;
 }
 const ListItems: React.FC = () => {
-  const {
-    state: { displayContext }
-  } = useRuleContext();
+  // const {
+  //   state: { displayContext }
+  // } = useRuleContext();
   const {
     state: { index, defaultValue: { list: defaultList } }
   } = useRuleDefinitionContext();
-  const { control, setValue } = useFormContext();
+  const { control } = useFormContext();
   const fieldName = `definitions.${index}.list`;
   const list = useWatch({ control, name: fieldName, defaultValue: defaultList });
-  const [focusState, setFocusState] = React.useState<FocusProps>({});
+  const [_focusState, setFocusState] = React.useState<FocusProps>({});
   
   function handleMouseOver(index: number) {
     const updated = {
@@ -37,11 +37,11 @@ const ListItems: React.FC = () => {
     setFocusState({});
   }
 
-  function handleRemoveKeyword(index: number) {
-    const newList = [...list]
-    newList.splice(index, 1);
-    setValue(fieldName, newList);
-  }
+  // function handleRemoveKeyword(index: number) {
+  //   const newList = [...list]
+  //   newList.splice(index, 1);
+  //   setValue(fieldName, newList);
+  // }
 
   function renderList() {
     return list.map((keyword: string, listIndex: number) => (
@@ -114,7 +114,8 @@ function sortByLength(list: string[]) {
   return list.sort(compareByLengthDesc);
 }
 
-const KeywordListInput = React.forwardRef((_props, ref: React.ForwardedRef<HTMLInputElement>) => {
+// TODO fix this type complaint
+const KeywordListInput = React.forwardRef((_props, ref: any) => {
   const {
     state: { index, listItemEntryValue },  
     dispatch
@@ -141,13 +142,18 @@ const KeywordListInput = React.forwardRef((_props, ref: React.ForwardedRef<HTMLI
       // otherwise we'll wrap the string in quotes ('xyz'i)
       const withQuote = /^\\'/.test(listItemEntryValue ?? '');
       const withSign = /^\$/.test(listItemEntryValue ?? '');
-      const autoFormatted = withQuote || withSign ? listItemEntryValue : `\`${listItemEntryValue}\`i`
+      const autoFormatted = withQuote || withSign ? listItemEntryValue : `\'${listItemEntryValue}\'i`
       const newList = sortByLength([...list, autoFormatted]);
-
       setValue(fieldName, newList);
       dispatch({ type: 'SET_LIST_ITEM_ENTRY_VALUE', payload: '' });
     }
   };
+
+  React.useEffect(() => {
+    if (ref?.current) {
+      ref.current.focus();
+    }
+  }, [ref]);
 
   return (
     <KeywordInput
