@@ -78,6 +78,14 @@ type Ingredient {
   updatedAt: String
 }
 
+input IngredientInput {
+  id: String!
+  isComposedIngredient: Boolean
+  isValidated: Boolean
+  name: String!
+  plural: String
+}
+
 type IngredientLine {
   blockIndex: Int
   createdAt: String

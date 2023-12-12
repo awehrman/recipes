@@ -82,7 +82,8 @@ const getRules = async (
       }
     }
   });
-  return rules;
+  const sortedRules = rules.sort((a, b) => a.order - b.order);
+  return sortedRules;
 };
 
 // TODO check on this; will nexus do this for us?
@@ -206,46 +207,46 @@ const addParserRule = async (
 // like maybe this just needs to be inserted into the cache?
 // there's got to be a default value for field arrays right??
 
-const addParserRuleDefinition = async (
-  _source: SourceValue<'Mutation'>,
-  args: ArgsValue<'Mutation', 'addParserRuleDefinition'>,
-  ctx: PartialAppContext | AppContext
-) => {
-  const { input } = args;
-  const { example, formatter, order, rule, type = 'RULE', list = [] } = input || {};
-  const { prisma } = ctx;
-  const data: Prisma.ParserRuleDefinitionCreateInput = {
-    example: example ?? '',
-    formatter: formatter ?? '',
-    order: order ?? 0,
-    rule: rule ?? '',
-    type: type ?? 'RULE',
-    list: [...(list ?? []) as string[]]
-    // for add we'll need to connect to the created rule on update
-    // parserRule: {
-    //   connect: {
-    //     id: parserRuleId
-    //   }
-    // }
-  };
+// const addParserRuleDefinition = async (
+//   _source: SourceValue<'Mutation'>,
+//   args: ArgsValue<'Mutation', 'addParserRuleDefinition'>,
+//   ctx: PartialAppContext | AppContext
+// ) => {
+//   const { input } = args;
+//   const { example, formatter, order, rule, type = 'RULE', list = [] } = input || {};
+//   const { prisma } = ctx;
+//   const data: Prisma.ParserRuleDefinitionCreateInput = {
+//     example: example ?? '',
+//     formatter: formatter ?? '',
+//     order: order ?? 0,
+//     rule: rule ?? '',
+//     type: type ?? 'RULE',
+//     list: [...(list ?? []) as string[]]
+//     // for add we'll need to connect to the created rule on update
+//     // parserRule: {
+//     //   connect: {
+//     //     id: parserRuleId
+//     //   }
+//     // }
+//   };
   
-  // console.log({ data });
-  const response = {};
-  try {
-    // TODO does this need to be explicitly tied to our parent rule? i mean probably right?
-    const result = await prisma.parserRuleDefinition.create({
-      data,
-      select: {
-        id: true
-      }
-    });
-    // response.id = result.id;
-  } catch (e) {
-    console.log({ e });
-  }
+//   // console.log({ data });
+//   const response = {};
+//   try {
+//     // TODO does this need to be explicitly tied to our parent rule? i mean probably right?
+//     const result = await prisma.parserRuleDefinition.create({
+//       data,
+//       select: {
+//         id: true
+//       }
+//     });
+//     // response.id = result.id;
+//   } catch (e) {
+//     console.log({ e });
+//   }
 
-  return response;
-};
+//   return response;
+// };
 
 // TODO all of this should probably go into a transaction
 const updateParserRule = async (
@@ -261,16 +262,18 @@ const updateParserRule = async (
     return { id: 'false' };
   }
 
+  // TODO we need to treat this differently...
+  // otherwise we're going to reset our ids every time...
+  // what if we sent an array of definitionsIds to delete instead?
   // clean out any removed definitions
-  await prisma.parserRuleDefinition.deleteMany({
-    where: {
-      parserRuleId: id,
-      id: {
-        notIn: (definitions ?? []).map((def) => def?.id ?? '')
-      }
-    }
-  });
-
+  // await prisma.parserRuleDefinition.deleteMany({
+  //   where: {
+  //     parserRuleId: id,
+  //     id: {
+  //       notIn: (definitions ?? []).map((def) => def?.id ?? '')
+  //     }
+  //   }
+  // });
 
   const upsert: Prisma.ParserRuleDefinitionUpsertWithWhereUniqueWithoutParserRuleInput[] =
     (definitions ?? []).map((def, index) => {
@@ -306,8 +309,8 @@ const updateParserRule = async (
   if (order) {
     data.order = order;
   }
-  const response = { id };
-  console.log(JSON.stringify(data, null, 2));
+  // TODO fix type
+  const response: any = { id };
 
   try {
     const result = await prisma.parserRule.update({
@@ -316,17 +319,19 @@ const updateParserRule = async (
         id: true,
         definitions: {
           select: {
-            id: true
+            id: true,
+            rule: true
           }
         }
       },
       where: { id }
     });
     response.id = result.id;
+    response.definitions = result.definitions.map((def) => ({ id: def.id, rule: def.rule }));
   } catch (e) {
     console.log({ e });
   }
-
+  console.log(JSON.stringify({ response }, null, 2));
   return response;
 };
 

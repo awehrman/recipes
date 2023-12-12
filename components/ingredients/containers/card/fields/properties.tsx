@@ -122,7 +122,7 @@ const Checkbox = styled.div`
         text-rendering: auto;
         -webkit-font-smoothing: antialiased;
 
-        font-family: 'Font Awesome 5 Pro';
+        font-family: 'Font Awesome 5 Pro' !important;
         font-weight: 900;
         content: '\f00c';
       }

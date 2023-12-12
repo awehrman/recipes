@@ -6,6 +6,7 @@ export const ADD_PARSER_RULE_MUTATION = gql`
       id
       definitions {
         id
+        rule
       }
     }
   }
@@ -18,6 +19,7 @@ export const UPDATE_PARSER_RULE_MUTATION = gql`
       id
       definitions {
         id
+        rule
       }
     }
   }

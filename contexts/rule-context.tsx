@@ -14,6 +14,7 @@ type RuleActionTypes =
   | 'SET_IS_FOCUSED'
   | 'SET_INDEX'
   | 'RESET_DEFAULT_VALUES'
+  | 'UPDATE_FORM_STATE'
   | 'SET_HAS_WARNING';
 
 type RuleState = {
@@ -69,6 +70,8 @@ function ruleReducer(state: RuleState, action: RuleAction): RuleState {
         return state;
       }
       return { ...state, hasWarning: !!action.payload };
+    case 'UPDATE_FORM_STATE':
+      return { ...state, defaultValues: { ...action.payload } };
     default:
       throw new Error(`Unhandled action type: ${action.type}`);
   }

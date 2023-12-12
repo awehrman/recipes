@@ -1,4 +1,4 @@
-import { extendType, idArg, objectType } from 'nexus';
+import { extendType, idArg, inputObjectType, objectType } from 'nexus';
 
 export const Ingredient = objectType({
   name: 'Ingredient',
@@ -84,9 +84,8 @@ export const Ingredient = objectType({
             }
           }
         });
-        // const substitutes = response.flatMap((s) => s.substitutes);
-        // return substitutes;
-        return [];
+        const substitutes = response.flatMap((s: any) => s.substitutes);
+        return substitutes;
       }
     });
     t.list.field('references', {
@@ -106,39 +105,38 @@ export const Ingredient = objectType({
             }
           }
         });
-        // const references = response.flatMap((r) => r.references);
-        // return references;
-        return [];
+        const references = response.flatMap((r: any) => r.references);
+        return references;
       }
     });
   }
 });
 
 // TODO share ingredient definition between types
-// export const IngredientInput = inputObjectType({
-//   name: 'IngredientInput',
-//   definition(t) {
-//     t.nonNull.string('id');
-//     t.nonNull.string('name');
-//     t.string('plural');
-//     t.boolean('isComposedIngredient');
-//     t.boolean('isValidated');
-//     t.list.field('properties', {
-//       type: 'Properties',
-//       resolve: async (root, _args, ctx) => {
-//         if (!root?.id) {
-//           return [];
-//         }
-//         // i wonder if there's a better way to define this in nexus :\
-//         const response = await ctx.prisma.ingredient.findUnique({
-//           where: { id: root.id },
-//           select: { properties: true },
-//         });
-//         return response?.properties ?? [];
-//       },
-//     });
-//   },
-// });
+export const IngredientInput = inputObjectType({
+  name: 'IngredientInput',
+  definition(t) {
+    t.nonNull.string('id');
+    t.nonNull.string('name');
+    t.string('plural');
+    t.boolean('isComposedIngredient');
+    t.boolean('isValidated');
+    // t.list.field('properties', {
+    //   type: 'Properties',
+    //   resolve: async (root, _args, ctx) => {
+    //     if (!root?.id) {
+    //       return [];
+    //     }
+    //     // i wonder if there's a better way to define this in nexus :\
+    //     const response = await ctx.prisma.ingredient.findUnique({
+    //       where: { id: root.id },
+    //       select: { properties: true },
+    //     });
+    //     return response?.properties ?? [];
+    //   },
+    // });
+  },
+});
 
 // Queries
 export const IngredientQuery = extendType({
@@ -213,6 +211,32 @@ export const IngredientsQuery = extendType({
               select: {
                 id: true,
                 name: true
+              }
+            },
+            // TODO 
+            // alternateNames: {
+            //   select: {
+            //     name: true
+            //   }
+            // },
+            // relatedIngredients: {
+            //   select: {
+            //     id: true,
+            //     name: true,
+            //     isValidated: true
+            //   }
+            // },
+            // substitutes: {
+            //   select: {
+            //     id: true,
+            //     name: true,
+            //     isValidated: true
+            //   }
+            // },
+            references: {
+              select: {
+                id: true,
+                reference: true
               }
             }
           }

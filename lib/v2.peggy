@@ -87,7 +87,7 @@ digits "Digits" =
 // BASE RULES
 
 _ "Whitespace" =
-  [\t, \n, \r, '  ']
+  [\t, \n, \r, ' ']
     {
       return ' ';
     }

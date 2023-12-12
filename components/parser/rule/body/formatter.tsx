@@ -26,7 +26,7 @@ const insertOrder = (value: string, index: number) => {
 
 const RuleFormatter: React.FC = () => {
   const {
-    state: { index, defaultValue }
+    state: { index, defaultValue, definitionId }
   } = useRuleDefinitionContext();
   const {
     state: { id, displayContext }
@@ -65,8 +65,9 @@ const RuleFormatter: React.FC = () => {
     if (displayContext === 'add') {
       return value.length > 0 ? value : defaultComputedValue;
     }
+    const isOptimisticAdd = definitionId.includes(`OPTIMISTIC`);
     if (displayContext === 'edit') {
-      return value;
+      return !isOptimisticAdd ? value : defaultComputedValue;
     }
     const formattedWithOrder = insertOrder(`${value}`, index);
     return formattedWithOrder;

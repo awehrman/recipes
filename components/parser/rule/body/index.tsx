@@ -20,10 +20,6 @@ const RuleBodyContent: React.FC = () => {
   } = useRuleContext();
  
   const { control, setValue } = useFormContext();
-  const { remove } = useFieldArray({
-    control,
-    name: 'definitions'
-  });
   const {
     state: { index, defaultValue: { list: defaultList, type: defaultType } }
   } = useRuleDefinitionContext();
@@ -31,7 +27,7 @@ const RuleBodyContent: React.FC = () => {
   const type = useWatch({ control, name: `definitions.${index}.type`, defaultValue: defaultType });
   const definitions = useWatch({ control, name: 'definitions' });
 
-  // TODO move this to a utlity helper
+  // TODO move this to a utility helper
   const showDeleteDefinitionButton = () => displayContext !== 'display' && ((type === 'LIST' && list.length > 0) || (type === 'RULE'));
 
   function handleRemoveDefinitionClick(index: number) {

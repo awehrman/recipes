@@ -63,8 +63,9 @@ const Errors: React.FC = () => {
   const { rules = [], loading } = useParserRules();
   const { errors = [] } = usePEGParser(rules, loading);
 
+  // TODO fix type
   function renderErrors() {
-    return errors.map((error, index) => (
+    return errors.map((error: any, index) => (
       <Error key={`error-${index}-${error?.message}-Error`}>{error?.message ?? ''}</Error>
     ));
   }

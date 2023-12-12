@@ -160,11 +160,15 @@ export const generateParsedRule = (
     const isUnlabeledRule = !ruleInstance.includes(':');
     if (isUnlabeledRule) {
       const unlabeledRule = generateUnlabeledRule(ruleInstance, ruleNames);
-      hasWarning = unlabeledRule.hasWarning ?? hasWarning;
+      if (!hasWarning) {
+        hasWarning = unlabeledRule.hasWarning ?? hasWarning;
+      }
       components.push([ ...unlabeledRule.components ]);
     } else {
       const labeledRule = generateLabeledRule(ruleInstance, ruleNames);
-      hasWarning = labeledRule.hasWarning ?? hasWarning;
+      if (!hasWarning) {
+        hasWarning = labeledRule.hasWarning ?? hasWarning;
+      }
       components.push([ ...labeledRule.components ]);
     }
   });

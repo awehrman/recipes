@@ -1,4 +1,4 @@
-import { ApolloCache, gql } from '@apollo/client';
+import { ApolloCache } from '@apollo/client';
 import _ from 'lodash';
 import peggy, { Parser, DiagnosticNote } from 'peggy';
 
@@ -35,7 +35,6 @@ export const handleAddRuleUpdate = (
   res: any, // TODO fix type
   input: any // TODO fix type
 ) => {
-  console.log('handleAddRuleUpdate', { res, input });
   const isOptimisticResponse = res.data.addParserRule.id === '-1';
   // TODO read/write fragment vs read/write all rules query vs read/write just this rule?
   const rules: ParserRules | null = cache.readQuery({
@@ -90,72 +89,6 @@ export const handleAddRuleUpdate = (
   }
 };
 
-export const handleUpdateRuleUpdate = (
-  cache: ApolloCache<any>,
-  res: any,
-  input: any
-) => {
-  const rules: ParserRules | null = cache.readQuery({
-    query: GET_ALL_PARSER_RULES_QUERY
-  });
-
-  if (!(input?.definitions ?? []).length) {
-    input.definitions = [];
-  }
-
-  input.definitions.forEach((definition: any, index: number) => {
-    const cacheKey = `ParserRuleDefinition:${definition.id}`;
-    // TODO instead of definition should this pull from res? so that we can have an accurate id?
-
-    // const existingDef = cache.readFragment({
-    //   id: cacheKey,
-    //   fragment: gql`
-    //     fragment ReadFragment on ParserRuleDefinition {
-    //       id
-    //       rule
-    //       order
-    //       example
-    //       formatter
-    //       type
-    //       list
-    //     }
-    //   `
-    // });
-    cache.writeFragment({
-      id: cacheKey,
-      // TODO move this fragment
-      fragment: gql`
-        fragment WriteFragment on ParserRuleDefinition {
-          id
-          rule
-          order
-          example
-          formatter
-          type
-          list
-        }
-      `,
-      data: {
-        ...definition,
-        __typename: 'ParserRuleDefinition'
-      }
-    });
-  });
-
-  const parserRules = (rules?.parserRules ?? []).map((rule: any) => ({
-    ...rule,
-    __typename: 'ParserRule',
-    // if we find our optimistic response, replace it with our actual response id
-    ...(rule.id === input.id ? { ...input } : {})
-  }));
-
-  const data = { parserRules };
-  cache.writeQuery({
-    query: GET_ALL_PARSER_RULES_QUERY,
-    data
-  });
-};
-
 export const handleDeleteRuleUpdate = (
   cache: ApolloCache<any>,
   res: any,
@@ -208,8 +141,8 @@ const getFormattedString = (formatter: string, index: number = 0) =>
 
 const styleRuleName = (name = '', label = '') => `\n${name} "${label}" = \n`;
 // TODO fix types
-const styleDefinitions = (defintions: any[] = []) => 
-  defintions.map((def: any, index: number) => {
+const styleDefinitions = (definitions: any[] = []) => 
+  definitions.map((def: any, index: number) => {
     const prefix = `${index > 0 ? '/' : ''}`;
     if (def.type === 'LIST') {
       return `${prefix}${styleList(def.list)}`;

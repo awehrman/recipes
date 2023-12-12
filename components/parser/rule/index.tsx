@@ -1,7 +1,7 @@
 import { ParserRuleWithRelations } from '@prisma/client';
 import _ from 'lodash';
 import React, { useEffect } from 'react';
-import { FormProvider, useForm } from 'react-hook-form';
+import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
 import styled from 'styled-components';
 
 import { getDefaultRuleValuesForIndex, RuleProvider, useRuleContext } from 'contexts/rule-context';
@@ -30,10 +30,11 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
     defaultValues,
     mode: 'onBlur'
   });
+  
   const { handleSubmit, reset, setFocus } = methods;
   const { addRule, updateRule } = useParserRule(rule?.id ?? '-1');
   const saveLabel = displayContext === 'add' ? 'Add Rule' : 'Save Rule';
-
+  
   function handleCancelClick(event: React.MouseEvent<HTMLButtonElement>) {
     event.preventDefault();
     // TODO should any of these useParserRule calls actually be dispatched from the ruleContext?
@@ -45,10 +46,14 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
 
   function handleFormSubmit(data: ParserRuleWithRelations) {
     // TODO we'll probably pass this explicitly in, but for now just throw it at the bottom
-    data.order = rules?.length ?? 0;
+    if (data.order === 'undefined' || data.order === null) {
+      data.order = rules?.length ?? 0;
+    }
     const input = removeTypename(data);
     if (displayContext === 'edit') {
+      reset({ ...input });
       updateRule(input);
+      dispatch({ type: 'UPDATE_FORM_STATE', payload: data });
     } else if (displayContext === 'add') {
       addRule(input);
       dispatch({ type: 'RESET_DEFAULT_VALUES', payload: getDefaultRuleValuesForIndex(0)});
@@ -166,7 +171,7 @@ const Wrapper = styled.form`
   padding-left: 40px;
   margin-bottom: 10px;
   /* keep some kind of background so we can maintain hover */
-  background: transparent;
+  background: white;
 
   &.edit {
     left: -40px;
