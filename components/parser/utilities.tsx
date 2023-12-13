@@ -3,9 +3,8 @@ import styled from 'styled-components';
 import { v4 } from 'uuid';
 
 import { PEG_CHARACTERS } from 'constants/parser';
-import { useRuleContext } from 'contexts/rule-context';
 
-import { formatEmbeddedList } from './utils';
+import { formatEmbeddedList, isEmbeddedList } from './utils';
 
 const defaultValue = `{
   function formatOutput(parsed = []) {
@@ -70,8 +69,8 @@ const UtilityTextArea = styled.textarea`
 const generateEmbeddedList = (ruleString: string): React.ReactNode => {
   const embeddedListKey = v4();
   const formattedListString = formatEmbeddedList(ruleString);
-  return <RuleList key={embeddedListKey}>{formattedListString}</RuleList>;
-}
+  return <RuleList key={embeddedListKey}>[{formattedListString}]</RuleList>;
+};
 
 // TODO return type
 const generateUnlabeledRule = (ruleString: string = '', ruleNames: string[] = []): any => {
@@ -123,7 +122,7 @@ const generateLabeledRule = (ruleString: string = '', ruleNames: string[] = []):
   const components: React.ReactNode[] = [];
   const [label, rule] = ruleString.split(':');
   const key = v4();
-  const { hasWarning, components: unlabeledComponents} = generateUnlabeledRule(rule, ruleNames);
+  const { components: unlabeledComponents} = generateUnlabeledRule(rule, ruleNames);
   components.push(<Label key={`label-${key}`}>{label}:</Label>);
   components.push(
     <Rule key={key}>
@@ -132,8 +131,7 @@ const generateLabeledRule = (ruleString: string = '', ruleNames: string[] = []):
   );
   
   return {
-    components,
-    hasWarning
+    components
   };
 };
 
@@ -143,15 +141,14 @@ export const generateParsedRule = (
   ruleNames: string[] = []
 ): any => {
   const components: React.ReactNode[] = [];
-  let hasWarning = false;
-  const isEmbeddedList = ruleString.startsWith('[') && ruleString.endsWith(']');
-  if (isEmbeddedList) {
+  const isList = isEmbeddedList(ruleString);
+  
+  if (isList) {
     const embeddedList = generateEmbeddedList(ruleString);
     components.push(embeddedList);
     
     return {
-      components,
-      hasWarning
+      components
     };
   }
 
@@ -160,22 +157,15 @@ export const generateParsedRule = (
     const isUnlabeledRule = !ruleInstance.includes(':');
     if (isUnlabeledRule) {
       const unlabeledRule = generateUnlabeledRule(ruleInstance, ruleNames);
-      if (!hasWarning) {
-        hasWarning = unlabeledRule.hasWarning ?? hasWarning;
-      }
       components.push([ ...unlabeledRule.components ]);
     } else {
       const labeledRule = generateLabeledRule(ruleInstance, ruleNames);
-      if (!hasWarning) {
-        hasWarning = labeledRule.hasWarning ?? hasWarning;
-      }
       components.push([ ...labeledRule.components ]);
     }
   });
 
   return {
-    components: components.flatMap((c) => (c)),
-    hasWarning
+    components: components.flatMap((c) => (c))
   };
 };
 

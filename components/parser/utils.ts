@@ -87,3 +87,33 @@ export const validateIndividualRule = (ruleInstanceName: string, rules: string[]
     ordered
   };
 };
+
+export const isEmbeddedList = (str: string) =>
+  str.startsWith('[') && (
+    str.endsWith(']') || str.endsWith(']i')
+  );
+
+function excludeCharacters(inputString: string) {
+  const exclusionList = /[.*!+$|()[\]]/g;
+  return inputString.replace(exclusionList, '');
+};
+
+export const hasRuleWarning = (ruleString: string = '', ruleNames: string[] = []): any => {
+  let hasWarning = false;
+  const isList = isEmbeddedList(ruleString);
+  if (isList) {
+    return hasWarning;
+  }
+
+  const rules = ruleString.split(' ');
+  for (const ruleInstance of rules) {
+    const isLabeledRule = ruleInstance.includes(':');
+    const ruleName = isLabeledRule ? excludeCharacters(ruleInstance.split(':')[1]) : excludeCharacters(ruleInstance);
+    
+    if (!ruleNames.includes(ruleName) && !PEG_CHARACTERS.some((c: string) => c === ruleName)) {
+      hasWarning = true;
+      return hasWarning;
+    }
+  }
+  return hasWarning;
+};

@@ -1,19 +1,20 @@
-import { ParserRuleWithRelations } from '@prisma/client';
+import { ParserRuleDefinition, ParserRuleWithRelations } from '@prisma/client';
 import _ from 'lodash';
 import React, { useEffect } from 'react';
-import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import styled from 'styled-components';
 
 import { getDefaultRuleValuesForIndex, RuleProvider, useRuleContext } from 'contexts/rule-context';
 import { useParserContext } from 'contexts/parser-context';
 import { Button } from 'components/common';
+import { removeTypename } from 'hooks/helpers/parser-rule';
 import useParserRule from 'hooks/use-parser-rule';
 import useParserRules from 'hooks/use-parser-rules';
 
 import RuleBody from './body';
 import RuleHeader from './header';
 import { RuleComponentProps, RuleContentProps } from '../types';
-import { removeTypename } from 'hooks/helpers/parser-rule';
+import { hasRuleWarning } from '../utils';
 
 const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
   const [isInit, setIsInit] = React.useState(false);
@@ -30,7 +31,13 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
     defaultValues,
     mode: 'onBlur'
   });
-  
+  const definedRuleNames = rules.map((rule: ParserRuleWithRelations) => rule.name);
+  const ruleDefinitionNames: any[] = [
+    ...new Set(
+      (rule?.definitions ?? [])
+        .map((def: ParserRuleDefinition) => def.rule)
+        .filter((def: string) => !!def.length)
+      )];
   const { handleSubmit, reset, setFocus } = methods;
   const { addRule, updateRule } = useParserRule(rule?.id ?? '-1');
   const saveLabel = displayContext === 'add' ? 'Add Rule' : 'Save Rule';
@@ -95,6 +102,18 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
       debouncedHandleMouseLeave.cancel();
     };
   }, [debouncedHandleMouseEnter, debouncedHandleMouseLeave]);
+
+  useEffect(() => {
+    let triggedWarning = false;
+    for (const rule of ruleDefinitionNames) {
+      const containsWarnings = hasRuleWarning(rule, definedRuleNames);
+      if (containsWarnings) {
+        triggedWarning = true;
+        break;
+      }
+    }
+    dispatch({ type: 'SET_HAS_WARNING', payload: triggedWarning });
+  }, [ruleDefinitionNames, definedRuleNames])
 
   return (
     <Wrapper

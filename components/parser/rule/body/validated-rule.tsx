@@ -53,16 +53,12 @@ const ValidatedRule: React.FC<ValidatedRuleComponentProps> = ({
       generateParsedRule(ruleString, ruleNames),
     [ruleNames]
   );
-  const { hasWarning, components } = formatRules(`${currentRuleDefinition}`);
+  const { components } = formatRules(`${currentRuleDefinition}`);
 
   const focusProps = {
     tabIndex: 0,
     onFocus: onFocus
   };
-
-  React.useEffect(() => {
-    dispatch({ type: 'SET_HAS_WARNING', payload: hasWarning });
-  }, [hasWarning])
 
   return (
     <Wrapper {...(displayContext === 'display' ? {} : { ...focusProps })}>
