@@ -41,12 +41,7 @@ const Rules: React.FC = () => {
     <RulesWrapper>
       <Header>Rules</Header>
       <ToggleView label={toggleLabel} onClick={handleToggleViewClick} />
-      {view === 'rules' ? (
-        <ParserBuilder />
-      ) : (
-        <Grammar />
-      )}
-      
+      {view === 'rules' ? <ParserBuilder /> : <Grammar />}
     </RulesWrapper>
   );
 };

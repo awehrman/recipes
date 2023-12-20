@@ -13,7 +13,7 @@ export const PARSER_RULE_DEFINITION_FRAGMENT = gql`
 `;
 
 const all = {
-  PARSER_RULE_DEFINITION_FRAGMENT,
+  PARSER_RULE_DEFINITION_FRAGMENT
 };
 
 export default all;

@@ -25,7 +25,8 @@ const RuleExample: React.FC = () => {
     event.target.value = event.target.value.trim();
   }
 
-  if ((displayContext === 'display' && !defaultValue.example) || !showField) return null;
+  if ((displayContext === 'display' && !defaultValue.example) || !showField)
+    return null;
 
   return (
     <Wrapper>

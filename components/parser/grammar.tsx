@@ -8,11 +8,7 @@ const Grammar: React.FC = () => {
   const { rules = [] } = useParserRules();
   const { grammar } = usePEGParser(rules);
 
-  return (
-    <Wrapper>
-      {grammar}
-    </Wrapper>
-  );
+  return <Wrapper>{grammar}</Wrapper>;
 };
 
 const Wrapper = styled.pre`

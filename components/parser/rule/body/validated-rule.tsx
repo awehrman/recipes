@@ -19,8 +19,7 @@ const ValidatedRule: React.FC<ValidatedRuleComponentProps> = ({
 }) => {
   const { rules = [] } = useParserRules();
   const {
-    state: { displayContext },
-    dispatch
+    state: { displayContext }
   } = useRuleContext();
   const {
     state: { definitionId, defaultValue }
@@ -49,11 +48,10 @@ const ValidatedRule: React.FC<ValidatedRuleComponentProps> = ({
       : dirtyValue;
 
   const formatRules = useCallback(
-    (ruleString: string) => 
-      generateParsedRule(ruleString, ruleNames),
+    (ruleString: string) => generateParsedRule(ruleString, ruleNames),
     [ruleNames]
   );
-  const { components } = formatRules(`${currentRuleDefinition}`);
+  const components = formatRules(`${currentRuleDefinition}`);
 
   const focusProps = {
     tabIndex: 0,

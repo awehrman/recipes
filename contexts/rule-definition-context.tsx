@@ -26,7 +26,7 @@ type RuleDefinitionState = {
     rule?: string;
     type: string;
     order: number; // TODO keep thinking about if this should be separate from index
-  }
+  };
 };
 
 type RuleDefinitionAction = {

@@ -37,7 +37,6 @@ const Rule: React.FC = () => {
     (displayContext === 'display' || !isActiveElement) &&
     (updatedFormValue?.length ?? 0) > 0;
 
-
   function handleOnBlur(event: React.ChangeEvent<HTMLInputElement>) {
     event.target.value = event.target.value.trim();
     setIsActiveElement(false);
@@ -47,7 +46,8 @@ const Rule: React.FC = () => {
     setIsActiveElement(true);
   }
 
-  if ((displayContext === 'display' && !defaultValue.rule) || !showField) return null;
+  if ((displayContext === 'display' && !defaultValue.rule) || !showField)
+    return null;
 
   return (
     <Wrapper>

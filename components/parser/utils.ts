@@ -2,7 +2,10 @@ import { ParserRuleDefinition } from '@prisma/client';
 import _ from 'lodash';
 
 import { PEG_CHARACTERS } from 'constants/parser';
-import { WatchParserForm } from './types';
+import {
+  ParserRuleDefinitionWithRelationsWithTypeName,
+  WatchParserForm
+} from './types';
 
 export const getDefaultDefinitions = (order: number = 0) => ({
   example: '',
@@ -33,20 +36,19 @@ export const getFieldUpdates = ({
 
   // otherwise we'll need to find the definition first, then the value
   const definition = definitions.find(
-    (def: ParserRuleDefinition) =>
-      def.id === definitionId
+    (def: ParserRuleDefinition) => def.id === definitionId
   );
   return definition?.[fieldName];
 };
 
-export const getDefaultFormatter = (ruleName: string): string => 
+export const getDefaultFormatter = (ruleName: string): string =>
   `{
-  const values = [...].flatMap(value => value);
-  return {
-    rule: \`#\${ORDER}_${_.camelCase(ruleName)}\`,
-    type: '${_.camelCase(ruleName)}',
-    values
-  };
+const values = [...].flatMap(value => value);
+return {
+rule: \`#\${ORDER}_${_.camelCase(ruleName)}\`,
+type: '${_.camelCase(ruleName)}',
+values
+};
 }`;
 
 export const formatEmbeddedList = (rule: string): string => {
@@ -55,7 +57,10 @@ export const formatEmbeddedList = (rule: string): string => {
 };
 
 // TODO fix return type
-export const validateIndividualRule = (ruleInstanceName: string, rules: string[]): any => {
+export const validateIndividualRule = (
+  ruleInstanceName: string,
+  rules: string[]
+): any => {
   const undefinedRules: any = [];
   const definedRules: any = [];
   const syntax: any = [];
@@ -89,16 +94,17 @@ export const validateIndividualRule = (ruleInstanceName: string, rules: string[]
 };
 
 export const isEmbeddedList = (str: string) =>
-  str.startsWith('[') && (
-    str.endsWith(']') || str.endsWith(']i')
-  );
+  str.startsWith('[') && (str.endsWith(']') || str.endsWith(']i'));
 
 function excludeCharacters(inputString: string) {
   const exclusionList = /[.*!+$|()[\]]/g;
   return inputString.replace(exclusionList, '');
-};
+}
 
-export const hasRuleWarning = (ruleString: string = '', ruleNames: string[] = []): any => {
+export const hasRuleWarning = (
+  ruleString: string = '',
+  ruleNames: string[] = []
+): any => {
   let hasWarning = false;
   const isList = isEmbeddedList(ruleString);
   if (isList) {
@@ -108,12 +114,52 @@ export const hasRuleWarning = (ruleString: string = '', ruleNames: string[] = []
   const rules = ruleString.split(' ');
   for (const ruleInstance of rules) {
     const isLabeledRule = ruleInstance.includes(':');
-    const ruleName = isLabeledRule ? excludeCharacters(ruleInstance.split(':')[1]) : excludeCharacters(ruleInstance);
-    
-    if (!ruleNames.includes(ruleName) && !PEG_CHARACTERS.some((c: string) => c === ruleName)) {
+    const ruleName = isLabeledRule
+      ? excludeCharacters(ruleInstance.split(':')[1])
+      : excludeCharacters(ruleInstance);
+
+    if (
+      !ruleNames.includes(ruleName) &&
+      !PEG_CHARACTERS.some((c: string) => c === ruleName)
+    ) {
       hasWarning = true;
       return hasWarning;
     }
   }
   return hasWarning;
+};
+
+export const getOptimisticParserRuleDefinition = (
+  fields: any[],
+  id: string = '-1'
+): ParserRuleDefinitionWithRelationsWithTypeName => ({
+  id: `OPTIMISTIC-${(fields ?? []).length}`,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  parserRuleId: id,
+  example: '',
+  rule: '',
+  formatter: '',
+  order: (fields ?? []).length,
+  type: 'RULE',
+  list: [],
+  __typename: 'ParserRuleDefinition'
+});
+
+export const sortByLength = (list: string[]) => {
+  function compareByLengthDesc(a: string, b: string) {
+    return b.length - a.length;
+  }
+
+  return list.sort(compareByLengthDesc);
+};
+
+export const formatKeywordList = (value: string, list: string[]): string[] => {
+  // if listItemEntryValue starts with a \' or a $( we'll take it as is
+  // otherwise we'll wrap the string in quotes ('xyz'i)
+  const withQuote = /^\\'/.test(value ?? '');
+  const withSign = /^\$/.test(value ?? '');
+  const autoFormatted = withQuote || withSign ? value : `\'${value}\'i`;
+  const newList = sortByLength([...list, autoFormatted]);
+  return newList;
 };

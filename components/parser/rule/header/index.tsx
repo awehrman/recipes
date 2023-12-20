@@ -20,7 +20,9 @@ const RuleHeader: React.FC<RuleComponentProps> = () => {
     dispatch,
     state: { id, displayContext, hasWarning, index }
   } = useRuleContext();
-  const { state: { focusedRuleIndex } } = useParserContext();
+  const {
+    state: { focusedRuleIndex }
+  } = useParserContext();
   const isFocusedRule = focusedRuleIndex !== null && index === focusedRuleIndex;
   const { deleteRule } = useParserRule(id);
 
@@ -60,7 +62,7 @@ const StyledWarningIcon = styled(WarningIcon)`
   fill: tomato;
   height: 13px;
   margin-top: 5px;
-`; 
+`;
 
 const Header = styled.div`
   display: flex;

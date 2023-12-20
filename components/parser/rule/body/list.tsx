@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 
@@ -7,23 +7,28 @@ import { useRuleContext } from 'contexts/rule-context';
 import { useRuleDefinitionContext } from 'contexts/rule-definition-context';
 import useClickOutside from 'hooks/use-click-outside';
 import PlusIcon from 'public/icons/plus.svg';
-import TrashIcon from 'public/icons/trash-can.svg';
 
-type FocusProps = {
-  [key: number]: boolean;
-}
+import { formatKeywordList } from '../../utils';
+import { ListKeywordFocusProps } from '../../types';
+
 const ListItems: React.FC = () => {
-  // const {
-  //   state: { displayContext }
-  // } = useRuleContext();
   const {
-    state: { index, defaultValue: { list: defaultList } }
+    state: {
+      index,
+      defaultValue: { list: defaultList }
+    }
   } = useRuleDefinitionContext();
   const { control } = useFormContext();
   const fieldName = `definitions.${index}.list`;
-  const list = useWatch({ control, name: fieldName, defaultValue: defaultList });
-  const [_focusState, setFocusState] = React.useState<FocusProps>({});
-  
+  const list = useWatch({
+    control,
+    name: fieldName,
+    defaultValue: defaultList
+  });
+  const [_focusState, setFocusState] = React.useState<ListKeywordFocusProps>(
+    {}
+  );
+
   function handleMouseOver(index: number) {
     const updated = {
       [index]: true
@@ -51,37 +56,11 @@ const ListItems: React.FC = () => {
         onMouseLeave={() => handleMouseLeave(listIndex)}
       >
         {keyword}
-        {/* {displayContext !== 'display' && (focusState?.[listIndex] ?? false) && (
-          <DeleteButton
-            onClick={() => handleRemoveKeyword(listIndex)}
-            icon={<TrashIcon />}
-          />
-        )} */}
       </ListItem>
     ));
   }
   return <StyledList>{renderList()}</StyledList>;
 };
-
-// const DeleteButton = styled(Button)`
-//   border: 0;
-//   background: transparent;
-//   color: #aaa;
-//   font-size: 12px;
-//   font-weight: 600;
-//   position: relative;
-//   cursor: pointer;
-//   z-index: 100;
-//   padding-right: 0px;
-
-//   svg {
-//     position: relative;
-//     height: 12px;
-//     top: 1px;
-//     fill: tomato;
-//     margin-right: 5px;
-//   }
-// `;
 
 const StyledList = styled.ul`
   margin: 0;
@@ -105,26 +84,13 @@ const ListItem = styled.li`
   }
 `;
 
-// TODO move
-function sortByLength(list: string[]) {
-  function compareByLengthDesc(a: string, b: string) {
-    return b.length - a.length;
-  }
-
-  return list.sort(compareByLengthDesc);
-}
-
 // TODO fix this type complaint
 const KeywordListInput = React.forwardRef((_props, ref: any) => {
   const {
-    state: { index, listItemEntryValue },  
+    state: { index, listItemEntryValue },
     dispatch
   } = useRuleDefinitionContext();
-  const {
-    control,
-    register,
-    setValue
-  } = useFormContext();
+  const { control, setValue } = useFormContext();
   const fieldName = `definitions.${index}.list`;
   const list = useWatch({ control, name: fieldName });
 
@@ -136,20 +102,13 @@ const KeywordListInput = React.forwardRef((_props, ref: any) => {
   function handleOnKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
     if (event.key === 'Enter') {
       dispatch({ type: 'SET_SHOW_LIST_INPUT', payload: false });
-
-      // TODO throw this all in a helper function
-      // if listItemEntryValue starts with a \' or a $( we'll take it as is
-      // otherwise we'll wrap the string in quotes ('xyz'i)
-      const withQuote = /^\\'/.test(listItemEntryValue ?? '');
-      const withSign = /^\$/.test(listItemEntryValue ?? '');
-      const autoFormatted = withQuote || withSign ? listItemEntryValue : `\'${listItemEntryValue}\'i`
-      const newList = sortByLength([...list, autoFormatted]);
-      setValue(fieldName, newList);
+      const sortedList = formatKeywordList(listItemEntryValue ?? '', list);
+      setValue(fieldName, sortedList);
       dispatch({ type: 'SET_LIST_ITEM_ENTRY_VALUE', payload: '' });
     }
-  };
+  }
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (ref?.current) {
       ref.current.focus();
     }
@@ -191,9 +150,11 @@ const RuleList: React.FC = () => {
   const type = useWatch({ control, name: `definitions.${index}.type` });
   const showField = type === 'LIST';
 
-  const showButton = showField && displayContext !== 'display' && !showListInput;
+  const showButton =
+    showField && displayContext !== 'display' && !showListInput;
 
-  const displayModeWithNoLength = displayContext === 'display' && defaultValue.list.length === 0;
+  const displayModeWithNoLength =
+    displayContext === 'display' && defaultValue.list.length === 0;
 
   if (displayModeWithNoLength || !showField) {
     return null;
@@ -204,7 +165,12 @@ const RuleList: React.FC = () => {
       <ListItems />
 
       {showButton ? (
-        <AddToListButton id="add-new-keyword-button" label="Add Keyword" onClick={handleAddToListClick} icon={<PlusIcon />} />
+        <AddToListButton
+          id="add-new-keyword-button"
+          label="Add Keyword"
+          onClick={handleAddToListClick}
+          icon={<PlusIcon />}
+        />
       ) : null}
 
       {showListInput ? <KeywordListInput ref={inputRef} /> : null}
@@ -213,7 +179,6 @@ const RuleList: React.FC = () => {
 };
 
 export default RuleList;
-
 
 const AddToListButton = styled(Button)`
   display: inline-block;

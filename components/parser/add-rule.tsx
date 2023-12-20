@@ -10,7 +10,7 @@ type AddRuleProps = {};
 
 const AddRule: React.FC<AddRuleProps> = () => {
   const {
-    state: { isAddButtonDisplayed },
+    state: { isAddButtonDisplayed }
   } = useParserContext();
 
   if (isAddButtonDisplayed) {
@@ -27,8 +27,7 @@ const AddRule: React.FC<AddRuleProps> = () => {
 
 export default AddRule;
 
-const Wrapper = styled.div`
-`;
+const Wrapper = styled.div``;
 
 const Header = styled.h2`
   font-size: 16px;

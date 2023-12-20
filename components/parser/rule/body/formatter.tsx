@@ -14,11 +14,7 @@ import { useRuleContext } from 'contexts/rule-context';
 import { useRuleDefinitionContext } from 'contexts/rule-definition-context';
 import useParserRule from 'hooks/use-parser-rule';
 
-import {
-  formatterSetup,
-  themeOptions
-} from './formatter.theme';
-
+import { formatterSetup, themeOptions } from './formatter.theme';
 
 const insertOrder = (value: string, index: number) => {
   return value.replace(/\${ORDER}/g, index.toString());
@@ -73,8 +69,10 @@ const RuleFormatter: React.FC = () => {
     return formattedWithOrder;
   }
 
-
-  if ((displayContext === 'display' && !formattedWithOrder?.length) || !showField) {
+  if (
+    (displayContext === 'display' && !formattedWithOrder?.length) ||
+    !showField
+  ) {
     return null;
   }
 
@@ -86,7 +84,9 @@ const RuleFormatter: React.FC = () => {
         defaultValue={defaultComputedValue}
         disabled={displayContext === 'display'}
         name={fieldName}
-        placeholder={displayContext === 'display' ? '' : '/* format rule return */'}
+        placeholder={
+          displayContext === 'display' ? '' : '/* format rule return */'
+        }
       />
       {/* TODO this is a focus trap */}
       <StyledEditor
@@ -96,7 +96,9 @@ const RuleFormatter: React.FC = () => {
         height="auto"
         indentWithTab
         onChange={handleOnChange}
-        placeholder={displayContext === 'display' ? '' : '/* format rule return */'}
+        placeholder={
+          displayContext === 'display' ? '' : '/* format rule return */'
+        }
         readOnly={displayContext === 'display'}
         theme={themeOptions[displayContext as ThemeOptionKey]}
         width="525px"

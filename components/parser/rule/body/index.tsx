@@ -1,13 +1,17 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 
 import { Button } from 'components/common';
 import { useRuleContext } from 'contexts/rule-context';
-import { useRuleDefinitionContext, RuleDefinitionProvider } from 'contexts/rule-definition-context';
+import {
+  useRuleDefinitionContext,
+  RuleDefinitionProvider
+} from 'contexts/rule-definition-context';
 import useParserRule from 'hooks/use-parser-rule';
 import PlusIcon from 'public/icons/plus.svg';
 
+import { getOptimisticParserRuleDefinition } from '../../utils';
 import Example from './example';
 import Formatter from './formatter';
 import Rule from './rule';
@@ -18,20 +22,38 @@ const RuleBodyContent: React.FC = () => {
   const {
     state: { displayContext }
   } = useRuleContext();
- 
+
   const { control, setValue } = useFormContext();
   const {
-    state: { index, defaultValue: { list: defaultList, type: defaultType } }
+    state: {
+      index,
+      defaultValue: { list: defaultList, type: defaultType }
+    }
   } = useRuleDefinitionContext();
-  const list = useWatch({ control, name: `definitions.${index}.list`, defaultValue: defaultList });
-  const type = useWatch({ control, name: `definitions.${index}.type`, defaultValue: defaultType });
+  const list = useWatch({
+    control,
+    name: `definitions.${index}.list`,
+    defaultValue: defaultList
+  });
+  const type = useWatch({
+    control,
+    name: `definitions.${index}.type`,
+    defaultValue: defaultType
+  });
   const definitions = useWatch({ control, name: 'definitions' });
 
-  // TODO move this to a utility helper
-  const showDeleteDefinitionButton = () => displayContext !== 'display' && ((type === 'LIST' && list.length > 0) || (type === 'RULE'));
+  const showDeleteDefinitionButton = useCallback(
+    () =>
+      displayContext !== 'display' &&
+      ((type === 'LIST' && list.length > 0) || type === 'RULE'),
+    [displayContext, type, list]
+  );
 
   function handleRemoveDefinitionClick(index: number) {
-    const updatedDefinitions = [...definitions.slice(0, index), ...definitions.slice(index + 1)];
+    const updatedDefinitions = [
+      ...definitions.slice(0, index),
+      ...definitions.slice(index + 1)
+    ];
     setValue('definitions', updatedDefinitions);
   }
 
@@ -57,8 +79,8 @@ const RuleBodyContent: React.FC = () => {
         />
       )}
     </Wrapper>
-  )
-}
+  );
+};
 
 const RuleBody: React.FC = () => {
   const {
@@ -73,18 +95,8 @@ const RuleBody: React.FC = () => {
   const { definitions = [] } = rule;
 
   function handleAddNewDefinitionClick() {
-    // TODO throw this into a constants file
-    append({
-      id: `OPTIMISTIC-${(fields ?? []).length}`,
-      parserRuleId: id,
-      example: '',
-      rule: '',
-      formatter: '',
-      order: (fields ?? []).length,
-      type: 'RULE',
-      list: [],
-      __typename: 'ParserRuleDefinition'
-    });
+    const optimisticDefinition = getOptimisticParserRuleDefinition(fields, id);
+    append(optimisticDefinition);
   }
 
   function renderDefinitions() {
@@ -138,8 +150,7 @@ const AddNewDefinition = styled(Button)`
   }
 `;
 
-const Body = styled.div`
-`;
+const Body = styled.div``;
 
 const DeleteButton = styled(Button)`
   border: 0;

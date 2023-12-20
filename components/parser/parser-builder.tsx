@@ -22,7 +22,6 @@ const ParserBuilder: React.FC = () => {
     dispatch({ type: 'SET_IS_ADD_BUTTON_DISPLAYED', payload: false });
   }
 
-
   function handleCollapseRulesOnClick() {
     dispatch({ type: 'SET_IS_COLLAPSED', payload: !isCollapsed });
   }
@@ -44,10 +43,12 @@ const ParserBuilder: React.FC = () => {
   return (
     <Wrapper>
       <RuleActions>
-        {!loading && rules.length > 0 && (<CollapseRules
-          label={!isCollapsed ? 'Collapse Rules' : 'Expand Rules'}
-          onClick={handleCollapseRulesOnClick}
-        />)}
+        {!loading && rules.length > 0 && (
+          <CollapseRules
+            label={!isCollapsed ? 'Collapse Rules' : 'Expand Rules'}
+            onClick={handleCollapseRulesOnClick}
+          />
+        )}
         {isAddButtonDisplayed && (
           <AddRuleButton
             icon={<PlusIcon />}
@@ -56,19 +57,16 @@ const ParserBuilder: React.FC = () => {
           />
         )}
       </RuleActions>
-      
+
       <AddRule />
-      <RulesContent>
-        {renderRules()}
-      </RulesContent>
+      <RulesContent>{renderRules()}</RulesContent>
     </Wrapper>
   );
 };
 
 export default ParserBuilder;
 
-const RulesContent = styled.div`
-`;
+const RulesContent = styled.div``;
 
 const RuleActions = styled.div`
   margin-bottom: 8px;
@@ -115,5 +113,4 @@ const CollapseRules = styled(Button)`
   margin-left: 10px;
 `;
 
-const Loading = styled.div`
-`;
+const Loading = styled.div``;

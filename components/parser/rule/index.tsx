@@ -1,10 +1,14 @@
 import { ParserRuleDefinition, ParserRuleWithRelations } from '@prisma/client';
 import _ from 'lodash';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import styled from 'styled-components';
 
-import { getDefaultRuleValuesForIndex, RuleProvider, useRuleContext } from 'contexts/rule-context';
+import {
+  getDefaultRuleValuesForIndex,
+  RuleProvider,
+  useRuleContext
+} from 'contexts/rule-context';
 import { useParserContext } from 'contexts/parser-context';
 import { Button } from 'components/common';
 import { removeTypename } from 'hooks/helpers/parser-rule';
@@ -31,17 +35,23 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
     defaultValues,
     mode: 'onBlur'
   });
-  const definedRuleNames = rules.map((rule: ParserRuleWithRelations) => rule.name);
-  const ruleDefinitionNames: any[] = [
-    ...new Set(
-      (rule?.definitions ?? [])
-        .map((def: ParserRuleDefinition) => def.rule)
-        .filter((def: string) => !!def.length)
-      )];
+  const definedRuleNames = rules.map(
+    (rule: ParserRuleWithRelations) => rule.name
+  );
+  const ruleDefinitionNames = React.useCallback(
+    () => [
+      ...new Set(
+        (rule?.definitions ?? [])
+          .map((def: ParserRuleDefinition) => `${def.rule}`)
+          .filter((def: string) => !!def.length)
+      )
+    ],
+    [rule?.definitions]
+  );
   const { handleSubmit, reset, setFocus } = methods;
   const { addRule, updateRule } = useParserRule(rule?.id ?? '-1');
   const saveLabel = displayContext === 'add' ? 'Add Rule' : 'Save Rule';
-  
+
   function handleCancelClick(event: React.MouseEvent<HTMLButtonElement>) {
     event.preventDefault();
     // TODO should any of these useParserRule calls actually be dispatched from the ruleContext?
@@ -63,7 +73,10 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
       dispatch({ type: 'UPDATE_FORM_STATE', payload: data });
     } else if (displayContext === 'add') {
       addRule(input);
-      dispatch({ type: 'RESET_DEFAULT_VALUES', payload: getDefaultRuleValuesForIndex(0)});
+      dispatch({
+        type: 'RESET_DEFAULT_VALUES',
+        payload: getDefaultRuleValuesForIndex(0)
+      });
     }
     // TODO on success only? where to handle validation?
     // seems like these should happen on update
@@ -94,7 +107,7 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
       setFocus('name');
       setIsInit(true);
     }
-  }, [displayContext, isInit]);
+  }, [displayContext, isInit, setFocus]);
 
   useEffect(() => {
     return () => {
@@ -105,15 +118,15 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
 
   useEffect(() => {
     let triggedWarning = false;
-    for (const rule of ruleDefinitionNames) {
-      const containsWarnings = hasRuleWarning(rule, definedRuleNames);
+    for (const rule of ruleDefinitionNames()) {
+      const containsWarnings = hasRuleWarning(`${rule}`, definedRuleNames);
       if (containsWarnings) {
         triggedWarning = true;
         break;
       }
     }
     dispatch({ type: 'SET_HAS_WARNING', payload: triggedWarning });
-  }, [ruleDefinitionNames, definedRuleNames])
+  }, [ruleDefinitionNames, definedRuleNames, dispatch]);
 
   return (
     <Wrapper
@@ -140,14 +153,24 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
   );
 };
 
-const Rule: React.FC<RuleComponentProps> = ({ context = 'display', index = 0, id }) => {
+const Rule: React.FC<RuleComponentProps> = ({
+  context = 'display',
+  index = 0,
+  id
+}) => {
   const { rule } = useParserRule(id);
   const {
     state: { isCollapsed }
   } = useParserContext();
 
   return (
-    <RuleProvider rule={rule} id={id} index={index} initialContext={context} isCollapsed={isCollapsed}>
+    <RuleProvider
+      rule={rule}
+      id={id}
+      index={index}
+      initialContext={context}
+      isCollapsed={isCollapsed}
+    >
       <RuleContent rule={rule} />
     </RuleProvider>
   );

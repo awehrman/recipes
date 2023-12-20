@@ -41,7 +41,10 @@ const RuleType: React.FC<RuleTypeComponentProps> = ({ onTypeSwitch }) => {
           name={fieldName}
           type="hidden"
         />
-        <RuleTypeButton label={type === 'RULE' ? 'Switch to List' : 'Switch to Rule'} onClick={handleRuleTypeButtonClick} />
+        <RuleTypeButton
+          label={type === 'RULE' ? 'Switch to List' : 'Switch to Rule'}
+          onClick={handleRuleTypeButtonClick}
+        />
       </Label>
     </Wrapper>
   );

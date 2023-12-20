@@ -66,13 +66,13 @@ const Errors: React.FC = () => {
   // TODO fix type
   function renderErrors() {
     return errors.map((error: any, index) => (
-      <Error key={`error-${index}-${error?.message}-Error`}>{error?.message ?? ''}</Error>
+      <Error key={`error-${index}-${error?.message}-Error`}>
+        {error?.message ?? ''}
+      </Error>
     ));
   }
 
-  return <ErrorWrapper>
-    {renderErrors()}
-  </ErrorWrapper>;
+  return <ErrorWrapper>{renderErrors()}</ErrorWrapper>;
 };
 
 const Error = styled.div`
@@ -94,10 +94,12 @@ const Tests: React.FC = () => {
     ));
   }
 
-  return <Wrapper>
-    {renderTests()}
-    {errors.length > 0 && <Errors />}
-  </Wrapper>;
+  return (
+    <Wrapper>
+      {renderTests()}
+      {errors.length > 0 && <Errors />}
+    </Wrapper>
+  );
 };
 
 export default Tests;

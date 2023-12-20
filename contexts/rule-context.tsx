@@ -115,7 +115,7 @@ export function RuleProvider({
 }: RuleProviderProps) {
   const defaultValues = {
     ...getDefaultRuleValuesForIndex(index),
-    ...initialContext !== 'add' ? rule : {}
+    ...(initialContext !== 'add' ? rule : {})
   };
   const [state, dispatch] = useReducer(ruleReducer, {
     id,

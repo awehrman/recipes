@@ -73,83 +73,69 @@ const generateEmbeddedList = (ruleString: string): React.ReactNode => {
 };
 
 // TODO return type
-const generateUnlabeledRule = (ruleString: string = '', ruleNames: string[] = []): any => {
+const generateUnlabeledRule = (
+  ruleString: string = '',
+  ruleNames: string[] = []
+): React.ReactNode[] => {
   const components: React.ReactNode[] = [];
-  let hasWarning = false;
   // TODO use a constant here
   const instances = ruleString.split(/([*!+$|()[\]])/).filter(Boolean);
   instances.forEach((name, index) => {
-    const isSpecialCharacter = PEG_CHARACTERS.find(
-      (char) => char === name
-    );
-    const keyRoot = `${v4()}-${index}`
+    const isSpecialCharacter = PEG_CHARACTERS.find((char) => char === name);
+    const keyRoot = `${v4()}-${index}`;
     const isMissingRule = !ruleNames.includes(name) && !isSpecialCharacter;
     if (isMissingRule) {
-      hasWarning = true;
       components.push(
-        <MissingRule key={`missing-${keyRoot}-${name}`}>
-          {name}
-        </MissingRule>
+        <MissingRule key={`missing-${keyRoot}-${name}`}>{name}</MissingRule>
       );
     }
 
     const isDefinedRule = ruleNames.includes(name) && !isSpecialCharacter;
     if (isDefinedRule && !isMissingRule) {
       components.push(
-        <DefinedRule key={`defined-${keyRoot}-${name}`}>
-          {name}
-        </DefinedRule>
+        <DefinedRule key={`defined-${keyRoot}-${name}`}>{name}</DefinedRule>
       );
     }
 
     if (!isDefinedRule && !isMissingRule) {
       components.push(
-        <SplitPiece key={`piece-${keyRoot}-${name}`}>
-          {name}
-        </SplitPiece>
+        <SplitPiece key={`piece-${keyRoot}-${name}`}>{name}</SplitPiece>
       );
     }
   });
 
-  return {
-    components,
-    hasWarning
-  };
+  return components;
 };
 
 // TODO fix return type
-const generateLabeledRule = (ruleString: string = '', ruleNames: string[] = []): any => {
+const generateLabeledRule = (
+  ruleString: string = '',
+  ruleNames: string[] = []
+): any => {
   const components: React.ReactNode[] = [];
   const [label, rule] = ruleString.split(':');
   const key = v4();
-  const { components: unlabeledComponents} = generateUnlabeledRule(rule, ruleNames);
+  const unlabeledComponents = generateUnlabeledRule(rule, ruleNames);
   components.push(<Label key={`label-${key}`}>{label}:</Label>);
-  components.push(
-    <Rule key={key}>
-      {[...unlabeledComponents]}
-    </Rule>
-  );
-  
+  components.push(<Rule key={key}>{[...unlabeledComponents]}</Rule>);
+
   return {
     components
   };
 };
 
-// TODO fix return type
 export const generateParsedRule = (
   ruleString: string = '',
   ruleNames: string[] = []
-): any => {
+): React.ReactNode[] => {
   const components: React.ReactNode[] = [];
   const isList = isEmbeddedList(ruleString);
-  
+
   if (isList) {
     const embeddedList = generateEmbeddedList(ruleString);
     components.push(embeddedList);
-    
-    return {
-      components
-    };
+
+    return components;
   }
 
   const rules = ruleString.split(' ');
@@ -157,16 +143,14 @@ export const generateParsedRule = (
     const isUnlabeledRule = !ruleInstance.includes(':');
     if (isUnlabeledRule) {
       const unlabeledRule = generateUnlabeledRule(ruleInstance, ruleNames);
-      components.push([ ...unlabeledRule.components ]);
+      components.push([...unlabeledRule]);
     } else {
       const labeledRule = generateLabeledRule(ruleInstance, ruleNames);
-      components.push([ ...labeledRule.components ]);
+      components.push([...labeledRule]);
     }
   });
 
-  return {
-    components: components.flatMap((c) => (c))
-  };
+  return components.flatMap((c) => c);
 };
 
 const Label = styled.label`

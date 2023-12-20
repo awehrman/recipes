@@ -127,3 +127,7 @@ export type ParserRuleDefinitionWithRelationsWithTypeName =
 export type ParserRuleWithRelationsWithTypeName = ParserRuleWithRelations & {
   __typename: string;
 };
+
+export type ListKeywordFocusProps = {
+  [key: number]: boolean;
+};
