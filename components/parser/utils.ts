@@ -155,11 +155,32 @@ export const sortByLength = (list: string[]) => {
 };
 
 export const formatKeywordList = (value: string, list: string[]): string[] => {
+  const commaSplit = value.split(',');
+  const isCommaSplit = commaSplit.length > 1;
+  if (isCommaSplit) {
+    const splitList = commaSplit.map((str) => formatKeyword(str));
+    const newList = sortByLength(Array.from(new Set([...list, ...splitList])));
+    return newList;
+  }
+
+  const slashSplit = value.split('/');
+  const isSlashSplit = slashSplit.length > 1;
+  if (isSlashSplit) {
+    const splitList = slashSplit.map((str) => formatKeyword(str));
+    const newList = sortByLength(Array.from(new Set([...list, ...splitList])));
+    return newList;
+  }
+
+  const autoFormatted = formatKeyword(value);
+  const newList = sortByLength(Array.from(new Set([...list, autoFormatted])));
+  return newList;
+};
+
+const formatKeyword = (value: string): string => {
   // if listItemEntryValue starts with a \' or a $( we'll take it as is
   // otherwise we'll wrap the string in quotes ('xyz'i)
   const withQuote = /^\\'/.test(value ?? '');
   const withSign = /^\$/.test(value ?? '');
   const autoFormatted = withQuote || withSign ? value : `\'${value}\'i`;
-  const newList = sortByLength([...list, autoFormatted]);
-  return newList;
+  return autoFormatted;
 };

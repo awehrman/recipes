@@ -64,10 +64,11 @@ const ListItems: React.FC = () => {
 
 const StyledList = styled.ul`
   margin: 0;
-  margin-bottom: 4px;
+  margin-bottom: 10px;
   padding: 0;
   list-style-type: none;
   font-size: 13px;
+  max-width: 430px;
 `;
 
 const ListItem = styled.li`
@@ -126,7 +127,16 @@ const KeywordListInput = React.forwardRef((_props, ref: any) => {
   );
 });
 
-const KeywordInput = styled.input``;
+KeywordListInput.displayName = 'KeywordListInput';
+
+const KeywordInput = styled.input`
+  border: 0;
+  background: transparent;
+  &::placeholder {
+    font-style: italic;
+    color: #ccc;
+  }
+`;
 
 const RuleList: React.FC = () => {
   const {

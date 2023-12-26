@@ -9,17 +9,18 @@ export interface ParserThemeSettings {
 }
 
 export type AutoWidthInputProps = {
-  fieldName?: string;
-  isRequired?: boolean;
   defaultValue?: string;
   definitionId?: string;
   definitionPath?: string;
+  index?: number;
+  isRequired?: boolean;
+  fieldName?: string;
   onBlur?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onFocus?: () => void;
+  // onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   placeholder?: string;
-  validators?: any; // TODO
   spellcheck?: boolean;
-  index?: number;
+  validators?: any; // TODO
 };
 
 export type WatchParserForm = {

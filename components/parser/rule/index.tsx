@@ -66,6 +66,9 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
     if (data.order === 'undefined' || data.order === null) {
       data.order = rules?.length ?? 0;
     }
+    if (data?.listItemEntryValue) {
+      delete data.listItemEntryValue;
+    }
     const input = removeTypename(data);
     if (displayContext === 'edit') {
       reset({ ...input });
