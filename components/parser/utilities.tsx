@@ -69,7 +69,7 @@ const UtilityTextArea = styled.textarea`
 const generateEmbeddedList = (ruleString: string): React.ReactNode => {
   const embeddedListKey = v4();
   const formattedListString = formatEmbeddedList(ruleString);
-  return <RuleList key={embeddedListKey}>[{formattedListString}]</RuleList>;
+  return <RuleList key={embeddedListKey}>{formattedListString}</RuleList>;
 };
 
 // TODO return type
@@ -119,9 +119,7 @@ const generateLabeledRule = (
   components.push(<Label key={`label-${key}`}>{label}:</Label>);
   components.push(<Rule key={key}>{[...unlabeledComponents]}</Rule>);
 
-  return {
-    components
-  };
+  return components;
 };
 
 export const generateParsedRule = (
@@ -132,6 +130,7 @@ export const generateParsedRule = (
   const isList = isEmbeddedList(ruleString);
 
   if (isList) {
+    console.log({ ruleString });
     const embeddedList = generateEmbeddedList(ruleString);
     components.push(embeddedList);
 
@@ -146,7 +145,7 @@ export const generateParsedRule = (
       components.push([...unlabeledRule]);
     } else {
       const labeledRule = generateLabeledRule(ruleInstance, ruleNames);
-      components.push([...labeledRule]);
+      components.push([labeledRule]);
     }
   });
 

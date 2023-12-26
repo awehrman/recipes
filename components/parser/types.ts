@@ -119,6 +119,13 @@ export type ParserRules = {
   parserRules: ParserRuleWithRelations[];
 };
 
+export type ParserRuleDefinitionPreSave = Omit<
+  ParserRuleDefinition,
+  'createdAt' | 'updatedAt'
+> & {
+  __typename: string;
+};
+
 export type ParserRuleDefinitionWithRelationsWithTypeName =
   ParserRuleDefinition & {
     __typename: string;

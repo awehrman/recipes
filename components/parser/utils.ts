@@ -2,10 +2,7 @@ import { ParserRuleDefinition } from '@prisma/client';
 import _ from 'lodash';
 
 import { PEG_CHARACTERS } from 'constants/parser';
-import {
-  ParserRuleDefinitionWithRelationsWithTypeName,
-  WatchParserForm
-} from './types';
+import { ParserRuleDefinitionPreSave, WatchParserForm } from './types';
 
 export const getDefaultDefinitions = (order: number = 0) => ({
   example: '',
@@ -43,17 +40,22 @@ export const getFieldUpdates = ({
 
 export const getDefaultFormatter = (ruleName: string): string =>
   `{
-const values = [...].flatMap(value => value);
-return {
-rule: \`#\${ORDER}_${_.camelCase(ruleName)}\`,
-type: '${_.camelCase(ruleName)}',
-values
-};
-}`;
+    const values = [...].flatMap(value => value);
+    return {
+      rule: \`#\${ORDER}_${_.camelCase(ruleName)}\`,
+      type: '${_.camelCase(ruleName)}',
+      values
+    };
+  }`;
 
 export const formatEmbeddedList = (rule: string): string => {
+  const hasSquareBracketRange = /\]/.test(rule);
+
+  if (hasSquareBracketRange) {
+    return rule;
+  }
   const keywords = rule.slice(1, rule.length - 1).split(',');
-  return keywords.join(', ');
+  return `[${keywords.join(', ')}]`;
 };
 
 // TODO fix return type
@@ -132,10 +134,8 @@ export const hasRuleWarning = (
 export const getOptimisticParserRuleDefinition = (
   fields: any[],
   id: string = '-1'
-): ParserRuleDefinitionWithRelationsWithTypeName => ({
+): ParserRuleDefinitionPreSave => ({
   id: `OPTIMISTIC-${(fields ?? []).length}`,
-  createdAt: new Date(),
-  updatedAt: new Date(),
   parserRuleId: id,
   example: '',
   rule: '',
