@@ -51,13 +51,12 @@ const ParserBuilder: React.FC = () => {
     ));
   }
 
-  function handleOnDragEnd(droppedItem: any) {
-    console.log({ droppedItem });
-    if (!droppedItem.destination) return;
+  function handleOnDragEnd(item: any) {
+    if (!item.destination) return;
     const updatedList = [...rules];
     // re-order list
-    const [reorderedItem] = updatedList.splice(droppedItem.source.index, 1);
-    updatedList.splice(droppedItem.destination.index, 0, reorderedItem);
+    const [reorderedItem] = updatedList.splice(item.source.index, 1);
+    updatedList.splice(item.destination.index, 0, reorderedItem);
     updateRulesOrder(updatedList);
   }
 

@@ -26,7 +26,7 @@ export const removeTypename = (data: ParserRuleWithRelationsWithTypeName) => {
       })
     )
   };
-  
+
   return input;
 };
 
@@ -41,13 +41,17 @@ export const handleAddRuleUpdate = (
     query: GET_ALL_PARSER_RULES_QUERY
   });
 
-  let parserRules = [...rules?.parserRules ?? []];
+  let parserRules = [...(rules?.parserRules ?? [])];
   const optimisticDefinitionIds: string[] = [];
   if (isOptimisticResponse) {
     parserRules.push({
       ...input,
-      definitions: input.definitions.map((def: any) => ({ ...def, __typename: 'ParserRuleDefinition' })),
-      __typename: 'ParserRule' });
+      definitions: input.definitions.map((def: any) => ({
+        ...def,
+        __typename: 'ParserRuleDefinition'
+      })),
+      __typename: 'ParserRule'
+    });
   } else {
     parserRules = parserRules.map((rule: any) => {
       if (rule.id === '-1') {
@@ -56,19 +60,19 @@ export const handleAddRuleUpdate = (
           definitions: rule.definitions.map((def: any, index: number) => {
             if (def.id.includes(`OPTIMISTIC`)) {
               optimisticDefinitionIds.push(def.id);
-              return ({
+              return {
                 ...def,
                 id: res.data.addParserRule.definitions[index].id
-              });
+              };
             }
             return def;
           }),
           id: res.data.addParserRule.id
-        }
+        };
       }
       return rule;
     });
-  }    
+  }
 
   const data = { parserRules };
   cache.writeQuery({
@@ -84,8 +88,8 @@ export const handleAddRuleUpdate = (
     optimisticDefinitionIds.forEach((id) => {
       cache.evict({
         id: `ParserRuleDefinitionId:${id}`
-      })
-    })
+      });
+    });
   }
 };
 
@@ -133,41 +137,54 @@ export const handleDeleteRuleUpdate = (
 
 const getFormattedString = (formatter: string, index: number = 0) =>
   formatter
-  .replace(/\${ORDER}/g, `${index}`)
-  .replace(
-    /(\n)(\s*)/g,
-    (_, newline, spaces) => `${newline}\t${spaces}`
-  );
+    .replace(/\${ORDER}/g, `${index}`)
+    .replace(/(\n)(\s*)/g, (_, newline, spaces) => `${newline}\t${spaces}`);
 
 const styleRuleName = (name = '', label = '') => `\n${name} "${label}" = \n`;
 // TODO fix types
-const styleDefinitions = (definitions: any[] = []) => 
-  definitions.map((def: any, index: number) => {
-    const prefix = `${index > 0 ? '/' : ''}`;
-    if (def.type === 'LIST') {
-      return `${prefix}${styleList(def.list)}`;
-    } else {
-      return `${prefix}${styleRuleChunk(def.example, def.rule, def.formatter, index)}`;
-    }
-  }).join(``);
+const styleDefinitions = (definitions: any[] = []) =>
+  definitions
+    .map((def: any, index: number) => {
+      const prefix = `${index > 0 ? '/' : ''}`;
+      if (def.type === 'LIST') {
+        return `${prefix}${styleList(def.list)}`;
+      } else {
+        return `${prefix}${styleRuleChunk(
+          def.example,
+          def.rule,
+          def.formatter,
+          index
+        )}`;
+      }
+    })
+    .join(``);
 
 const styleRuleChunk = (example = '', rule = '', formatter = '', index = 0) => {
- const exampleString = `${example.length > 0 ? styleExample(example) : ''}`;
- const ruleString = `${rule.length > 0 ? styleRule(rule) : ''}`;
- const formatterString = `${formatter.length > 0 ? styleFormatter(formatter, index) : ''}`;
- return `${exampleString}${ruleString}${formatterString}`;
+  const exampleString = `${example.length > 0 ? styleExample(example) : ''}`;
+  const ruleString = `${rule.length > 0 ? styleRule(rule) : ''}`;
+  const formatterString = `${
+    formatter.length > 0 ? styleFormatter(formatter, index) : ''
+  }`;
+  return `${exampleString}${ruleString}${formatterString}`;
 };
-const styleExample = (example = '') =>`\t// '${example}'\n`;
+const styleExample = (example = '') => `\t// '${example}'\n`;
 const styleRule = (rule = '') => `\t${rule}\n`;
-const styleFormatter = (formatter = '', index = 0) => `\t${getFormattedString(formatter, index)}\n`;
+const styleFormatter = (formatter = '', index = 0) =>
+  `\t${getFormattedString(formatter, index)}\n`;
 const styleList = (list = []) => `\t${list.join(` /\ `)}\n`;
 
 export const getStyledParserRule = (rule: Rule) => {
-  const parserRuleString = `${styleRuleName(rule.name, rule.label)}${styleDefinitions(rule.definitions)}`;
+  const parserRuleString = `${styleRuleName(
+    rule.name,
+    rule.label
+  )}${styleDefinitions(rule.definitions)}`;
   return parserRuleString;
 };
 
-export const compileGrammar = (rules: Rule[], loading: boolean = false): ParserUtility => {
+export const compileGrammar = (
+  rules: Rule[],
+  loading: boolean = false
+): ParserUtility => {
   if (loading) {
     return {
       parser: undefined,
@@ -186,7 +203,10 @@ export const compileGrammar = (rules: Rule[], loading: boolean = false): ParserU
       cache: true,
       output: 'source',
       error: function (_stage, message, location) {
-        if (location?.start && !grammarErrors.find((err) => err.message === message)) {
+        if (
+          location?.start &&
+          !grammarErrors.find((err) => err.message === message)
+        ) {
           grammarErrors.push({ message, location });
         }
       }
@@ -204,9 +224,12 @@ export const compileGrammar = (rules: Rule[], loading: boolean = false): ParserU
       grammar
     };
   }
-}
+};
 
-export const parseTests = (parser: Parser | undefined, loading: boolean = false): TestProps[] => {
+export const parseTests = (
+  parser: Parser | undefined,
+  loading: boolean = false
+): TestProps[] => {
   const tests: TestProps[] = [...defaultTests];
   if (parser && !loading) {
     tests.forEach((test: TestProps) => {
@@ -232,4 +255,25 @@ export const parseTests = (parser: Parser | undefined, loading: boolean = false)
     });
   }
   return tests;
-}
+};
+
+export const handleUpdateRulesOrder = (cache: ApolloCache<any>, res: any) => {
+  const rules: ParserRules | null = cache.readQuery({
+    query: GET_ALL_PARSER_RULES_QUERY
+  });
+
+  const data = {
+    parserRules: (rules?.parserRules ?? [])
+      .map((rule) => ({
+        ...rule,
+        order: res.data.updateParserRulesOrder.find(
+          (r: any) => r.id === rule.id
+        ).order
+      }))
+      .sort((a, b) => a.order - b.order)
+  };
+  cache.writeQuery({
+    query: GET_ALL_PARSER_RULES_QUERY,
+    data
+  });
+};
