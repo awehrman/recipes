@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  // TODO strict mode is interfering with dnd
+  reactStrictMode: false,
   swcMinify: true,
   webpack(config) {
     config.module.rules.push({

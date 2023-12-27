@@ -1,6 +1,6 @@
 import { gql } from '@apollo/client';
 
-export default gql`
+export const ParserRuleInput = gql`
   input ParserRuleInput {
     id
     name
@@ -15,5 +15,18 @@ export default gql`
       type
       list
     }
+  }
+`;
+
+export const ParserRuleOrderInput = gql`
+  input ParserRuleOrderInput {
+    id: String!
+    order: Int!
+  }
+`;
+
+export const ParserRulesOrderInput = gql`
+  input ParserRulesOrderInput {
+    parserRules [ParserRuleOrderInput!]!
   }
 `;

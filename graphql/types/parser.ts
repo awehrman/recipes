@@ -49,6 +49,15 @@ export const ParserRule = objectType({
   }
 });
 
+export const ParserRules = objectType({
+  name: 'ParserRules',
+  definition(t) {
+    t.list.field('parserRules', {
+      type: ParserRule
+    });
+  }
+});
+
 // TODO move
 type PartialAppContext = {
   prisma: PrismaClient;
@@ -157,9 +166,10 @@ const addParserRule = async (
     createMany: {
       data: (definitions ?? []).map((def, index) => {
         const type = def?.type ?? 'RULE';
-        const list = type === 'RULE' ? [] : [...(def?.list ?? []) as string[]];
-        
-        return ({
+        const list =
+          type === 'RULE' ? [] : [...((def?.list ?? []) as string[])];
+
+        return {
           example: def?.example ?? '',
           rule: def?.rule ?? '',
           order: def?.order ?? index,
@@ -168,7 +178,7 @@ const addParserRule = async (
           list: {
             set: [...list]
           }
-        });
+        };
       })
     }
   };
@@ -178,7 +188,7 @@ const addParserRule = async (
     label: `${label}`,
     order
   };
-  console.log(JSON.stringify({ data }, null, 2))
+  console.log(JSON.stringify({ data }, null, 2));
   if ((definitions ?? []).length > 0) {
     data.definitions = definitionsCreateMany;
   }
@@ -229,7 +239,7 @@ const addParserRule = async (
 //     //   }
 //     // }
 //   };
-  
+
 //   // console.log({ data });
 //   const response = {};
 //   try {
@@ -278,7 +288,7 @@ const updateParserRule = async (
   const upsert: Prisma.ParserRuleDefinitionUpsertWithWhereUniqueWithoutParserRuleInput[] =
     (definitions ?? []).map((def, index) => {
       const type = def?.type ?? 'RULE';
-      const list = type === 'RULE' ? [] : [...(def?.list ?? []) as string[]];
+      const list = type === 'RULE' ? [] : [...((def?.list ?? []) as string[])];
       const upsertData = {
         example: def?.example ?? '',
         rule: def?.rule ?? '',
@@ -289,12 +299,12 @@ const updateParserRule = async (
       };
       console.log({ upsertData });
 
-      return ({
+      return {
         where: { id: def?.id ?? undefined },
         create: { ...upsertData },
         update: { ...upsertData }
-      });
-  });
+      };
+    });
 
   const data: Prisma.ParserRuleUncheckedUpdateInput = {
     name,
@@ -327,7 +337,36 @@ const updateParserRule = async (
       where: { id }
     });
     response.id = result.id;
-    response.definitions = result.definitions.map((def) => ({ id: def.id, rule: def.rule }));
+    response.definitions = result.definitions.map((def) => ({
+      id: def.id,
+      rule: def.rule
+    }));
+  } catch (e) {
+    console.log({ e });
+  }
+  console.log(JSON.stringify({ response }, null, 2));
+  return response;
+};
+
+const updateParserRulesOrder = async (
+  _source: SourceValue<'Mutation'>,
+  args: ArgsValue<'Mutation', 'updateParserRulesOrder'>,
+  ctx: PartialAppContext | AppContext
+) => {
+  const { prisma } = ctx;
+  const { input } = args;
+  let { parserRules = [] } = input || {};
+  console.log({ parserRules });
+  const response: any = parserRules;
+  try {
+    await prisma.$transaction(
+      (parserRules ?? []).map(({ id, order }: any) =>
+        prisma.parserRule.update({
+          where: { id },
+          data: { order }
+        })
+      )
+    );
   } catch (e) {
     console.log({ e });
   }
@@ -411,6 +450,20 @@ export const UpdateParserRuleMutation = extendType({
   }
 });
 
+export const UpdateParserRulesOrderMutation = extendType({
+  type: 'Mutation',
+  definition(t) {
+    t.list.field('updateParserRulesOrder', {
+      type: 'ParserRule',
+      args: { input: ParserRulesOrderInput },
+      resolve: updateParserRulesOrder as unknown as FieldResolver<
+        'Mutation',
+        'updateParserRulesOrder'
+      >
+    });
+  }
+});
+
 export const DeleteParserRuleMutation = extendType({
   type: 'Mutation',
   definition(t) {
@@ -449,5 +502,22 @@ export const ParserRuleDefinitionInput = inputObjectType({
     t.nullable.string('parserRuleId');
     t.field('type', { type: ParserRuleDefinitionType });
     t.list.string('list');
+  }
+});
+
+export const ParserRulesOrderInput = inputObjectType({
+  name: 'ParserRulesOrderInput',
+  definition(t) {
+    t.list.field('parserRules', {
+      type: ParserRuleOrderInput
+    });
+  }
+});
+
+export const ParserRuleOrderInput = inputObjectType({
+  name: 'ParserRuleOrderInput',
+  definition(t) {
+    t.string('id');
+    t.int('order');
   }
 });

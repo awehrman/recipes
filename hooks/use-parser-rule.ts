@@ -2,10 +2,7 @@ import _ from 'lodash';
 import { useQuery, useMutation } from '@apollo/client';
 
 import { ParserRuleWithRelationsWithTypeName } from 'components/parser/types';
-import {
-  GET_ALL_PARSER_RULES_QUERY,
-  GET_PARSER_RULE_QUERY
-} from '../graphql/queries/parser';
+import { GET_PARSER_RULE_QUERY } from '../graphql/queries/parser';
 import {
   ADD_PARSER_RULE_MUTATION,
   DELETE_PARSER_RULE_MUTATION,

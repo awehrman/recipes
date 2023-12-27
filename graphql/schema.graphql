@@ -118,6 +118,7 @@ type Mutation {
   toggleContainer(id: String): Container
   toggleContainerIngredient(currentIngredientId: String, currentIngredientName: String, id: String): Container
   updateParserRule(input: ParserRuleInput): ParserRule
+  updateParserRulesOrder(input: ParserRulesOrderInput): [ParserRule]
 }
 
 type Note {
@@ -203,6 +204,19 @@ input ParserRuleInput {
   label: String
   name: String!
   order: Int!
+}
+
+input ParserRuleOrderInput {
+  id: String
+  order: Int
+}
+
+type ParserRules {
+  parserRules: [ParserRule]
+}
+
+input ParserRulesOrderInput {
+  parserRules: [ParserRuleOrderInput]
 }
 
 enum Properties {

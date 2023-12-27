@@ -12,7 +12,6 @@ export const ADD_PARSER_RULE_MUTATION = gql`
   }
 `;
 
-
 export const UPDATE_PARSER_RULE_MUTATION = gql`
   mutation UPDATE_PARSER_RULE_MUTATION($input: ParserRuleInput) {
     updateParserRule(input: $input) {
@@ -33,10 +32,19 @@ export const DELETE_PARSER_RULE_MUTATION = gql`
   }
 `;
 
+export const UPDATE_PARSER_RULES_ORDER_MUTATION = gql`
+  mutation UPDATE_PARSER_RULES_ORDER_MUTATION($input: ParserRulesOrderInput) {
+    updateParserRulesOrder(input: $input) {
+      id
+      order
+    }
+  }
+`;
+
 const all = {
   ADD_PARSER_RULE_MUTATION,
   UPDATE_PARSER_RULE_MUTATION,
-  DELETE_PARSER_RULE_MUTATION,
+  DELETE_PARSER_RULE_MUTATION
 };
 
 export default all;

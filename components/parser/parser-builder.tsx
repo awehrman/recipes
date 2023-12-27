@@ -1,5 +1,6 @@
 import { ParserRuleWithRelations } from '@prisma/client';
 import React from 'react';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 
 import { Button } from 'components/common';
@@ -16,7 +17,7 @@ const ParserBuilder: React.FC = () => {
     dispatch
   } = useParserContext();
 
-  const { loading, rules = [] } = useParserRules();
+  const { loading, rules = [], updateRulesOrder } = useParserRules();
 
   function handleAddRuleClick() {
     dispatch({ type: 'SET_IS_ADD_BUTTON_DISPLAYED', payload: false });
@@ -36,8 +37,28 @@ const ParserBuilder: React.FC = () => {
     }
 
     return rules.map((rule: ParserRuleWithRelations, index: number) => (
-      <Rule key={rule.id} index={index} id={rule.id} />
+      <Draggable key={rule.id} draggableId={rule.id} index={index}>
+        {(provided) => (
+          <div
+            ref={provided.innerRef}
+            {...provided.dragHandleProps}
+            {...provided.draggableProps}
+          >
+            <Rule key={rule.id} index={index} id={rule.id} />
+          </div>
+        )}
+      </Draggable>
     ));
+  }
+
+  function handleOnDragEnd(droppedItem: any) {
+    console.log({ droppedItem });
+    if (!droppedItem.destination) return;
+    const updatedList = [...rules];
+    // re-order list
+    const [reorderedItem] = updatedList.splice(droppedItem.source.index, 1);
+    updatedList.splice(droppedItem.destination.index, 0, reorderedItem);
+    updateRulesOrder(updatedList);
   }
 
   return (
@@ -59,7 +80,18 @@ const ParserBuilder: React.FC = () => {
       </RuleActions>
 
       <AddRule />
-      <RulesContent>{renderRules()}</RulesContent>
+      <RulesContent>
+        <DragDropContext onDragEnd={handleOnDragEnd}>
+          <Droppable droppableId="list-container">
+            {(provided) => (
+              <div {...provided.droppableProps} ref={provided.innerRef}>
+                {renderRules()}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
+      </RulesContent>
     </Wrapper>
   );
 };

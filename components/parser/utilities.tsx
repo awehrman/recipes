@@ -130,7 +130,6 @@ export const generateParsedRule = (
   const isList = isEmbeddedList(ruleString);
 
   if (isList) {
-    console.log({ ruleString });
     const embeddedList = generateEmbeddedList(ruleString);
     components.push(embeddedList);
 
