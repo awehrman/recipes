@@ -1,4 +1,8 @@
-import { Prisma, PrismaClient } from '@prisma/client';
+import {
+  ParserRuleDefinition as ParserRuleDefinitionType,
+  Prisma,
+  PrismaClient
+} from '@prisma/client';
 import { AppContext } from '../context';
 import {
   enumType,
@@ -164,22 +168,24 @@ const addParserRule = async (
 
   const definitionsCreateMany = {
     createMany: {
-      data: (definitions ?? []).map((def, index) => {
-        const type = def?.type ?? 'RULE';
-        const list =
-          type === 'RULE' ? [] : [...((def?.list ?? []) as string[])];
+      data: (definitions ?? []).map(
+        (def: ParserRuleDefinitionType, index: number) => {
+          const type = def?.type ?? 'RULE';
+          const list =
+            type === 'RULE' ? [] : [...((def?.list ?? []) as string[])];
 
-        return {
-          example: def?.example ?? '',
-          rule: def?.rule ?? '',
-          order: def?.order ?? index,
-          formatter: def?.formatter ?? null,
-          type,
-          list: {
-            set: [...list]
-          }
-        };
-      })
+          return {
+            example: def?.example ?? '',
+            rule: def?.rule ?? '',
+            order: def?.order ?? index,
+            formatter: def?.formatter ?? null,
+            type,
+            list: {
+              set: [...list]
+            }
+          };
+        }
+      )
     }
   };
 
@@ -286,7 +292,7 @@ const updateParserRule = async (
   // });
 
   const upsert: Prisma.ParserRuleDefinitionUpsertWithWhereUniqueWithoutParserRuleInput[] =
-    (definitions ?? []).map((def, index) => {
+    (definitions ?? []).map((def: ParserRuleDefinitionType, index: number) => {
       const type = def?.type ?? 'RULE';
       const list = type === 'RULE' ? [] : [...((def?.list ?? []) as string[])];
       const upsertData = {
@@ -356,7 +362,6 @@ const updateParserRulesOrder = async (
   const { prisma } = ctx;
   const { input } = args;
   let { parserRules = [] } = input || {};
-  console.log({ parserRules });
   const response: any = parserRules;
   try {
     await prisma.$transaction(
@@ -370,7 +375,6 @@ const updateParserRulesOrder = async (
   } catch (e) {
     console.log({ e });
   }
-  console.log(JSON.stringify({ response }, null, 2));
   return response;
 };
 
