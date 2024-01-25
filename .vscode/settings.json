@@ -17,7 +17,8 @@
     "SUPERADMIN",
     "svgr",
     "typegen",
-    "Verdana"
+    "Verdana",
+    "welldone"
   ],
   "editor.formatOnSave": true,
   "[javascript]": {

@@ -99,13 +99,9 @@ export function RuleDefinitionProvider({
     showListInput,
     defaultValue: defaultValue ?? newDefault
   });
-  const memoizedContext = useMemo(
-    () => ({ state, dispatch }),
-    [state, dispatch]
-  );
 
   return (
-    <RuleDefinitionContext.Provider value={memoizedContext}>
+    <RuleDefinitionContext.Provider value={{ state, dispatch }}>
       {children}
     </RuleDefinitionContext.Provider>
   );

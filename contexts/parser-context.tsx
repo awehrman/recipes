@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useMemo,
-  useReducer,
-  ReactNode
-} from 'react';
+import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 
 type ParserActionTypes =
   | 'SET_IS_ADD_BUTTON_DISPLAYED'
@@ -78,13 +72,9 @@ export function ParserProvider({
     view,
     focusedRuleIndex
   });
-  const memoizedContext = useMemo(
-    () => ({ state, dispatch }),
-    [state, dispatch]
-  );
 
   return (
-    <ParserContext.Provider value={memoizedContext}>
+    <ParserContext.Provider value={{ state, dispatch }}>
       {children}
     </ParserContext.Provider>
   );
