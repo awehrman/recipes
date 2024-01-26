@@ -57,7 +57,8 @@ function useEvernote() {
       const { authURL = null } = authenticateEvernote || {};
 
       if (authURL) {
-        window.open(authURL, '_self');
+        // window.open(authURL, '_self');
+        window.location.href = authURL;
       }
     }
   });

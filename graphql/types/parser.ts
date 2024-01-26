@@ -1,8 +1,4 @@
-import {
-  ParserRuleDefinition as ParserRuleDefinitionType,
-  Prisma,
-  PrismaClient
-} from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { AppContext } from '../context';
 import {
   enumType,
@@ -13,6 +9,13 @@ import {
   objectType
 } from 'nexus';
 import { ArgsValue, SourceValue } from 'nexus/dist/core';
+
+import { addParserRule } from './helpers/parser';
+
+// TODO move
+type PartialAppContext = {
+  prisma: PrismaClient;
+};
 
 export const ParserRuleDefinition = objectType({
   name: 'ParserRuleDefinition',
@@ -61,11 +64,6 @@ export const ParserRules = objectType({
     });
   }
 });
-
-// TODO move
-type PartialAppContext = {
-  prisma: PrismaClient;
-};
 
 // Queries
 const getRules = async (
@@ -156,67 +154,6 @@ export const RuleQuery = extendType({
   }
 });
 
-// TODO move this into a helper file
-const addParserRule = async (
-  _source: SourceValue<'Mutation'>,
-  args: ArgsValue<'Mutation', 'addParserRule'>,
-  ctx: PartialAppContext | AppContext
-) => {
-  const { prisma } = ctx;
-  const { input } = args;
-  let { id, name = '', label = '', order = 0, definitions = [] } = input || {};
-
-  const definitionsCreateMany = {
-    createMany: {
-      data: (definitions ?? []).map(
-        (def: ParserRuleDefinitionType, index: number) => {
-          const type = def?.type ?? 'RULE';
-          const list =
-            type === 'RULE' ? [] : [...((def?.list ?? []) as string[])];
-
-          return {
-            example: def?.example ?? '',
-            rule: def?.rule ?? '',
-            order: def?.order ?? index,
-            formatter: def?.formatter ?? null,
-            type,
-            list: {
-              set: [...list]
-            }
-          };
-        }
-      )
-    }
-  };
-
-  const data: Prisma.ParserRuleUncheckedCreateInput = {
-    name,
-    label: `${label}`,
-    order
-  };
-  console.log(JSON.stringify({ data }, null, 2));
-  if ((definitions ?? []).length > 0) {
-    data.definitions = definitionsCreateMany;
-  }
-
-  // TODO fix type
-  const response: any = { id };
-  try {
-    const result = await prisma.parserRule.create({
-      data,
-      select: {
-        id: true,
-        definitions: true
-      }
-    });
-    response.id = result.id;
-    response.definitions = result.definitions.map((def) => ({ id: def.id }));
-  } catch (e) {
-    console.log({ e });
-  }
-  return response;
-};
-
 // TODO why do we need to create a new definition on form mount?
 // this is going to cause us to have to go back and cleanup
 // and definitions that get
@@ -292,7 +229,7 @@ const updateParserRule = async (
   // });
 
   const upsert: Prisma.ParserRuleDefinitionUpsertWithWhereUniqueWithoutParserRuleInput[] =
-    (definitions ?? []).map((def: ParserRuleDefinitionType, index: number) => {
+    (definitions ?? []).map((def: any, index: number) => {
       const type = def?.type ?? 'RULE';
       const list = type === 'RULE' ? [] : [...((def?.list ?? []) as string[])];
       const upsertData = {
@@ -432,10 +369,11 @@ export const AddParserRuleMutation = extendType({
     t.field('addParserRule', {
       type: 'ParserRule',
       args: { input: ParserRuleInput },
-      resolve: addParserRule as unknown as FieldResolver<
-        'Mutation',
-        'addParserRule'
-      >
+      // resolve: addParserRule as unknown as FieldResolver<
+      //   'Mutation',
+      //   'addParserRule'
+      // >
+      resolve: addParserRule
     });
   }
 });

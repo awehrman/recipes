@@ -2,6 +2,10 @@ import { Extension } from '@codemirror/state';
 import { ParserRuleWithRelations, ParserRuleDefinition } from '@prisma/client';
 import { Parser, DiagnosticNote } from 'peggy';
 
+// TODO should all of these just exist in Prisma @types? or some other @type global?
+// i'm not a fan of these living in the components section when some of these are used
+// across the app
+
 export type ThemeOptionKey = 'add' | 'display' | 'edit';
 
 export interface ParserThemeSettings {
