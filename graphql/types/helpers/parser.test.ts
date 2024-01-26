@@ -1,6 +1,7 @@
 import { Prisma, ParserRuleDefinition } from '@prisma/client';
 import { AppContext } from 'graphql/context';
 import { MockContext, createMockContext } from '../../../context';
+import { PARSER_RULE_MULTIPLE_RULE_DEFINITION_OPTIMISTIC_A } from '../../../tests/fixtures/input/parser-rule';
 import { createParserRuleDefinitionCreateManyData } from './parser';
 
 // TODO move fixture data
@@ -10,49 +11,6 @@ type UnsavedParserRuleDefinition = Omit<
   ParserRuleDefinition,
   'createdAt' | 'updatedAt'
 >;
-
-const FIXTURE_INPUT_OPTIMISTIC_PARSER_RULE_WITH_SINGULAR_DEFINITION = {};
-const FIXTURE_INPUT_OPTIMISTIC_PARSER_RULE_WITH_MULTIPLE_DEFINITIONS = {};
-
-const FIXTURE_INPUT_OPTIMISTIC_PARSER_RULE_DEFINITIONS_SINGULAR: UnsavedParserRuleDefinition[] =
-  [];
-const FIXTURE_INPUT_OPTIMISTIC_PARSER_RULE_DEFINITIONS_MULTIPLE: UnsavedParserRuleDefinition[] =
-  [
-    {
-      id: 'OPTIMISTIC-0',
-      rule: 'amt:amountKeyword',
-      order: 0,
-      example: 'one',
-      formatter:
-        '{\n' +
-        '  return {\n' +
-        '    rule: `#${ORDER}_amount`,\n' +
-        "    type: 'amount',\n" +
-        '    values: [amt]\n' +
-        '  };\n' +
-        '}',
-      parserRuleId: '-1',
-      type: 'RULE',
-      list: []
-    },
-    {
-      id: 'OPTIMISTIC-1',
-      rule: 'amt:digits',
-      order: 1,
-      example: '11',
-      formatter:
-        '{\n' +
-        '  return {\n' +
-        '    rule: `#${ORDER}_amount`,\n' +
-        "    type: 'amount',\n" +
-        '    values: [...amt.values]\n' +
-        '  };\n' +
-        '}',
-      parserRuleId: '-1',
-      type: 'RULE',
-      list: []
-    }
-  ];
 
 let mockCtx: MockContext;
 let ctx: AppContext;
@@ -74,9 +32,8 @@ describe('graphql > types > helpers > parser', () => {
       // TODO empty definitions
       // TODO one definition
       test('multiple definitions should be in correct format', () => {
-        const definitions = [
-          ...FIXTURE_INPUT_OPTIMISTIC_PARSER_RULE_DEFINITIONS_MULTIPLE
-        ];
+        const definitions =
+          PARSER_RULE_MULTIPLE_RULE_DEFINITION_OPTIMISTIC_A.definitions as UnsavedParserRuleDefinition[];
         const result = createParserRuleDefinitionCreateManyData(definitions);
         // should have a createMany object
         expect(result.createMany).toBeDefined();

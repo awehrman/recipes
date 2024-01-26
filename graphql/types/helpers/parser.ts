@@ -15,6 +15,7 @@ type UnsavedParserRuleDefinition = Omit<
 export const createParserRuleDefinitionCreateManyData = (
   definitions: UnsavedParserRuleDefinition[] = []
 ): Prisma.ParserRuleDefinitionCreateNestedManyWithoutParserRuleInput => {
+  // console.log('createParserRuleDefinitionCreateManyData', { definitions });
   const data: Prisma.ParserRuleDefinitionCreateManyParserRuleInput[] =
     definitions.map((def: any, index: number) => {
       const type = def?.type ?? 'RULE';
@@ -46,6 +47,7 @@ export const createParserRuleCreateData = (
   input: ParserRuleWithRelations
 ): Prisma.ParserRuleCreateInput => {
   const { definitions, name, label, order } = input;
+  console.log({ input });
   const data: Prisma.ParserRuleCreateInput = {
     name,
     label: `${label}`,
