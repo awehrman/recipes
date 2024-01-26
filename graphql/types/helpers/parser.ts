@@ -47,7 +47,7 @@ export const createParserRuleCreateData = (
   input: ParserRuleWithRelations
 ): Prisma.ParserRuleCreateInput => {
   const { definitions, name, label, order } = input;
-  console.log({ input });
+
   const data: Prisma.ParserRuleCreateInput = {
     name,
     label: `${label}`,

@@ -1,7 +1,11 @@
 import { Prisma, ParserRuleDefinition } from '@prisma/client';
 import { AppContext } from 'graphql/context';
 import { MockContext, createMockContext } from '../../../context';
-import { PARSER_RULE_MULTIPLE_RULE_DEFINITION_OPTIMISTIC_A } from '../../../tests/fixtures/input/parser-rule';
+import {
+  PARSER_RULE_MULTIPLE_RULE_DEFINITION_OPTIMISTIC_A,
+  PARSER_RULE_SINGLE_RULE_DEFINITION_OPTIMISTIC_A,
+  PARSER_RULE_SINGLE_LIST_DEFINITION_OPTIMISTIC_A
+} from '../../../tests/fixtures/input/parser-rule';
 import { createParserRuleDefinitionCreateManyData } from './parser';
 
 // TODO move fixture data
@@ -28,9 +32,93 @@ describe('graphql > types > helpers > parser', () => {
 
   describe('utility functions', () => {
     describe('createParserRuleDefinitionCreateManyData', () => {
-      // TODO missing definitions
-      // TODO empty definitions
-      // TODO one definition
+      test('empty rule definitions should be in correct format', () => {
+        const result = createParserRuleDefinitionCreateManyData();
+        // should have a createMany object
+        expect(result.createMany).toBeDefined();
+        // with a nested empty data object
+        const resultData = result.createMany?.data as
+          | Prisma.ParserRuleDefinitionCreateManyParserRuleInput[]
+          | undefined;
+        expect(resultData).toBeDefined();
+
+        // expect the same number of definitions
+        expect(resultData?.length ?? 0).toEqual(0);
+      });
+
+      test('singular rule definitions should be in correct format', () => {
+        const definitions =
+          PARSER_RULE_SINGLE_RULE_DEFINITION_OPTIMISTIC_A.definitions as UnsavedParserRuleDefinition[];
+        const result = createParserRuleDefinitionCreateManyData(definitions);
+        // should have a createMany object
+        expect(result.createMany).toBeDefined();
+        // with a nested data object
+        const resultData = result.createMany?.data as
+          | Prisma.ParserRuleDefinitionCreateManyParserRuleInput[]
+          | undefined;
+        expect(resultData).toBeDefined();
+
+        // expect the same number of definitions
+        expect(resultData?.length ?? 0).toEqual(1);
+        const firstResultDefinition =
+          resultData?.[0] as Prisma.ParserRuleDefinitionCreateManyParserRuleInput;
+        expect(firstResultDefinition).toBeDefined();
+
+        // ensure nothing new in the list since our type is RULE
+        // but that we're in the correct list shape for an empty value
+        expect(firstResultDefinition.list).toBeDefined();
+        expect(
+          (
+            firstResultDefinition.list as Prisma.ParserRuleDefinitionCreatelistInput
+          ).set
+        ).toEqual([]);
+
+        // ensure all other valid fields have transferred
+        expect(firstResultDefinition.example).toEqual(definitions[0].example);
+        expect(firstResultDefinition.rule).toEqual(definitions[0].rule);
+        expect(firstResultDefinition.order).toEqual(definitions[0].order);
+        expect(firstResultDefinition.formatter).toEqual(
+          definitions[0].formatter
+        );
+        expect(firstResultDefinition.type).toEqual(definitions[0].type);
+      });
+
+      test('singular list definitions should be in correct format', () => {
+        const definitions =
+          PARSER_RULE_SINGLE_LIST_DEFINITION_OPTIMISTIC_A.definitions as UnsavedParserRuleDefinition[];
+        const result = createParserRuleDefinitionCreateManyData(definitions);
+        // should have a createMany object
+        expect(result.createMany).toBeDefined();
+        // with a nested data object
+        const resultData = result.createMany?.data as
+          | Prisma.ParserRuleDefinitionCreateManyParserRuleInput[]
+          | undefined;
+        expect(resultData).toBeDefined();
+
+        // expect the same number of definitions
+        expect(resultData?.length ?? 0).toEqual(1);
+        const firstResultDefinition =
+          resultData?.[0] as Prisma.ParserRuleDefinitionCreateManyParserRuleInput;
+        expect(firstResultDefinition).toBeDefined();
+
+        // should have a newly formatted list
+        expect(firstResultDefinition.list).toBeDefined();
+        expect(
+          (
+            firstResultDefinition.list as Prisma.ParserRuleDefinitionCreatelistInput
+          ).set
+        ).toEqual(["'three'i", "'one'i", "'two'i"]);
+
+        // ensure all other valid fields have transferred
+        expect(firstResultDefinition.example).toEqual(definitions[0].example);
+        expect(firstResultDefinition.rule).toEqual(definitions[0].rule);
+        expect(firstResultDefinition.order).toEqual(definitions[0].order);
+        expect(firstResultDefinition.formatter).toEqual(
+          definitions[0].formatter
+        );
+        expect(firstResultDefinition.type).toEqual(definitions[0].type);
+      });
+
       test('multiple definitions should be in correct format', () => {
         const definitions =
           PARSER_RULE_MULTIPLE_RULE_DEFINITION_OPTIMISTIC_A.definitions as UnsavedParserRuleDefinition[];

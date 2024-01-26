@@ -9,7 +9,7 @@ export const PARSER_RULE_SINGLE_RULE_DEFINITION_OPTIMISTIC_A = {
   label: 'Amount',
   name: 'amount',
   order: 0,
-  definitions: PARSER_RULE_DEFINITION_TYPE_RULE_OPTIMISTIC_B()
+  definitions: [PARSER_RULE_DEFINITION_TYPE_RULE_OPTIMISTIC_B()]
 };
 
 export const PARSER_RULE_SINGLE_LIST_DEFINITION_OPTIMISTIC_A = {
@@ -17,7 +17,7 @@ export const PARSER_RULE_SINGLE_LIST_DEFINITION_OPTIMISTIC_A = {
   label: 'AmountKeyword',
   name: 'amountKeyword',
   order: 0,
-  definitions: PARSER_RULE_DEFINITION_TYPE_LIST_OPTIMISTIC_A()
+  definitions: [PARSER_RULE_DEFINITION_TYPE_LIST_OPTIMISTIC_A()]
 };
 
 export const PARSER_RULE_MULTIPLE_RULE_DEFINITION_OPTIMISTIC_A = {
