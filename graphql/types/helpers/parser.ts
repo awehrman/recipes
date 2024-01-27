@@ -15,7 +15,6 @@ type UnsavedParserRuleDefinition = Omit<
 export const createParserRuleDefinitionCreateManyData = (
   definitions: UnsavedParserRuleDefinition[] = []
 ): Prisma.ParserRuleDefinitionCreateNestedManyWithoutParserRuleInput => {
-  // console.log('createParserRuleDefinitionCreateManyData', { definitions });
   const data: Prisma.ParserRuleDefinitionCreateManyParserRuleInput[] =
     definitions.map((def: any, index: number) => {
       const type = def?.type ?? 'RULE';
@@ -43,10 +42,14 @@ export const createParserRuleDefinitionCreateManyData = (
   };
 };
 
-export const createParserRuleCreateData = (
-  input: ParserRuleWithRelations
-): Prisma.ParserRuleCreateInput => {
-  const { definitions, name, label, order } = input;
+export const addParserRule = async (
+  _source: SourceValue<'Mutation'>,
+  args: ArgsValue<'Mutation', 'addParserRule'>,
+  ctx: AppContext
+): ParserRuleWithRelations => {
+  const { prisma } = ctx;
+  const { input } = args;
+  const { definitions, name, label, order } = input as ParserRuleWithRelations;
 
   const data: Prisma.ParserRuleCreateInput = {
     name,
@@ -55,18 +58,6 @@ export const createParserRuleCreateData = (
     definitions: createParserRuleDefinitionCreateManyData(definitions)
   };
 
-  return data;
-};
-
-export const addParserRule = async (
-  _source: SourceValue<'Mutation'>,
-  args: ArgsValue<'Mutation', 'addParserRule'>,
-  ctx: AppContext
-): ParserRuleWithRelations => {
-  const { prisma } = ctx;
-  const { input } = args;
-
-  const data = createParserRuleCreateData(input);
   const response: ParserRuleWithRelations = {};
   try {
     const result = await prisma.parserRule.create({

@@ -1,4 +1,6 @@
 import { Prisma, ParserRuleDefinition } from '@prisma/client';
+import { ArgsValue, SourceValue } from 'nexus/dist/core';
+
 import { AppContext } from 'graphql/context';
 import { MockContext, createMockContext } from '../../../context';
 import {
@@ -6,7 +8,10 @@ import {
   PARSER_RULE_SINGLE_RULE_DEFINITION_OPTIMISTIC_A,
   PARSER_RULE_SINGLE_LIST_DEFINITION_OPTIMISTIC_A
 } from '../../../tests/fixtures/input/parser-rule';
-import { createParserRuleDefinitionCreateManyData } from './parser';
+import {
+  addParserRule,
+  createParserRuleDefinitionCreateManyData
+} from './parser';
 
 // TODO move fixture data
 
@@ -27,7 +32,35 @@ beforeEach(() => {
 
 describe('graphql > types > helpers > parser', () => {
   describe('addParserRule', () => {
-    // TODO
+    test('a valid parser rule input should save', async () => {
+      const parserRule = {
+        ...PARSER_RULE_SINGLE_RULE_DEFINITION_OPTIMISTIC_A,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      mockCtx.prisma.parserRule.create.mockResolvedValue(parserRule);
+
+      const result = await addParserRule(
+        {} as SourceValue<'Mutation'>,
+        { input: parserRule } as ArgsValue<'Mutation', 'addParserRule'>,
+        ctx
+      );
+      console.log(JSON.stringify({ input: parserRule }, null, 2));
+      expect(result).toEqual({
+        id: '-1', // is this right? should this actually be a real guid?
+        definitions: [{ id: 'OPTIMISTIC-0' }]
+      });
+    });
+
+    // has invalid name
+    // has invalid label
+    // has invalid order
+    // has invalid definition
+
+    // has existing name
+    // has existing label
+    // has existing order
+    // has existing definition
   });
 
   describe('utility functions', () => {
@@ -171,10 +204,6 @@ describe('graphql > types > helpers > parser', () => {
         expect(firstResultDefinition.type).toEqual(definitions[0].type);
         expect(secondResultDefinition.type).toEqual(definitions[1].type);
       });
-    });
-
-    describe('createParserRuleCreateData', () => {
-      // TODO
     });
   });
 });

@@ -127,11 +127,17 @@ function useNotes(
     getNotesMeta();
   }
 
+  async function importLocal() {
+    // const notes = await readLocalNotes();
+    // console.log({ notes });
+  }
+
   return {
     loading,
     notes,
     refetchNotes: refetch,
     importNotes,
+    importLocal,
     saveRecipes
   };
 }
