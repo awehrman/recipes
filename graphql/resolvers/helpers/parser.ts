@@ -77,10 +77,9 @@ export const parseHTML = (
   let ingredients: IngredientLine[] = [];
   let instructions: InstructionLine[] = [];
   let newHash = { ...ingHash };
-
   // load our string dom content into a cheerio object
   // this will allow us to easily traverse the DOM tree
-  const $ = cheerio.load(note.content);
+  const $ = cheerio.load(note?.content ?? '');
   const enNote = $('en-note');
   const firstNonEmptyLine = enNote
     .find('div')
@@ -149,6 +148,12 @@ export const parseHTML = (
       }));
     }
   }
+
+  console.log({
+    ingredients,
+    instructions,
+    ingHash: newHash
+  });
 
   return {
     ingredients,

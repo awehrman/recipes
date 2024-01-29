@@ -237,6 +237,23 @@ export const fetchNotesContent = async (
   return notes;
 };
 
+export const fetchLocalNotesContent = async (
+  ctx: AppContext
+): Promise<NoteWithRelations[]> => {
+  const { prisma } = ctx;
+
+  const { parsedNotes, ingHash } = await getLocalParsedNoteContent();
+  console.log('finished local read');
+  console.log({ parsedNotes, ingHash });
+  // const updatedHash = await saveNoteIngredients(ingHash, prisma);
+  // console.log('finishing saving ingredients');
+  // const notes = await saveLocalNotes(parsedNotes, updatedHash, prisma);
+  // console.log('finished saving notes');
+
+  // return notes;
+  return [];
+};
+
 const saveNoteIngredients = async (
   ingHash: IngredientHash,
   prisma: PrismaClient
@@ -477,6 +494,146 @@ const saveNotes = async (
   return notes;
 };
 
+const saveLocalNotes = async (
+  parsedNotes: NoteWithRelations[],
+  ingHash: IngredientHash,
+  prisma: PrismaClient
+): Promise<NoteWithRelations[]> => {
+  const noteIds: string[] = [];
+
+  // create notes with content, ingredients and instruction lines
+  const basicNotes: NoteWithRelations = await prisma.$transaction(
+    parsedNotes.map((note: NoteWithRelations) => {
+      noteIds.push(note.id);
+      const ingredients: Prisma.IngredientLineUpdateManyWithoutNoteNestedInput =
+        formatIngredientLinesUpsert(note.ingredients, ingHash);
+      const instructions: Prisma.InstructionLineUpdateManyWithoutNoteNestedInput =
+        formatInstructionLinesUpsert(note.instructions);
+      const data: Prisma.NoteCreateInput = {
+        title: note.title,
+        source: note.source,
+        // TODO categories?:
+        // TODO tags?:
+        image: note.image,
+        content: note.content,
+        ingredients,
+        instructions,
+        isParsed: true
+      };
+
+      return prisma.note.create({
+        data,
+        select: {
+          id: true,
+          source: true,
+          title: true,
+          image: true,
+          content: true,
+          isParsed: true,
+          ingredients: {
+            select: {
+              id: true,
+              reference: true,
+              blockIndex: true,
+              lineIndex: true,
+              isParsed: true
+            }
+          },
+          instructions: {
+            select: {
+              id: true,
+              blockIndex: true,
+              reference: true
+            }
+          }
+        }
+      });
+    })
+  );
+
+  // update the parsedSegments and link to our ingredients line
+  const data: Prisma.ParsedSegmentCreateManyInput[] = [];
+
+  parsedNotes.forEach((note: NoteWithRelations, noteIndex: number) => {
+    const { ingredients } = note;
+    ingredients.forEach((line: IngredientLineWithParsed, lineIndex: number) => {
+      const ingredientLineId: string | null =
+        basicNotes?.[noteIndex]?.ingredients?.[lineIndex]?.id ?? null;
+
+      if (ingredientLineId) {
+        line.parsed.forEach((parsed: ParsedSegment) => {
+          const ingredientId: string | null =
+            parsed.type === 'ingredient'
+              ? ingHash.valueHash?.[parsed.value]?.id ?? null
+              : null;
+          const segment: CreateParsedSegment = {
+            // updatedAt
+            index: parsed.index,
+            rule: parsed.rule,
+            type: parsed.type,
+            value: parsed.value,
+            ingredientId: parsed.type === 'ingredient' ? ingredientId : null,
+            ingredientLineId
+          };
+          data.push(segment);
+        });
+      }
+    });
+  });
+
+  await prisma.parsedSegment.createMany({
+    data,
+    skipDuplicates: true
+  });
+
+  // fetch updated note
+  const notes = await prisma.note.findMany({
+    where: {
+      id: {
+        in: noteIds
+      }
+    },
+    select: {
+      id: true,
+      source: true,
+      title: true,
+      image: true,
+      content: true,
+      isParsed: true,
+      ingredients: {
+        select: {
+          id: true,
+          reference: true,
+          blockIndex: true,
+          lineIndex: true,
+          isParsed: true,
+          parsed: {
+            select: {
+              value: true
+            }
+          },
+          ingredient: {
+            select: {
+              id: true,
+              isComposedIngredient: true,
+              isValidated: true
+            }
+          }
+        }
+      },
+      instructions: {
+        select: {
+          id: true,
+          blockIndex: true,
+          reference: true
+        }
+      }
+    }
+  });
+
+  return notes;
+};
+
 type NotesWithIngredients = {
   parsedNotes: NoteWithRelations[];
   ingHash: IngredientHash;
@@ -516,6 +673,35 @@ const getParsedNoteContent = async (
   );
 
   return { parsedNotes, ingHash };
+};
+
+const getLocalParsedNoteContent = async (): Promise<NotesWithIngredients> => {
+  const ingHash: IngredientHash = {
+    matchBy: [],
+    valueHash: {},
+    createData: []
+  };
+  const notes = await readLocalNotes().then((res) => {
+    const notes = res.filter((n) => n);
+    console.log(notes.length, 'notes');
+    const parsedNotes = notes.map((note: any) => {
+      const parsed = parseNoteContent(note, ingHash);
+      ingHash.matchBy = [
+        ...new Set([...ingHash.matchBy, ...parsed.ingHash.matchBy])
+      ];
+      ingHash.valueHash = {
+        ...ingHash.valueHash,
+        ...parsed.ingHash.valueHash
+      };
+      ingHash.createData = [
+        ...new Set([...ingHash.createData, ...parsed.ingHash.createData])
+      ];
+      return parsed.parsedNote;
+    });
+    return parsedNotes;
+  });
+
+  return { parsedNotes: notes, ingHash };
 };
 
 const getNoteContent = async (
@@ -567,105 +753,102 @@ const parseNoteContent = (
 };
 
 export const readLocalNotes = async () => {
-  // const directoryPath = './public/export';
   const directoryPath = path.resolve('./public', 'test-data');
 
   try {
     const files = await fs.readdir(directoryPath);
 
     const htmlContents = await Promise.all(
-      files.map(async (file: string) => {
-        const filePath = `${directoryPath}/${file}/${file}.html`;
-        console.log(filePath);
-        if (filePath.includes('.DS_Store')) {
-          console.log('skipping DS store...');
-          return null;
-        }
-        const isFile = (await fs.stat(filePath)).isFile();
-        if (isFile) {
-          const content = await fs.readFile(filePath, 'utf-8');
-          const $ = cheerio.load(content);
-          $('style').remove();
-          $('icons').remove();
-          const final = $.html();
-          fs.writeFileSync(
-            `${directoryPath}/${file}/cleaned.html`,
-            final,
-            'utf8'
-          );
+      files
+        .map(async (file: string) => {
+          const filePath = `${directoryPath}/${file}/${file}.html`;
+          if (filePath.includes('.DS_Store')) {
+            return null;
+          }
+          const isFile = (await fs.stat(filePath)).isFile();
+          if (isFile) {
+            const content = await fs.readFile(filePath, 'utf-8');
+            const $ = cheerio.load(content);
+            $('style').remove();
+            $('icons').remove();
+            const final = $.html();
+            fs.writeFileSync(
+              `${directoryPath}/${file}/cleaned.html`,
+              final,
+              'utf8'
+            );
 
-          const metaTags = $('meta[itemprop="title"]');
-          const notes = [];
-          metaTags.each((index, element) => {
-            // Get the content following the <meta> tag until the next <meta> tag
-            const title = $(element).prop('content');
-            const source = $(element)
-              .nextAll('note-attributes')
-              .first()
-              .find('meta[itemprop="source-url"]')
-              .attr('content');
+            const metaTags = $('meta[itemprop="title"]');
+            const notes = [];
+            metaTags.each((_index, element) => {
+              // Get the content following the <meta> tag until the next <meta> tag
+              const title = $(element).prop('content');
+              const source = $(element)
+                .nextAll('note-attributes')
+                .first()
+                .find('meta[itemprop="source-url"]')
+                .attr('content');
 
-            const siblings = $(element).nextAll();
-            let foundEnd = false;
-            let image = '';
-            let noteContent: string[] = [];
-            const tags: string[] = [];
+              const siblings = $(element).nextAll();
+              let foundEnd = false;
+              let image = '';
+              let noteContent: string[] = [];
+              const tags: string[] = [];
 
-            const lines = siblings.each((i, sibling) => {
-              if (foundEnd) {
-                return false;
-              }
-
-              const isEndOfLine = $(sibling).is('hr');
-              if (isEndOfLine) {
-                foundEnd = true;
-              }
-
-              // strip out any meta/title tags
-              const isNoteAttributesTag = $(sibling).is('note-attributes');
-              const isMetaTag = $(sibling).is('meta');
-              if (isMetaTag) {
-                const isTag = $(sibling).attr('itemprop') === 'tag';
-                if (isTag) {
-                  const tag = $(sibling).attr('content');
-                  tags.push(`${tag}`);
+              noteContent.push('<en-note>');
+              const lines = siblings.each((i, sibling) => {
+                if (foundEnd) {
+                  return false;
                 }
-              }
-              const isTitleTag = $(sibling).is('h1');
 
-              // but save our image
-              const isImage = $(sibling).is('img');
-              if (isImage) {
-                image = `${$(sibling).attr('src')}`;
-              }
-              const validLine = !isNoteAttributesTag && !isImage && !isTitleTag;
+                const isEndOfLine = $(sibling).is('hr');
+                if (isEndOfLine) {
+                  foundEnd = true;
+                }
 
-              const isRecipeLine = foundEnd ? false : validLine;
-              if (isRecipeLine) {
-                noteContent.push(`<div>${$(sibling).html()?.trim()}</div>`);
-              }
+                // strip out any meta/title tags
+                const isNoteAttributesTag = $(sibling).is('note-attributes');
+                const isMetaTag = $(sibling).is('meta');
+                if (isMetaTag) {
+                  const isTag = $(sibling).attr('itemprop') === 'tag';
+                  if (isTag) {
+                    const tag = $(sibling).attr('content');
+                    tags.push(`${tag}`);
+                  }
+                }
+                const isTitleTag = $(sibling).is('h1');
+
+                // but save our image
+                const isImage = $(sibling).is('img');
+                if (isImage) {
+                  image = `${$(sibling).attr('src')}`;
+                }
+                const validLine =
+                  !isNoteAttributesTag && !isImage && !isTitleTag;
+
+                const isRecipeLine = foundEnd ? false : validLine;
+                if (isRecipeLine) {
+                  noteContent.push(`<div>${$(sibling).html()?.trim()}</div>`);
+                }
+              });
+
+              noteContent.push('</en-note>');
+              const content = noteContent.join('');
+
+              // Add the content to the array
+              notes.push({ title, source, content, categories: [file], tags });
             });
 
-            // lines.each((i, e) => {
-            //   console.log(i, $(e).html());
-            // });
-            const content = noteContent.join('');
-            console.log({ title, source, content, category: file, tags });
-            console.log('- - - - - - ');
-
-            // Add the content to the array
-            notes.push({ title, source, content, category: file, tags });
-          });
-
-          return { notes };
-        } else {
-          console.log('directory');
-          return null;
-        }
-      })
+            return notes;
+          } else {
+            // TODO this is our image directory
+            return null;
+          }
+        })
+        .filter((n) => n)
     );
 
-    return htmlContents;
+    return htmlContents.flatMap((n) => n);
   } catch (error) {
     console.error('Error reading HTML files:', error);
     return [];

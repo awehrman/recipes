@@ -142,7 +142,7 @@ model Recipe {
   importedUser   User     @relation(fields: [importedUserId], references: [id])
   importedUserId String   @map(name: "imported_user_id")
 
-  evernoteGUID String   @map(name: "evernote_guid")
+  evernoteGUID String?  @map(name: "evernote_guid")
   title        String
   sources      String[]
   image        String
@@ -248,7 +248,7 @@ model Note {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  evernoteGUID String  @map(name: "evernote_guid")
+  evernoteGUID String? @map(name: "evernote_guid")
   title        String
   source       String?
 

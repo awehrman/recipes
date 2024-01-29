@@ -13,7 +13,7 @@ import { AppContext } from '../context';
 import {
   fetchNotesMeta,
   fetchNotesContent,
-  readLocalNotes
+  fetchLocalNotesContent
 } from './helpers/note';
 
 import { isAuthenticated } from './helpers/evernote-session';
@@ -216,7 +216,7 @@ export const importLocal = async (
   try {
     const t0 = performance.now();
     console.log('import the stuff...');
-    const result = await readLocalNotes();
+    const result = await fetchLocalNotesContent(ctx);
     // find all parsed notes
     // const notes = await prisma.note.findMany({
     //   where: { isParsed: true },

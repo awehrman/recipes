@@ -126,7 +126,7 @@ type Note {
   categories: [Category]
   content: String
   createdAt: String
-  evernoteGUID: String!
+  evernoteGUID: String
   id: String!
   image: String
   ingredients: [IngredientLine]
@@ -142,7 +142,7 @@ type NoteMeta {
   categories: [Category]
   content: String
   createdAt: String
-  evernoteGUID: String!
+  evernoteGUID: String
   id: String!
   image: String
   isParsed: Boolean

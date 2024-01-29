@@ -16,7 +16,7 @@ export const Note = objectType({
     t.nonNull.string('id');
     t.string('createdAt');
     t.string('updatedAt');
-    t.nonNull.string('evernoteGUID');
+    t.string('evernoteGUID');
     t.nonNull.string('title');
     t.string('source');
     t.list.field('categories', {
@@ -50,7 +50,7 @@ export const NoteMeta = objectType({
     t.nonNull.string('id');
     t.string('createdAt');
     t.string('updatedAt');
-    t.nonNull.string('evernoteGUID');
+    t.string('evernoteGUID');
     t.nonNull.string('title');
     t.string('source');
     t.list.field('categories', {
