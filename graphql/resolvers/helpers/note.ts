@@ -243,15 +243,10 @@ export const fetchLocalNotesContent = async (
   const { prisma } = ctx;
 
   const { parsedNotes, ingHash } = await getLocalParsedNoteContent();
-  console.log('finished local read');
-  console.log({ parsedNotes, ingHash });
-  // const updatedHash = await saveNoteIngredients(ingHash, prisma);
-  // console.log('finishing saving ingredients');
-  // const notes = await saveLocalNotes(parsedNotes, updatedHash, prisma);
-  // console.log('finished saving notes');
+  const updatedHash = await saveNoteIngredients(ingHash, prisma);
+  const notes = await saveLocalNotes(parsedNotes, updatedHash, prisma);
 
-  // return notes;
-  return [];
+  return notes;
 };
 
 const saveNoteIngredients = async (
@@ -683,24 +678,27 @@ const getLocalParsedNoteContent = async (): Promise<NotesWithIngredients> => {
   };
   const notes = await readLocalNotes().then((res) => {
     const notes = res.filter((n) => n);
-    console.log(notes.length, 'notes');
-    const parsedNotes = notes.map((note: any) => {
-      const parsed = parseNoteContent(note, ingHash);
-      ingHash.matchBy = [
-        ...new Set([...ingHash.matchBy, ...parsed.ingHash.matchBy])
-      ];
-      ingHash.valueHash = {
-        ...ingHash.valueHash,
-        ...parsed.ingHash.valueHash
-      };
-      ingHash.createData = [
-        ...new Set([...ingHash.createData, ...parsed.ingHash.createData])
-      ];
-      return parsed.parsedNote;
+    const result = notes.map((note: any) => {
+      try {
+        const parsed = parseNoteContent(note, ingHash);
+        ingHash.matchBy = [
+          ...new Set([...ingHash.matchBy, ...parsed.ingHash.matchBy])
+        ];
+        ingHash.valueHash = {
+          ...ingHash.valueHash,
+          ...parsed.ingHash.valueHash
+        };
+        ingHash.createData = [
+          ...new Set([...ingHash.createData, ...parsed.ingHash.createData])
+        ];
+        return parsed.parsedNote;
+      } catch (er) {
+        console.log('an error occurred');
+        console.log(er);
+      }
     });
-    return parsedNotes;
+    return result;
   });
-
   return { parsedNotes: notes, ingHash };
 };
 

@@ -98,7 +98,7 @@ export const parseHTML = (
     const line = element.children?.[0];
     // for the most part, we're only looking 1 level deep
     // anything else multi nested is either an image or junk that we'll skip over
-    const { type } = line;
+    const { type } = line ?? {};
 
     if (type === 'tag' && startTrackingNewBlocks) {
       // start a new block any time we see a non-text element
@@ -133,8 +133,12 @@ export const parseHTML = (
       } else {
         // parse ingredient line
         const response = parseIngredientLine(block as IngredientLine, ingHash);
-        ingredients.push(response.line);
-        newHash = { ...response.ingHash };
+        if (!response?.line) {
+          console.log({ block, response });
+        } else {
+          ingredients.push(response.line);
+          newHash = { ...response.ingHash };
+        }
       }
     });
   });
@@ -148,12 +152,6 @@ export const parseHTML = (
       }));
     }
   }
-
-  console.log({
-    ingredients,
-    instructions,
-    ingHash: newHash
-  });
 
   return {
     ingredients,
