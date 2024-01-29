@@ -16,7 +16,7 @@ const Page: React.FC<PageProps> = ({ title, children }) => {
   const { data: session } = useSession();
   const themeContext = useContext(ThemeContext);
   const [isExpanded, setIsExpanded] = useState(false);
-  console.log('useSession', { data: session });
+  // console.log('useSession', { data: session });
   return (
     <ApolloConsumer>
       {(client) => (

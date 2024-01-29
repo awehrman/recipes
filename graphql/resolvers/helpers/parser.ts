@@ -82,7 +82,10 @@ export const parseHTML = (
   // this will allow us to easily traverse the DOM tree
   const $ = cheerio.load(note.content);
   const enNote = $('en-note');
-  const firstNonEmptyLine = enNote.find('div').filter((index, element) => $(element).text().trim() !== '').first();
+  const firstNonEmptyLine = enNote
+    .find('div')
+    .filter((index, element) => $(element).text().trim() !== '')
+    .first();
 
   const children = firstNonEmptyLine.parent().children('div');
   const blocks: Blocks = []; // [[{}, {}, {}], [{}], [{}], [{}]]

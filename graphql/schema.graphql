@@ -113,6 +113,7 @@ type Mutation {
   deleteParserRule(id: ID): ParserRule
   getNotesContent: EvernoteNotesResponse
   getNotesMeta: EvernoteNotesMetaResponse
+  importLocal: EvernoteNotesResponse
   resetDatabase(userId: String): EvernoteSession
   saveRecipes: EvernoteNotesResponse
   toggleContainer(id: String): Container

@@ -1,7 +1,12 @@
 import { IngredientLineWithParsed } from '@prisma/client';
 import { extendType, FieldResolver, idArg, objectType, stringArg } from 'nexus';
 
-import { getNotesMeta, getNotesContent, saveRecipes } from '../resolvers/note';
+import {
+  getNotesMeta,
+  getNotesContent,
+  importLocal,
+  saveRecipes
+} from '../resolvers/note';
 import { resetDatabase } from '../resolvers/admin-tools';
 
 // TODO can this be an extension of NoteMeta?
@@ -183,6 +188,17 @@ export const ResetDatabase = extendType({
       type: 'EvernoteSession',
       args: { userId: stringArg() },
       resolve: resetDatabase as FieldResolver<'Mutation', 'resetDatabase'>
+    });
+  }
+});
+
+export const ImportLocalNotes = extendType({
+  type: 'Mutation',
+  definition(t) {
+    t.field('importLocal', {
+      type: 'EvernoteNotesResponse',
+      args: {},
+      resolve: importLocal as FieldResolver<'Mutation', 'importLocal'>
     });
   }
 });

@@ -41,3 +41,5 @@ next-env.d.ts
 
 # sample data
 public/export/**
+public/data/**
+public/test-data/**

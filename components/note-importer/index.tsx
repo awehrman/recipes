@@ -16,15 +16,15 @@ const NoteImporter: React.FC<NoteImporterProps> = () => {
   const { isAuthenticated } = useEvernote();
   const [status, setStatus] = useState(defaultLoadingStatus);
   const {
-    importNotes,
-    importLocal,
+    // importNotes,
+    importLocalNotes,
     loading,
     notes = [],
     saveRecipes
   } = useNotes(status, setStatus);
 
   function handleImportLocalFiles() {
-    importLocal();
+    importLocalNotes();
   }
 
   return (
@@ -41,7 +41,7 @@ const NoteImporter: React.FC<NoteImporterProps> = () => {
           noteSize={notes.length}
           loading={loading}
           status={status}
-          importNotes={importNotes}
+          importNotes={/*importNotes*/ () => {}}
           saveRecipes={saveRecipes}
         />
       ) : null}
@@ -52,39 +52,14 @@ const NoteImporter: React.FC<NoteImporterProps> = () => {
         <NoNotesFound>No notes found. Import some notes.</NoNotesFound>
       ) : null}
 
-      {isAuthenticated ? <Notes notes={notes} status={status} /> : null}
+      {isAuthenticated || notes.length > 0 ? (
+        <Notes notes={notes} status={status} />
+      ) : null}
     </Wrapper>
   );
 };
 
 export default NoteImporter;
-
-// // TODO move
-// import fs from 'fs-extra';
-// import path from 'path';
-
-// const readLocalNotes = async () => {
-//   // const directoryPath = './public/export';
-//   const directoryPath = path.resolve('./public', 'export');
-
-//   try {
-//     const files = await fs.readdir(directoryPath);
-
-//     const htmlContents = await Promise.all(
-//       files.map(async (file: string) => {
-//         const filePath = `${directoryPath}/${file}`;
-//         console.log(filePath);
-//         const content = await fs.readFile(filePath, 'utf-8');
-//         return { fileName: file, content };
-//       })
-//     );
-
-//     return htmlContents;
-//   } catch (error) {
-//     console.error('Error reading HTML files:', error);
-//     return [];
-//   }
-// };
 
 const ImportLocal = styled(Button)`
   border: 0;

@@ -10,7 +10,11 @@ import { AuthenticationError } from 'apollo-server-micro';
 import { performance } from 'perf_hooks';
 
 import { AppContext } from '../context';
-import { fetchNotesMeta, fetchNotesContent } from './helpers/note';
+import {
+  fetchNotesMeta,
+  fetchNotesContent,
+  readLocalNotes
+} from './helpers/note';
 
 import { isAuthenticated } from './helpers/evernote-session';
 
@@ -190,6 +194,77 @@ export const saveRecipes = async (
     });
     const t1 = performance.now();
     console.log(`[saveRecipes] took ${((t1 - t0) / 1000).toFixed(2)} seconds.`);
+  } catch (err) {
+    response.error = `${err}`;
+  }
+  return response;
+};
+
+export const importLocal = async (
+  _root: unknown,
+  _args: unknown,
+  ctx: AppContext
+): Promise<EvernoteNotesResponse> => {
+  console.log('[importLocal]');
+  const { prisma, session } = ctx;
+  // validateSession(ctx);
+
+  const response: EvernoteNotesResponse = {
+    notes: []
+  };
+
+  try {
+    const t0 = performance.now();
+    console.log('import the stuff...');
+    const result = await readLocalNotes();
+    // find all parsed notes
+    // const notes = await prisma.note.findMany({
+    //   where: { isParsed: true },
+    //   select: {
+    //     id: true,
+    //     evernoteGUID: true,
+    //     title: true,
+    //     source: true,
+    //     image: true,
+    //     ingredients: {
+    //       select: {
+    //         id: true
+    //       }
+    //     },
+    //     instructions: {
+    //       select: {
+    //         id: true
+    //       }
+    //     },
+    //     categories: {
+    //       select: {
+    //         id: true
+    //       }
+    //     },
+    //     tags: {
+    //       select: {
+    //         id: true
+    //       }
+    //     }
+    //   }
+    // });
+    // if (!notes.length) {
+    //   throw new Error('No unparsed notes found!');
+    // }
+    // const noteIds = (notes ?? []).map((note) => note.id);
+    // // create new recipes
+    // if (session) {
+    //   await Promise.all(
+    //     notes.map((note) => saveRecipe(note, prisma, session.user.id))
+    //   );
+    // }
+
+    // // remove notes
+    // await prisma.note.deleteMany({
+    //   where: { id: { in: noteIds } }
+    // });
+    const t1 = performance.now();
+    console.log(`[importLocal] took ${((t1 - t0) / 1000).toFixed(2)} seconds.`);
   } catch (err) {
     response.error = `${err}`;
   }

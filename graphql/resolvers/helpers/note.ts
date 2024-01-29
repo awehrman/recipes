@@ -7,8 +7,11 @@ import {
   Prisma,
   PrismaClient
 } from '@prisma/client';
+import * as cheerio from 'cheerio';
 import { AuthenticationError } from 'apollo-server-micro';
 import Evernote from 'evernote';
+import fs from 'fs-extra';
+import path from 'path';
 
 import {
   METADATA_NOTE_SPEC,
@@ -135,10 +138,13 @@ const verifyNotes = async (
   const { noteImportOffset = 0 } = session?.user;
 
   // get just the GUIDs that aren't in bookmarked (note: this may take a while...)
-  const evernoteGUIDs = notes.filter(
-    (note: Evernote.NoteStore.NoteMetadata) => `${note.notebookGuid}` !== EVERNOTE_PROD_BOOKMARK_GUID
-  ).map((note: Evernote.NoteStore.NoteMetadata) => `${note.guid}`);
-  
+  const evernoteGUIDs = notes
+    .filter(
+      (note: Evernote.NoteStore.NoteMetadata) =>
+        `${note.notebookGuid}` !== EVERNOTE_PROD_BOOKMARK_GUID
+    )
+    .map((note: Evernote.NoteStore.NoteMetadata) => `${note.guid}`);
+
   // TODO or less than the import number
   if (evernoteGUIDs.length < 1) {
     const offset = noteImportOffset + 1;
@@ -529,7 +535,7 @@ const getNoteContent = async (
     const folder = { folder: 'recipes' };
     image = await uploadImage(buffer, folder).then((data) => data?.secure_url);
   }
-  
+
   const note: NoteWithRelations = {
     ...noteMeta,
     content: `${content}`,
@@ -558,4 +564,110 @@ const parseNoteContent = (
     },
     ingHash: { ...response.ingHash }
   };
+};
+
+export const readLocalNotes = async () => {
+  // const directoryPath = './public/export';
+  const directoryPath = path.resolve('./public', 'test-data');
+
+  try {
+    const files = await fs.readdir(directoryPath);
+
+    const htmlContents = await Promise.all(
+      files.map(async (file: string) => {
+        const filePath = `${directoryPath}/${file}/${file}.html`;
+        console.log(filePath);
+        if (filePath.includes('.DS_Store')) {
+          console.log('skipping DS store...');
+          return null;
+        }
+        const isFile = (await fs.stat(filePath)).isFile();
+        if (isFile) {
+          const content = await fs.readFile(filePath, 'utf-8');
+          const $ = cheerio.load(content);
+          $('style').remove();
+          $('icons').remove();
+          const final = $.html();
+          fs.writeFileSync(
+            `${directoryPath}/${file}/cleaned.html`,
+            final,
+            'utf8'
+          );
+
+          const metaTags = $('meta[itemprop="title"]');
+          const notes = [];
+          metaTags.each((index, element) => {
+            // Get the content following the <meta> tag until the next <meta> tag
+            const title = $(element).prop('content');
+            const source = $(element)
+              .nextAll('note-attributes')
+              .first()
+              .find('meta[itemprop="source-url"]')
+              .attr('content');
+
+            const siblings = $(element).nextAll();
+            let foundEnd = false;
+            let image = '';
+            let noteContent: string[] = [];
+            const tags: string[] = [];
+
+            const lines = siblings.each((i, sibling) => {
+              if (foundEnd) {
+                return false;
+              }
+
+              const isEndOfLine = $(sibling).is('hr');
+              if (isEndOfLine) {
+                foundEnd = true;
+              }
+
+              // strip out any meta/title tags
+              const isNoteAttributesTag = $(sibling).is('note-attributes');
+              const isMetaTag = $(sibling).is('meta');
+              if (isMetaTag) {
+                const isTag = $(sibling).attr('itemprop') === 'tag';
+                if (isTag) {
+                  const tag = $(sibling).attr('content');
+                  tags.push(`${tag}`);
+                }
+              }
+              const isTitleTag = $(sibling).is('h1');
+
+              // but save our image
+              const isImage = $(sibling).is('img');
+              if (isImage) {
+                image = `${$(sibling).attr('src')}`;
+              }
+              const validLine = !isNoteAttributesTag && !isImage && !isTitleTag;
+
+              const isRecipeLine = foundEnd ? false : validLine;
+              if (isRecipeLine) {
+                noteContent.push(`<div>${$(sibling).html()?.trim()}</div>`);
+              }
+            });
+
+            // lines.each((i, e) => {
+            //   console.log(i, $(e).html());
+            // });
+            const content = noteContent.join('');
+            console.log({ title, source, content, category: file, tags });
+            console.log('- - - - - - ');
+
+            // Add the content to the array
+            notes.push({ title, source, content, category: file, tags });
+          });
+
+          return { notes };
+        } else {
+          console.log('directory');
+          return null;
+        }
+      })
+    );
+
+    return htmlContents;
+  } catch (error) {
+    console.error('Error reading HTML files:', error);
+    return [];
+  }
 };

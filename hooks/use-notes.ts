@@ -7,8 +7,8 @@ import {
   GET_NOTES_CONTENT_MUTATION,
   SAVE_RECIPES_MUTATION
 } from '../graphql/mutations/note';
+import { IMPORT_LOCAL_MUTATION } from '../graphql/mutations/import';
 import { defaultLoadingStatus } from 'constants/note';
-// import { loadingSkeleton } from 'lib/util';
 import { MAX_NOTES_LIMIT } from 'constants/evernote';
 import React, { SetStateAction } from 'react';
 
@@ -120,6 +120,8 @@ function useNotes(
     }
   });
 
+  const [importLocal] = useMutation(IMPORT_LOCAL_MUTATION);
+
   function importNotes() {
     const updated = { ...status };
     updated.meta = true;
@@ -127,16 +129,15 @@ function useNotes(
     getNotesMeta();
   }
 
-  async function importLocal() {
-    // const notes = await readLocalNotes();
-    // console.log({ notes });
+  function importLocalNotes() {
+    importLocal();
   }
 
   return {
     loading,
     notes,
     refetchNotes: refetch,
-    importNotes,
+    importLocalNotes,
     importLocal,
     saveRecipes
   };
