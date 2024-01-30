@@ -243,6 +243,7 @@ export const parseIngredientLine = (
     );
   } catch (err) {
     console.log(`!!! Parsing Error !!!: ${reference}`);
+    console.log({ ingredientLine });
   }
   return {
     line: ingredientLine,

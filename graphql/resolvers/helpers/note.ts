@@ -242,10 +242,12 @@ export const fetchLocalNotesContent = async (
 ): Promise<NoteWithRelations[]> => {
   const { prisma } = ctx;
 
+  console.log('importing...');
   const { parsedNotes, ingHash } = await getLocalParsedNoteContent();
+  console.log('saving ingredients...');
   const updatedHash = await saveNoteIngredients(ingHash, prisma);
+  console.log('saving notes...', parsedNotes.length);
   const notes = await saveLocalNotes(parsedNotes, updatedHash, prisma);
-
   return notes;
 };
 
@@ -494,12 +496,9 @@ const saveLocalNotes = async (
   ingHash: IngredientHash,
   prisma: PrismaClient
 ): Promise<NoteWithRelations[]> => {
-  const noteIds: string[] = [];
-
   // create notes with content, ingredients and instruction lines
   const basicNotes: NoteWithRelations = await prisma.$transaction(
     parsedNotes.map((note: NoteWithRelations) => {
-      noteIds.push(note.id);
       const ingredients: Prisma.IngredientLineUpdateManyWithoutNoteNestedInput =
         formatIngredientLinesUpsert(note.ingredients, ingHash);
       const instructions: Prisma.InstructionLineUpdateManyWithoutNoteNestedInput =
@@ -545,6 +544,9 @@ const saveLocalNotes = async (
       });
     })
   );
+  const noteIds: string[] = basicNotes.map(
+    (note: NoteWithRelations) => note.id
+  );
 
   // update the parsedSegments and link to our ingredients line
   const data: Prisma.ParsedSegmentCreateManyInput[] = [];
@@ -581,6 +583,7 @@ const saveLocalNotes = async (
     skipDuplicates: true
   });
 
+  console.log({ noteIds });
   // fetch updated note
   const notes = await prisma.note.findMany({
     where: {
@@ -626,6 +629,7 @@ const saveLocalNotes = async (
     }
   });
 
+  console.log({ notes });
   return notes;
 };
 

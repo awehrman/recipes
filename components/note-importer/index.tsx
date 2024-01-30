@@ -36,15 +36,13 @@ const NoteImporter: React.FC<NoteImporterProps> = () => {
         label="Import Local Files"
       />
 
-      {isAuthenticated ? (
-        <NoteActions
-          noteSize={notes.length}
-          loading={loading}
-          status={status}
-          importNotes={/*importNotes*/ () => {}}
-          saveRecipes={saveRecipes}
-        />
-      ) : null}
+      <NoteActions
+        noteSize={notes.length}
+        loading={loading}
+        status={status}
+        importNotes={/*importNotes*/ () => {}}
+        saveRecipes={saveRecipes}
+      />
 
       {loading ? <Loading>Loading ...</Loading> : null}
 
