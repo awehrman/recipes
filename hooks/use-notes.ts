@@ -120,8 +120,11 @@ function useNotes(
     }
   });
 
-  const [importLocal] = useMutation(IMPORT_LOCAL_MUTATION);
+  const [importLocal] = useMutation(IMPORT_LOCAL_MUTATION, {
+    refetchQueries: [GET_ALL_NOTES_QUERY]
+  });
 
+  // TODO rename to be evernote specific
   function importNotes() {
     const updated = { ...status };
     updated.meta = true;

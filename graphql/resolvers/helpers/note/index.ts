@@ -1,17 +1,21 @@
 import {
   IngredientLineWithParsed,
-  IngredientWithAltNames,
   NoteMeta,
   NoteWithRelations,
   ParsedSegment,
   Prisma,
   PrismaClient
 } from '@prisma/client';
-import * as cheerio from 'cheerio';
 import { AuthenticationError } from 'apollo-server-micro';
 import Evernote from 'evernote';
-import fs from 'fs-extra';
-import path from 'path';
+
+import {
+  IngredientHash,
+  IngredientValueHash,
+  CreateParsedSegment,
+  ParsedNoteContent,
+  NotesWithIngredients
+} from './types';
 
 import {
   METADATA_NOTE_SPEC,
@@ -19,15 +23,15 @@ import {
   NOTE_FILTER,
   NOTE_SPEC
 } from 'constants/evernote';
-import { AppContext } from '../../context';
+import { AppContext } from '../../../context';
 
-import { addNewCategories } from './category';
-import { getEvernoteStore } from './evernote-session';
-import { uploadImage } from './image';
-import { parseHTML } from './parser';
-import { addNewTags } from './tag';
-import { formatInstructionLinesUpsert } from './ingredient/instruction-line';
-import { formatIngredientLinesUpsert } from './ingredient/ingredient-line';
+import { addNewCategories } from '../category';
+import { getEvernoteStore } from '../evernote-session';
+import { uploadImage } from '../image';
+import { parseHTML } from '../parser';
+import { addNewTags } from '../tag';
+import { formatInstructionLinesUpsert } from '../ingredient/instruction-line';
+import { formatIngredientLinesUpsert } from '../ingredient/ingredient-line';
 
 // TODO move to constants file
 const EVERNOTE_PROD_BOOKMARK_GUID = `f4deaa34-0e7e-4d1a-9ebf-d6c0b04900ed`;
@@ -237,20 +241,6 @@ export const fetchNotesContent = async (
   return notes;
 };
 
-export const fetchLocalNotesContent = async (
-  ctx: AppContext
-): Promise<NoteWithRelations[]> => {
-  const { prisma } = ctx;
-
-  console.log('importing...');
-  const { parsedNotes, ingHash } = await getLocalParsedNoteContent();
-  console.log('saving ingredients...');
-  const updatedHash = await saveNoteIngredients(ingHash, prisma);
-  console.log('saving notes...', parsedNotes.length);
-  const notes = await saveLocalNotes(parsedNotes, updatedHash, prisma);
-  return notes;
-};
-
 const saveNoteIngredients = async (
   ingHash: IngredientHash,
   prisma: PrismaClient
@@ -320,32 +310,6 @@ const saveNoteIngredients = async (
   ingHash.valueHash = valueHash;
 
   return ingHash;
-};
-
-// TODO move
-type IngredientValueHash = {
-  [value: string]: IngredientWithAltNames | null;
-};
-
-type CreateIngredientData = {
-  name: string;
-  plural?: string;
-};
-
-type IngredientHash = {
-  matchBy: string[];
-  valueHash: IngredientValueHash;
-  createData: CreateIngredientData[];
-};
-
-type CreateParsedSegment = {
-  // updatedAt: Date
-  index: number;
-  rule: string;
-  type: string;
-  value: string;
-  ingredientId: string | null;
-  ingredientLineId: string;
 };
 
 const saveNotes = async (
@@ -491,153 +455,6 @@ const saveNotes = async (
   return notes;
 };
 
-const saveLocalNotes = async (
-  parsedNotes: NoteWithRelations[],
-  ingHash: IngredientHash,
-  prisma: PrismaClient
-): Promise<NoteWithRelations[]> => {
-  // create notes with content, ingredients and instruction lines
-  const basicNotes: NoteWithRelations = await prisma.$transaction(
-    parsedNotes.map((note: NoteWithRelations) => {
-      const ingredients: Prisma.IngredientLineUpdateManyWithoutNoteNestedInput =
-        formatIngredientLinesUpsert(note.ingredients, ingHash);
-      const instructions: Prisma.InstructionLineUpdateManyWithoutNoteNestedInput =
-        formatInstructionLinesUpsert(note.instructions);
-      const data: Prisma.NoteCreateInput = {
-        title: note.title,
-        source: note.source,
-        // TODO categories?:
-        // TODO tags?:
-        image: note.image,
-        content: note.content,
-        ingredients,
-        instructions,
-        isParsed: true
-      };
-
-      return prisma.note.create({
-        data,
-        select: {
-          id: true,
-          source: true,
-          title: true,
-          image: true,
-          content: true,
-          isParsed: true,
-          ingredients: {
-            select: {
-              id: true,
-              reference: true,
-              blockIndex: true,
-              lineIndex: true,
-              isParsed: true
-            }
-          },
-          instructions: {
-            select: {
-              id: true,
-              blockIndex: true,
-              reference: true
-            }
-          }
-        }
-      });
-    })
-  );
-  const noteIds: string[] = basicNotes.map(
-    (note: NoteWithRelations) => note.id
-  );
-
-  // update the parsedSegments and link to our ingredients line
-  const data: Prisma.ParsedSegmentCreateManyInput[] = [];
-
-  parsedNotes.forEach((note: NoteWithRelations, noteIndex: number) => {
-    const { ingredients } = note;
-    ingredients.forEach((line: IngredientLineWithParsed, lineIndex: number) => {
-      const ingredientLineId: string | null =
-        basicNotes?.[noteIndex]?.ingredients?.[lineIndex]?.id ?? null;
-
-      if (ingredientLineId) {
-        line.parsed.forEach((parsed: ParsedSegment) => {
-          const ingredientId: string | null =
-            parsed.type === 'ingredient'
-              ? ingHash.valueHash?.[parsed.value]?.id ?? null
-              : null;
-          const segment: CreateParsedSegment = {
-            // updatedAt
-            index: parsed.index,
-            rule: parsed.rule,
-            type: parsed.type,
-            value: parsed.value,
-            ingredientId: parsed.type === 'ingredient' ? ingredientId : null,
-            ingredientLineId
-          };
-          data.push(segment);
-        });
-      }
-    });
-  });
-
-  await prisma.parsedSegment.createMany({
-    data,
-    skipDuplicates: true
-  });
-
-  console.log({ noteIds });
-  // fetch updated note
-  const notes = await prisma.note.findMany({
-    where: {
-      id: {
-        in: noteIds
-      }
-    },
-    select: {
-      id: true,
-      source: true,
-      title: true,
-      image: true,
-      content: true,
-      isParsed: true,
-      ingredients: {
-        select: {
-          id: true,
-          reference: true,
-          blockIndex: true,
-          lineIndex: true,
-          isParsed: true,
-          parsed: {
-            select: {
-              value: true
-            }
-          },
-          ingredient: {
-            select: {
-              id: true,
-              isComposedIngredient: true,
-              isValidated: true
-            }
-          }
-        }
-      },
-      instructions: {
-        select: {
-          id: true,
-          blockIndex: true,
-          reference: true
-        }
-      }
-    }
-  });
-
-  console.log({ notes });
-  return notes;
-};
-
-type NotesWithIngredients = {
-  parsedNotes: NoteWithRelations[];
-  ingHash: IngredientHash;
-};
-
 const getParsedNoteContent = async (
   notesSansContent: NoteMeta[],
   store: Evernote.NoteStoreClient
@@ -674,38 +491,6 @@ const getParsedNoteContent = async (
   return { parsedNotes, ingHash };
 };
 
-const getLocalParsedNoteContent = async (): Promise<NotesWithIngredients> => {
-  const ingHash: IngredientHash = {
-    matchBy: [],
-    valueHash: {},
-    createData: []
-  };
-  const notes = await readLocalNotes().then((res) => {
-    const notes = res.filter((n) => n);
-    const result = notes.map((note: any) => {
-      try {
-        const parsed = parseNoteContent(note, ingHash);
-        ingHash.matchBy = [
-          ...new Set([...ingHash.matchBy, ...parsed.ingHash.matchBy])
-        ];
-        ingHash.valueHash = {
-          ...ingHash.valueHash,
-          ...parsed.ingHash.valueHash
-        };
-        ingHash.createData = [
-          ...new Set([...ingHash.createData, ...parsed.ingHash.createData])
-        ];
-        return parsed.parsedNote;
-      } catch (er) {
-        console.log('an error occurred');
-        console.log(er);
-      }
-    });
-    return result;
-  });
-  return { parsedNotes: notes, ingHash };
-};
-
 const getNoteContent = async (
   noteMeta: NoteMeta,
   store: Evernote.NoteStoreClient
@@ -733,12 +518,7 @@ const getNoteContent = async (
   return note;
 };
 
-type ParsedNoteContent = {
-  parsedNote: NoteWithRelations;
-  ingHash: IngredientHash;
-};
-
-const parseNoteContent = (
+export const parseNoteContent = (
   note: NoteWithRelations,
   ingHash: IngredientHash
 ): ParsedNoteContent => {
@@ -752,107 +532,4 @@ const parseNoteContent = (
     },
     ingHash: { ...response.ingHash }
   };
-};
-
-export const readLocalNotes = async () => {
-  const directoryPath = path.resolve('./public', 'test-data');
-
-  try {
-    const files = await fs.readdir(directoryPath);
-
-    const htmlContents = await Promise.all(
-      files
-        .map(async (file: string) => {
-          const filePath = `${directoryPath}/${file}/${file}.html`;
-          if (filePath.includes('.DS_Store')) {
-            return null;
-          }
-          const isFile = (await fs.stat(filePath)).isFile();
-          if (isFile) {
-            const content = await fs.readFile(filePath, 'utf-8');
-            const $ = cheerio.load(content);
-            $('style').remove();
-            $('icons').remove();
-            const final = $.html();
-            fs.writeFileSync(
-              `${directoryPath}/${file}/cleaned.html`,
-              final,
-              'utf8'
-            );
-
-            const metaTags = $('meta[itemprop="title"]');
-            const notes = [];
-            metaTags.each((_index, element) => {
-              // Get the content following the <meta> tag until the next <meta> tag
-              const title = $(element).prop('content');
-              const source = $(element)
-                .nextAll('note-attributes')
-                .first()
-                .find('meta[itemprop="source-url"]')
-                .attr('content');
-
-              const siblings = $(element).nextAll();
-              let foundEnd = false;
-              let image = '';
-              let noteContent: string[] = [];
-              const tags: string[] = [];
-
-              noteContent.push('<en-note>');
-              const lines = siblings.each((i, sibling) => {
-                if (foundEnd) {
-                  return false;
-                }
-
-                const isEndOfLine = $(sibling).is('hr');
-                if (isEndOfLine) {
-                  foundEnd = true;
-                }
-
-                // strip out any meta/title tags
-                const isNoteAttributesTag = $(sibling).is('note-attributes');
-                const isMetaTag = $(sibling).is('meta');
-                if (isMetaTag) {
-                  const isTag = $(sibling).attr('itemprop') === 'tag';
-                  if (isTag) {
-                    const tag = $(sibling).attr('content');
-                    tags.push(`${tag}`);
-                  }
-                }
-                const isTitleTag = $(sibling).is('h1');
-
-                // but save our image
-                const isImage = $(sibling).is('img');
-                if (isImage) {
-                  image = `${$(sibling).attr('src')}`;
-                }
-                const validLine =
-                  !isNoteAttributesTag && !isImage && !isTitleTag;
-
-                const isRecipeLine = foundEnd ? false : validLine;
-                if (isRecipeLine) {
-                  noteContent.push(`<div>${$(sibling).html()?.trim()}</div>`);
-                }
-              });
-
-              noteContent.push('</en-note>');
-              const content = noteContent.join('');
-
-              // Add the content to the array
-              notes.push({ title, source, content, categories: [file], tags });
-            });
-
-            return notes;
-          } else {
-            // TODO this is our image directory
-            return null;
-          }
-        })
-        .filter((n) => n)
-    );
-
-    return htmlContents.flatMap((n) => n);
-  } catch (error) {
-    console.error('Error reading HTML files:', error);
-    return [];
-  }
 };

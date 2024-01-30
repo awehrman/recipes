@@ -13,8 +13,6 @@ import {
   createParserRuleDefinitionCreateManyData
 } from './parser';
 
-// TODO move fixture data
-
 // TODO move
 type UnsavedParserRuleDefinition = Omit<
   ParserRuleDefinition,

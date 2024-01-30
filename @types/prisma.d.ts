@@ -8,7 +8,9 @@ declare module '@prisma/client' {
     }
   });
 
-  type NoteMeta = Prisma.NoteGetPayload<typeof noteMeta>;
+  type NoteMeta = Prisma.NoteGetPayload<typeof noteMeta> & {
+    id?: string;
+  };
 
   const noteWithRelations = Prisma.validator<Prisma.NoteArgs>()({
     include: {

@@ -6,34 +6,13 @@ import {
   PrismaClient,
   Recipe
 } from '@prisma/client';
-import { AuthenticationError } from 'apollo-server-micro';
 import { performance } from 'perf_hooks';
 
 import { AppContext } from '../context';
-import {
-  fetchNotesMeta,
-  fetchNotesContent,
-  fetchLocalNotesContent
-} from './helpers/note';
+import { fetchNotesMeta, fetchNotesContent } from './helpers/note';
+import { startLocalNotesImport } from './helpers/note/local-importer';
 
-import { isAuthenticated } from './helpers/evernote-session';
-
-// TODO move this
-const validateSession = (ctx: AppContext): void => {
-  const { session } = ctx;
-  if (!session) {
-    throw new AuthenticationError('No evernote session available');
-  }
-
-  const {
-    user: { evernote }
-  } = session;
-  const authenticated = isAuthenticated(evernote);
-
-  if (!authenticated) {
-    throw new AuthenticationError('Evernote is not authenticated');
-  }
-};
+import { validateSession } from './helpers/note/evernote-importer';
 
 export const getNotesMeta = async (
   _root: unknown,
@@ -200,23 +179,24 @@ export const saveRecipes = async (
   return response;
 };
 
-export const importLocal = async (
+export const importLocalNotes = async (
   _root: unknown,
-  _args: unknown,
+  _args: {},
   ctx: AppContext
 ): Promise<EvernoteNotesResponse> => {
-  console.log('[importLocal]');
+  console.log('[importLocalNotes]');
   const response: EvernoteNotesResponse = {
     notes: []
   };
 
   try {
     const t0 = performance.now();
-    console.log('import the stuff...');
-    const result = await fetchLocalNotesContent(ctx);
+    const result = await startLocalNotesImport(ctx);
     response.notes = [...result];
     const t1 = performance.now();
-    console.log(`[importLocal] took ${((t1 - t0) / 1000).toFixed(2)} seconds.`);
+    console.log(
+      `[importLocalNotes] took ${((t1 - t0) / 1000).toFixed(2)} seconds.`
+    );
   } catch (err) {
     response.error = `${err}`;
   }

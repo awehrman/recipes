@@ -4,7 +4,7 @@ import { extendType, FieldResolver, idArg, objectType, stringArg } from 'nexus';
 import {
   getNotesMeta,
   getNotesContent,
-  importLocal,
+  importLocalNotes,
   saveRecipes
 } from '../resolvers/note';
 import { resetDatabase } from '../resolvers/admin-tools';
@@ -198,7 +198,7 @@ export const ImportLocalNotes = extendType({
     t.field('importLocal', {
       type: 'EvernoteNotesResponse',
       args: {},
-      resolve: importLocal as FieldResolver<'Mutation', 'importLocal'>
+      resolve: importLocalNotes as FieldResolver<'Mutation', 'importLocal'>
     });
   }
 });
