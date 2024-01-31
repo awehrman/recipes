@@ -26,13 +26,13 @@ export const startLocalNotesImport = async (
 ): Promise<NoteWithRelations[]> => {
   console.log('startLocalNotesImporter');
   const { prisma } = ctx;
-  // if (!prisma) {
-  //   throw new Error('No prisma session available.');
-  // }
+  if (!prisma) {
+    throw new Error('No prisma session available.');
+  }
 
-  // console.log('reading local files...');
-  // const importedNotes = await readLocalCategoryFiles();
-
+  console.log('reading local files...');
+  const importedNotes = await readLocalCategoryFiles();
+  return importedNotes;
   // console.log('parsing note content...');
   // const { parsedNotes, ingHash } = await getLocalParsedNoteContent(
   //   importedNotes
@@ -44,7 +44,6 @@ export const startLocalNotesImport = async (
   // console.log('saving notes...', parsedNotes.length);
   // const notes = await saveLocalNotes(parsedNotes, updatedHash, prisma);
   // return notes;
-  return [];
 };
 
 export const readLocalCategoryFiles = async () => {
@@ -63,6 +62,7 @@ export const readLocalCategoryFiles = async () => {
 
     importedNotes = allCategoryNotes.flatMap((n) => n).filter((n) => !!n);
   } catch (error) {
+    console.log({ error });
     throw new Error('An error occurred while reading category files.');
   }
   return importedNotes;

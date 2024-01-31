@@ -1,6 +1,7 @@
 {
   "extends": ["next/core-web-vitals", "prettier"],
   "plugins": ["prettier"],
+  "parser": "@babel/eslint-parser",
   "rules": {
     "prettier/prettier": "warn"
   }
