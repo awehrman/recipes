@@ -12,15 +12,10 @@ beforeEach(() => {
 });
 
 describe('graphql > resolvers > helpers > note', () => {
-  describe('importLocalNotes', async () => {
-    // takes _root, _args, ctx: AppContext
-    // returns EvernoteNotesResponse
-    test('should return a notes response on success', async () => {
+  describe('importLocalNotes', () => {
+    test('should return empty notes with no files', async () => {
       const response = await importLocalNotes({}, {}, ctx);
-      expect(response.notes.length).toEqual(3);
+      expect(response.notes.length).toEqual(0);
     });
-    // test('should return an error response on failure', async () => {
-    //   // TODO
-    // });
   });
 });

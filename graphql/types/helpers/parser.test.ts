@@ -23,7 +23,7 @@ let mockCtx: MockContext;
 let ctx: AppContext;
 
 beforeEach(() => {
-  console.log('[beforeEach] resetting context');
+  // console.log('[beforeEach] resetting context');
   mockCtx = createMockContext();
   ctx = mockCtx as unknown as AppContext;
 });
@@ -43,7 +43,6 @@ describe('graphql > types > helpers > parser', () => {
         { input: parserRule } as ArgsValue<'Mutation', 'addParserRule'>,
         ctx
       );
-      console.log(JSON.stringify({ input: parserRule }, null, 2));
       expect(result).toEqual({
         id: '-1', // is this right? should this actually be a real guid?
         definitions: [{ id: 'OPTIMISTIC-0' }]

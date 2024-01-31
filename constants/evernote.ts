@@ -28,3 +28,4 @@ export const NOTE_SPEC = new Evernote.NoteStore.NoteResultSpec({
 
 export const NOTE_FILTER = new Evernote.NoteStore.NoteFilter();
 export const MAX_NOTES_LIMIT = 1;
+export const EVERNOTE_PROD_BOOKMARK_GUID = `f4deaa34-0e7e-4d1a-9ebf-d6c0b04900ed`;

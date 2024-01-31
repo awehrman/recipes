@@ -6,7 +6,7 @@ import {
   NoteWithRelations,
   ParsedSegment
 } from '@prisma/client';
-import * as cheerio from 'cheerio';
+import { load } from 'cheerio';
 
 import { determinePluralization } from './ingredient';
 import Parser from '../../../lib/line-parser.min.js';
@@ -79,7 +79,7 @@ export const parseHTML = (
   let newHash = { ...ingHash };
   // load our string dom content into a cheerio object
   // this will allow us to easily traverse the DOM tree
-  const $ = cheerio.load(note?.content ?? '');
+  const $ = load(note?.content ?? '');
   const enNote = $('en-note');
   const firstNonEmptyLine = enNote
     .find('div')

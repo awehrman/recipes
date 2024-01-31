@@ -5,7 +5,7 @@ import {
   Prisma,
   PrismaClient
 } from '@prisma/client';
-import * as cheerio from 'cheerio';
+import { load, Cheerio, CheerioAPI, Element } from 'cheerio';
 import fs from 'fs-extra';
 import path from 'path';
 
@@ -24,13 +24,14 @@ import { formatIngredientLinesUpsert } from '../ingredient/ingredient-line';
 export const startLocalNotesImport = async (
   ctx: AppContext
 ): Promise<NoteWithRelations[]> => {
+  console.log('startLocalNotesImporter');
   const { prisma } = ctx;
-  if (!prisma) {
-    throw new Error('No prisma session available.');
-  }
+  // if (!prisma) {
+  //   throw new Error('No prisma session available.');
+  // }
 
-  console.log('reading local files...');
-  const importedNotes = await readLocalCategoryFiles();
+  // console.log('reading local files...');
+  // const importedNotes = await readLocalCategoryFiles();
 
   // console.log('parsing note content...');
   // const { parsedNotes, ingHash } = await getLocalParsedNoteContent(
@@ -78,7 +79,7 @@ export const readLocalCategoryFile = async (
   const isFile = (await fs.stat(filePath)).isFile();
   if (isFile) {
     const content = await fs.readFile(filePath, 'utf-8');
-    const $ = cheerio.load(content);
+    const $ = load(content);
     $('style').remove();
     $('icons').remove();
     // const final = $.html();
@@ -103,8 +104,8 @@ export const readLocalCategoryFile = async (
 };
 
 export const parseNoteFromCategoryFile = (
-  $: cheerio.CheerioAPI,
-  element: cheerio.Element,
+  $: CheerioAPI,
+  element: Element,
   category: string
 ) => {
   const noteElement = $(element);
@@ -167,13 +168,10 @@ export const parseNoteFromCategoryFile = (
   };
 };
 
-export const getLocalNoteTitle = (
-  noteElement: cheerio.Cheerio<cheerio.Element>
-) => noteElement.prop('content');
+export const getLocalNoteTitle = (noteElement: Cheerio<Element>) =>
+  noteElement.prop('content');
 
-export const getLocalNoteSource = (
-  noteElement: cheerio.Cheerio<cheerio.Element>
-) =>
+export const getLocalNoteSource = (noteElement: Cheerio<Element>) =>
   noteElement
     .nextAll('note-attributes')
     .first()

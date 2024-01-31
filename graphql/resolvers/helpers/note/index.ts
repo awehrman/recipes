@@ -21,8 +21,9 @@ import {
   METADATA_NOTE_SPEC,
   MAX_NOTES_LIMIT,
   NOTE_FILTER,
-  NOTE_SPEC
-} from 'constants/evernote';
+  NOTE_SPEC,
+  EVERNOTE_PROD_BOOKMARK_GUID
+} from '../../../../constants/evernote';
 import { AppContext } from '../../../context';
 
 import { addNewCategories } from '../category';
@@ -32,9 +33,6 @@ import { parseHTML } from '../parser';
 import { addNewTags } from '../tag';
 import { formatInstructionLinesUpsert } from '../ingredient/instruction-line';
 import { formatIngredientLinesUpsert } from '../ingredient/ingredient-line';
-
-// TODO move to constants file
-const EVERNOTE_PROD_BOOKMARK_GUID = `f4deaa34-0e7e-4d1a-9ebf-d6c0b04900ed`;
 
 export const fetchNotesMeta = async (
   ctx: AppContext,
