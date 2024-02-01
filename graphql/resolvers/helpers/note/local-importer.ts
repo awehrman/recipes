@@ -6,8 +6,10 @@ import {
   PrismaClient
 } from '@prisma/client';
 import { load, Cheerio, CheerioAPI, Element } from 'cheerio';
-import fs from 'fs-extra';
+import fs, { createReadStream } from 'fs-extra';
 import path from 'path';
+// import { promisify } from 'util';
+// import { pipeline } from 'stream';
 
 import { AppContext } from '../../../context';
 import {
@@ -16,7 +18,7 @@ import {
   NotesWithIngredients
 } from './types';
 
-import { parseNoteContent } from './index';
+import { parseNoteContent, saveNoteIngredients } from './index';
 
 import { formatInstructionLinesUpsert } from '../ingredient/instruction-line';
 import { formatIngredientLinesUpsert } from '../ingredient/ingredient-line';
@@ -24,36 +26,36 @@ import { formatIngredientLinesUpsert } from '../ingredient/ingredient-line';
 export const startLocalNotesImport = async (
   ctx: AppContext
 ): Promise<NoteWithRelations[]> => {
-  console.log('startLocalNotesImporter');
   const { prisma } = ctx;
   if (!prisma) {
     throw new Error('No prisma session available.');
   }
 
-  console.log('reading local files...');
   const importedNotes = await readLocalCategoryFiles();
-  return importedNotes;
-  // console.log('parsing note content...');
-  // const { parsedNotes, ingHash } = await getLocalParsedNoteContent(
-  //   importedNotes
-  // );
+  // return importedNotes;
+  console.log('parsing note content...');
+  const { parsedNotes, ingHash } = await getLocalParsedNoteContent(
+    importedNotes
+  );
 
-  // console.log('saving ingredients...');
-  // const updatedHash = await saveNoteIngredients(ingHash, prisma);
+  console.log('saving ingredients...');
+  const updatedHash = await saveNoteIngredients(ingHash, prisma);
 
-  // console.log('saving notes...', parsedNotes.length);
-  // const notes = await saveLocalNotes(parsedNotes, updatedHash, prisma);
-  // return notes;
+  console.log('saving notes...', parsedNotes.length);
+  const notes = await saveLocalNotes(parsedNotes, updatedHash, prisma);
+  console.log('done');
+  return notes;
 };
 
 export const readLocalCategoryFiles = async () => {
   let importedNotes = [];
-  // TODO process.env.APP_ENV === 'test' ? 'test-data' : 'data
-  const directoryPath = path.resolve('./public', 'test-data');
+  const directoryPath = path.resolve('./public', process.env.APP_ENV === 'test' ? 'test-data' : 'data');
 
   try {
     const categoryFiles = await fs.readdir(directoryPath);
-
+    if (!categoryFiles.length) {
+      return [];
+    }
     const allCategoryNotes = await Promise.all(
       categoryFiles.map(
         async (file: string) => await readLocalCategoryFile(file, directoryPath)
@@ -82,12 +84,6 @@ export const readLocalCategoryFile = async (
     const $ = load(content);
     $('style').remove();
     $('icons').remove();
-    // const final = $.html();
-    // fs.writeFileSync(
-    //   `${directoryPath}/${file}/cleaned.html`,
-    //   final,
-    //   'utf8'
-    // );
 
     const metaTags = $('meta[itemprop="title"]');
     const notes: any[] = [];
@@ -95,13 +91,89 @@ export const readLocalCategoryFile = async (
       const note = parseNoteFromCategoryFile($, element, file);
       notes.push(note);
     });
-
     return notes;
   } else {
     // TODO this is our image directory
     return null;
   }
 };
+// const asyncPipeline = promisify(pipeline);
+// export const readLocalCategoryFile = async (
+//   file: string,
+//   directoryPath: string
+// ) => {
+//   const filePath = `${directoryPath}/${file}/${file}.html`;
+//   if (filePath.includes('.DS_Store')) {
+//     return null;
+//   }
+
+//   try {
+//     const isFile = await fs.pathExists(filePath);
+
+//     if (isFile) {
+//       const notes: any[] = [];
+//       let insideMetaTag = false;
+//       let buffer = '';
+
+//       await asyncPipeline(
+//         createReadStream(filePath, 'utf-8'),
+//         async function* (source) {
+//           for await (const chunk of source) {
+//             buffer += chunk;
+//             const content = buffer;
+//             console.log({ content });
+
+//             // Load content into Cheerio to search for the specified elements
+//             const $content = load(content);
+//             const styleAndIcons = $content('style, icons');
+//             const metaTags = $content('meta[itemprop="title"]');
+
+//             if (styleAndIcons.length > 0) {
+//               console.log('style and icons found');
+//               // Remove style and icons elements from buffer
+//               const styleAndIconsContent = styleAndIcons.toString();
+//               buffer = buffer.substring(buffer.indexOf(styleAndIconsContent) + styleAndIconsContent.length);
+//             }
+
+//             if (metaTags.length > 0) {
+//               console.log('metaTags found');
+//               // Process content between meta tags
+//               metaTags.each((_index, element) => {
+//                 const metaTagContent = $content(element).toString();
+//                 buffer = buffer.substring(buffer.indexOf(metaTagContent) + metaTagContent.length);
+//                 // insideMetaTag = true;
+
+//                 // Process content between meta tags
+//                 const $chunk = load(metaTagContent);
+//                 $chunk('style').remove();
+//                 $chunk('icons').remove();
+
+//                 const metaTagNotes = $chunk('meta[itemprop="title"]');
+//                 metaTagNotes.each((_metaIndex, metaElement) => {
+//                   const note = parseNoteFromCategoryFile($chunk, metaElement, file);
+//                   notes.push(note);
+//                 });
+//               });
+//             }
+
+//             // // If inside a meta tag, wait for the next closing tag before processing further
+//             // if (insideMetaTag && buffer.includes('</meta>')) {
+//             //   insideMetaTag = false;
+//             // }
+//           }
+//         }
+//       );
+//         console.log({ notes });
+//       return notes;
+//     } else {
+//       // TODO: this is our image directory
+//       return null;
+//     }
+//   } catch (error) {
+//     console.error('Error reading file:', error);
+//     return null;
+//   }
+// };
 
 export const parseNoteFromCategoryFile = (
   $: CheerioAPI,

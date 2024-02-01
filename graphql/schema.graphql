@@ -127,7 +127,7 @@ type Note {
   content: String
   createdAt: String
   evernoteGUID: String
-  id: String!
+  id: String
   image: String
   ingredients: [IngredientLine]
   instructions: [InstructionLine]
@@ -143,7 +143,7 @@ type NoteMeta {
   content: String
   createdAt: String
   evernoteGUID: String
-  id: String!
+  id: String
   image: String
   isParsed: Boolean
   source: String

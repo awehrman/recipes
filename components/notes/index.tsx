@@ -43,7 +43,7 @@ const Notes: React.FC<NotesProps> = ({
             <SourceWrapper>
               <ImageWrapper>
                 {/* width={400} height={222} */}
-                <Image src={`${image}`} alt={title} layout="fill" />
+                {/* <Image src={`${image}`} alt={title} layout="fill" /> */}
               </ImageWrapper>
               {/* Source */}
               {source ? (

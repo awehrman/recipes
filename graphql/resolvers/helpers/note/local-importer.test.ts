@@ -1,42 +1,66 @@
 import { MockContext, createMockContext } from '../../../../context';
 import { AppContext } from 'graphql/context';
 
-import { importLocalNotes } from '../../note';
 import {
   startLocalNotesImport,
   readLocalCategoryFiles
 } from './local-importer';
 
+import path from 'path';
+// TODO fix this
+import { copyFiles, resetTestData } from '../../../../tests/helpers/note/local-importer';
+
+// TODO this is heavily based on runInBand being passed... i'm going to keep thinking on this long term
+
+// TODO generalize this into a better helper function
 let mockCtx: MockContext;
 let ctx: AppContext;
 
-beforeEach(() => {
+beforeEach(async () => {
+  console.log('[beforeEach]')
+  await resetTestData();
   mockCtx = createMockContext();
   ctx = mockCtx as unknown as AppContext;
 });
 
 describe('graphql > resolvers > helpers > note > local-importer', () => {
   describe('startLocalNotesImport', () => {
-    // takes ctx: AppContext
-    // returns Notes
-    test('should return a notes response on success', async () => {
+    test('should return an empty notes response on empty import directory', async () => {
       const result = await startLocalNotesImport(ctx);
       expect(result.length).toEqual(0);
     });
-    // test('should throw an error on failure', async () => {
-    //   // TODO
-    // });
+
+    test('should return three notes within two categories', async () => {
+      const cannoli = path.resolve('./tests/fixtures/local-import', 'Cannoli');
+      await copyFiles(cannoli, 'Cannoli');
+      const swordfish = path.resolve(
+        './tests/fixtures/local-import',
+        'Swordfish'
+      );
+      await copyFiles(swordfish, 'Swordfish');
+      const response = await startLocalNotesImport(ctx);
+      console.log({ response });
+      expect(response.length).toEqual(3);
+    });
   });
 
   // describe('readLocalCategoryFiles', () => {
-  //   // returns NotesMeta (unparsed)
-  //   test('should return a notes response on success', async () => {
+  //   test('should return an empty notes response on empty import directory', async () => {
   //     const result = await readLocalCategoryFiles();
-  //     expect(result.length).toEqual(3);
+  //     expect(result.length).toEqual(0);
   //   });
-  //   // test('should throw an error on failure', async () => {
-  //   //   // TODO
-  //   // });
+
+  //   test('should return three notes within two categories', async () => {
+  //     const cannoli = path.resolve('<rootDir>/tests/fixtures/local-import', 'Cannoli');
+  //     await copyFiles(cannoli, 'Cannoli');
+  //     const swordfish = path.resolve(
+  //       './tests/fixtures/local-import',
+  //       'Swordfish'
+  //     );
+  //     await copyFiles(swordfish, 'Swordfish');
+  //     const response = await readLocalCategoryFiles();
+  //     expect(response.length).toEqual(3);
+  //   });
   // });
 
   // describe('readLocalCategoryFile', () => {

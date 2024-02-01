@@ -2,18 +2,16 @@ import { IngredientLineWithParsed } from '@prisma/client';
 import { extendType, FieldResolver, idArg, objectType, stringArg } from 'nexus';
 
 import {
-  getNotesMeta,
-  getNotesContent,
-  importLocalNotes,
-  saveRecipes
+  importLocalNotes
 } from '../resolvers/note';
+import { getNotesMeta, getNotesContent, saveRecipes } from 'graphql/resolvers/helpers/note/evernote-importer';
 import { resetDatabase } from '../resolvers/admin-tools';
 
 // TODO can this be an extension of NoteMeta?
 export const Note = objectType({
   name: 'Note',
   definition(t) {
-    t.nonNull.string('id');
+    t.string('id');
     t.string('createdAt');
     t.string('updatedAt');
     t.string('evernoteGUID');
@@ -47,7 +45,7 @@ export const Note = objectType({
 export const NoteMeta = objectType({
   name: 'NoteMeta',
   definition(t) {
-    t.nonNull.string('id');
+    t.string('id');
     t.string('createdAt');
     t.string('updatedAt');
     t.string('evernoteGUID');

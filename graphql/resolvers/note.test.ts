@@ -3,7 +3,7 @@ import { createMockContext, MockContext } from '../../context';
 import { AppContext } from 'graphql/context';
 
 import { importLocalNotes } from './note';
-import { copyFiles, resetTestData } from 'tests/helpers/note/local-importer';
+import { copyFiles, resetTestData } from '../../tests/helpers/note/local-importer';
 
 // TODO generalize this into a better helper function
 let mockCtx: MockContext;

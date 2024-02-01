@@ -239,7 +239,7 @@ export const fetchNotesContent = async (
   return notes;
 };
 
-const saveNoteIngredients = async (
+export const saveNoteIngredients = async (
   ingHash: IngredientHash,
   prisma: PrismaClient
 ): Promise<IngredientHash> => {
