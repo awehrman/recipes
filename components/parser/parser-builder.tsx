@@ -1,6 +1,8 @@
 import { ParserRuleWithRelations } from '@prisma/client';
 import React from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { VariableSizeList as List } from 'react-window';
+import AutoSizer from 'react-virtualized-auto-sizer';
 import styled from 'styled-components';
 
 import { Button } from 'components/common';
@@ -27,6 +29,44 @@ const ParserBuilder: React.FC = () => {
     dispatch({ type: 'SET_IS_COLLAPSED', payload: !isCollapsed });
   }
 
+
+  const listRef = React.useRef();
+  const sizeMap = React.useRef({});
+  const setSize = React.useCallback((index: number, size: number) => {
+    if (sizeMap?.current && listRef?.current) {
+      sizeMap.current = { ...sizeMap.current, [index]: size };
+      listRef.current.resetAfterIndex(index);
+    }
+  }, []);
+  const getSize = (index: number) => console.log('getSize', sizeMap?.current?.[index] || 50) || sizeMap?.current?.[index] || 50;
+
+  const Row = ({ data, index, setSize, windowWidth }) => {
+    const rowRef = React.useRef();
+    const isEven = index % 2 === 0;
+  
+    React.useEffect(() => {
+      setSize(index, rowRef.current.getBoundingClientRect().height);
+    }, [setSize, index, windowWidth]);
+  
+    return (
+      <div
+        ref={rowRef}
+      >
+        <Draggable draggableId={rules[index].id} index={index}>
+         {(provided) => (
+           <div
+             ref={provided.innerRef}
+             {...provided.dragHandleProps}
+             {...provided.draggableProps}
+           >
+             <Rule key={rules[index].id} index={index} id={rules[index].id} />
+           </div>
+         )}
+       </Draggable>
+      </div>
+    );
+  };
+
   function renderRules() {
     if (loading && !rules.length) {
       return <Loading>Loading rules...</Loading>;
@@ -36,19 +76,35 @@ const ParserBuilder: React.FC = () => {
       return <Message>No parsing rules exist.</Message>;
     }
 
-    return rules.map((rule: ParserRuleWithRelations, index: number) => (
-      <Draggable key={rule.id} draggableId={rule.id} index={index}>
-        {(provided) => (
-          <div
-            ref={provided.innerRef}
-            {...provided.dragHandleProps}
-            {...provided.draggableProps}
-          >
-            <Rule key={rule.id} index={index} id={rule.id} />
-          </div>
-        )}
-      </Draggable>
-    ));
+    // TODO row type
+    // const Row = ({ index, style }: any) => (
+    //   <Draggable draggableId={rules[index].id} index={index}>
+    //     {(provided) => (
+    //       <div
+    //         ref={provided.innerRef}
+    //         {...provided.dragHandleProps}
+    //         {...provided.draggableProps}
+    //         style={style}
+    //       >
+    //         <Rule key={rules[index].id} index={index} id={rules[index].id} />
+    //       </div>
+    //     )}
+    //   </Draggable>
+    // );
+
+    // return rules.map((rule: ParserRuleWithRelations, index: number) => (
+    //   <Draggable key={rule.id} draggableId={rule.id} index={index}>
+    //     {(provided) => (
+    //       <div
+    //         ref={provided.innerRef}
+    //         {...provided.dragHandleProps}
+    //         {...provided.draggableProps}
+    //       >
+    //         <Rule key={rule.id} index={index} id={rule.id} />
+    //       </div>
+    //     )}
+    //   </Draggable>
+    // ));
   }
 
   function handleOnDragEnd(item: any) {
@@ -83,10 +139,33 @@ const ParserBuilder: React.FC = () => {
         <DragDropContext onDragEnd={handleOnDragEnd}>
           <Droppable droppableId="list-container">
             {(provided) => (
-              <div {...provided.droppableProps} ref={provided.innerRef}>
+              <DragRef {...provided.droppableProps} ref={provided.innerRef}>
                 {renderRules()}
+                <AutoSizer>
+                  {({ height, width }) => (
+                    <List
+                      ref={listRef}
+                      height={height}
+                      width={width}
+                      itemCount={rules.length}
+                      itemSize={getSize}
+                      itemData={rules}
+                    >
+                      {({ data, index, style }) => (
+                        <div style={style}>
+                          <Row
+                            data={data}
+                            index={index}
+                            setSize={setSize}
+                            windowWidth={width}
+                          />
+                        </div>
+                      )}
+                    </List>)
+                  }
+                </AutoSizer>
                 {provided.placeholder}
-              </div>
+              </DragRef>
             )}
           </Droppable>
         </DragDropContext>
@@ -97,7 +176,14 @@ const ParserBuilder: React.FC = () => {
 
 export default ParserBuilder;
 
-const RulesContent = styled.div``;
+const DragRef = styled.div`
+  height: 100%;
+`;
+
+const RulesContent = styled.div`
+  background: yellow;
+  height: calc(100vh - 220px);
+`;
 
 const RuleActions = styled.div`
   margin-bottom: 8px;
