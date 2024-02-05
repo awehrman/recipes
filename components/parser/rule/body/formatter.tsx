@@ -16,16 +16,30 @@ import useParserRule from 'hooks/use-parser-rule';
 
 import { formatterSetup, themeOptions } from './formatter.theme';
 
+// TODO move
 const insertOrder = (value: string, index: number) => {
   return value.replace(/\${ORDER}/g, index.toString());
 };
 
+function getEditorHeight(element: HTMLDivElement | undefined): number {
+  if (!element) {
+    if (!element) {
+      return 0;
+    }
+  }
+  return element.getBoundingClientRect()?.height ?? 0;
+}
+
+type CodeMirrorElement = {
+  editor: HTMLDivElement | undefined;
+}
 const RuleFormatter: React.FC = () => {
   const {
     state: { index, defaultValue, definitionId }
   } = useRuleDefinitionContext();
   const {
-    state: { id, displayContext }
+    state: { id, displayContext },
+    setSize
   } = useRuleContext();
   const { control, getValues, register, setValue } = useFormContext();
   const type = useWatch({ control, name: `definitions.${index}.type` });
@@ -41,6 +55,9 @@ const RuleFormatter: React.FC = () => {
   const defaultComputedValue =
     displayContext === 'display' ? formattedWithOrder : defaultFormatter;
   const currentValue = getEditorValue();
+  const editorRef = React.useRef<CodeMirrorElement>();
+  const editorHeight = getEditorHeight(editorRef?.current?.editor);
+  const wrapperRef = React.useRef();
 
   function handleOnChange(value: string, _viewUpdate: ViewUpdate) {
     setValue(fieldName, value);
@@ -76,41 +93,62 @@ const RuleFormatter: React.FC = () => {
     return null;
   }
 
+  React.useEffect(() => {
+    if (wrapperRef?.current && editorHeight > 0) {
+      (wrapperRef.current as HTMLDivElement).style.height = `${editorHeight}px`;
+      // rule header + height of comment and rule (18 + 52)
+      // TODO this is likely insufficient
+      console.log(index, editorHeight);
+      const ruleHeight = 81 + editorHeight;
+      // TODO why is my index always 0?
+      // no i'm being dumb, this index is the rule definition index...
+      // i 
+      setSize();
+    }
+  }, [editorHeight]);
+
   return (
-    <EditFormatter htmlFor={uniqueId}>
-      <HiddenFormInput
-        {...register(fieldName)}
-        id={uniqueId}
-        defaultValue={defaultComputedValue}
-        disabled={displayContext === 'display'}
-        name={fieldName}
-        placeholder={
-          displayContext === 'display' ? '' : '/* format rule return */'
-        }
-      />
-      {/* TODO this is a focus trap */}
-      <StyledEditor
-        basicSetup={formatterSetup}
-        editable={displayContext !== 'display'}
-        extensions={[javascript({ jsx: true }), handleOnBlur]}
-        height="auto"
-        indentWithTab
-        onChange={handleOnChange}
-        placeholder={
-          displayContext === 'display' ? '' : '/* format rule return */'
-        }
-        readOnly={displayContext === 'display'}
-        theme={themeOptions[displayContext as ThemeOptionKey]}
-        width="525px"
-        value={currentValue}
-      />
-    </EditFormatter>
+    <Wrapper ref={wrapperRef}>
+      <EditFormatter htmlFor={uniqueId}>
+        <HiddenFormInput
+          {...register(fieldName)}
+          id={uniqueId}
+          defaultValue={defaultComputedValue}
+          disabled={displayContext === 'display'}
+          name={fieldName}
+          placeholder={
+            displayContext === 'display' ? '' : '/* format rule return */'
+          }
+        />
+        {/* TODO this is a focus trap */}
+        <StyledEditor
+          ref={editorRef}
+          basicSetup={formatterSetup}
+          editable={displayContext !== 'display'}
+          extensions={[javascript({ jsx: true }), handleOnBlur]}
+          height="auto"
+          indentWithTab
+          onChange={handleOnChange}
+          placeholder={
+            displayContext === 'display' ? '' : '/* format rule return */'
+          }
+          readOnly={displayContext === 'display'}
+          theme={themeOptions[displayContext as ThemeOptionKey]}
+          width="525px"
+          value={currentValue}
+        />
+      </EditFormatter>
+    </Wrapper>
   );
 };
 
 export default RuleFormatter;
 
 // RuleFormatter.whyDidYouRender = true;
+
+const Wrapper = styled.div`
+  position: relative;
+`;
 
 const LabelWrapper = styled.label`
   display: flex;
@@ -127,6 +165,7 @@ const HiddenFormInput = styled.textarea`
 const EditFormatter = styled(LabelWrapper)`
   margin-right: 10px;
   margin-top: 6px;
+  position: relative;
 `;
 
 const StyledEditor = styled(CodeMirror)`

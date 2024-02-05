@@ -159,7 +159,8 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
 const Rule: React.FC<RuleComponentProps> = ({
   context = 'display',
   index = 0,
-  id
+  id,
+  setSize
 }) => {
   const { rule } = useParserRule(id);
   const {
@@ -173,6 +174,7 @@ const Rule: React.FC<RuleComponentProps> = ({
       index={index}
       initialContext={context}
       isCollapsed={isCollapsed}
+      setSize={setSize}
     >
       <RuleContent rule={rule} />
     </RuleProvider>

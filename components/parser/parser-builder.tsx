@@ -20,6 +20,16 @@ const ParserBuilder: React.FC = () => {
   } = useParserContext();
 
   const { loading, rules = [], updateRulesOrder } = useParserRules();
+    const listRef = React.useRef();
+  const sizeMap = React.useRef({});
+  const setSize = React.useCallback((index: number, size: number) => {
+    console.log('setting size!', index, size)
+    if (sizeMap?.current && listRef?.current) {
+      sizeMap.current = { ...sizeMap.current, [index]: size };
+      listRef.current.resetAfterIndex(index);
+    }
+  }, []);
+  const getSize = (index: number) => sizeMap?.current?.[index] || DEFAULT_ROW_SIZE;
 
   function handleAddRuleClick() {
     dispatch({ type: 'SET_IS_ADD_BUTTON_DISPLAYED', payload: false });
@@ -29,30 +39,31 @@ const ParserBuilder: React.FC = () => {
     dispatch({ type: 'SET_IS_COLLAPSED', payload: !isCollapsed });
   }
 
-
-  const listRef = React.useRef();
-  const sizeMap = React.useRef({});
-  const setSize = React.useCallback((index: number, size: number) => {
-    if (sizeMap?.current && listRef?.current) {
-      sizeMap.current = { ...sizeMap.current, [index]: size };
-      listRef.current.resetAfterIndex(index);
+  const DEFAULT_ROW_SIZE = 81; // TODO move
+  // TODO move and dry 
+  function getRuleHeight(element: HTMLDivElement | null): number {
+    if (!element) {
+      return 0;
     }
-  }, []);
-  const getSize = (index: number) => console.log('getSize', sizeMap?.current?.[index] || 50) || sizeMap?.current?.[index] || 50;
+    return element.getBoundingClientRect()?.height ?? 0;
+  }
 
-  const Row = ({ data, index, setSize, windowWidth }) => {
-    const rowRef = React.useRef();
-    const isEven = index % 2 === 0;
+  // TODO fix type
+  const Row = ({ index, setSize }: any) => {
+    const rowRef = React.useRef<HTMLDivElement>(null);
   
-    React.useEffect(() => {
-      setSize(index, rowRef.current.getBoundingClientRect().height);
-    }, [setSize, index, windowWidth]);
+    // TODO fuck sending just setSize, we need this whole ass function including the height lookup
+    // that way i don't have to build it up from the formatter
+    // the formatter component should just holla at every render
+    const recomputeRuleHeight = React.useCallback(() => {
+      console.log('recomputeRuleHeight');
+      const height = getRuleHeight(rowRef.current);
+      setSize(index, height + 8);
+    }, [rowRef, setSize, index]);
   
     return (
-      <div
-        ref={rowRef}
-      >
-        <Draggable draggableId={rules[index].id} index={index}>
+      <div ref={rowRef}>
+        {/* <Draggable draggableId={rules[index].id} index={index}>
          {(provided) => (
            <div
              ref={provided.innerRef}
@@ -62,7 +73,8 @@ const ParserBuilder: React.FC = () => {
              <Rule key={rules[index].id} index={index} id={rules[index].id} />
            </div>
          )}
-       </Draggable>
+       </Draggable> */}
+       <Rule key={rules[index].id} index={index} id={rules[index].id} setSize={recomputeRuleHeight} />
       </div>
     );
   };
@@ -75,22 +87,6 @@ const ParserBuilder: React.FC = () => {
     if (!rules.length && !loading) {
       return <Message>No parsing rules exist.</Message>;
     }
-
-    // TODO row type
-    // const Row = ({ index, style }: any) => (
-    //   <Draggable draggableId={rules[index].id} index={index}>
-    //     {(provided) => (
-    //       <div
-    //         ref={provided.innerRef}
-    //         {...provided.dragHandleProps}
-    //         {...provided.draggableProps}
-    //         style={style}
-    //       >
-    //         <Rule key={rules[index].id} index={index} id={rules[index].id} />
-    //       </div>
-    //     )}
-    //   </Draggable>
-    // );
 
     // return rules.map((rule: ParserRuleWithRelations, index: number) => (
     //   <Draggable key={rule.id} draggableId={rule.id} index={index}>
@@ -107,14 +103,14 @@ const ParserBuilder: React.FC = () => {
     // ));
   }
 
-  function handleOnDragEnd(item: any) {
-    if (!item.destination) return;
-    const updatedList = [...rules];
-    // re-order list
-    const [reorderedItem] = updatedList.splice(item.source.index, 1);
-    updatedList.splice(item.destination.index, 0, reorderedItem);
-    updateRulesOrder(updatedList);
-  }
+  // function handleOnDragEnd(item: any) {
+  //   if (!item.destination) return;
+  //   const updatedList = [...rules];
+  //   // re-order list
+  //   const [reorderedItem] = updatedList.splice(item.source.index, 1);
+  //   updatedList.splice(item.destination.index, 0, reorderedItem);
+  //   updateRulesOrder(updatedList);
+  // }
 
   return (
     <Wrapper>
@@ -136,10 +132,10 @@ const ParserBuilder: React.FC = () => {
 
       <AddRule />
       <RulesContent>
-        <DragDropContext onDragEnd={handleOnDragEnd}>
+        {/* <DragDropContext onDragEnd={handleOnDragEnd}>
           <Droppable droppableId="list-container">
             {(provided) => (
-              <DragRef {...provided.droppableProps} ref={provided.innerRef}>
+              <DragRef {...provided.droppableProps} ref={provided.innerRef}> */}
                 {renderRules()}
                 <AutoSizer>
                   {({ height, width }) => (
@@ -164,11 +160,11 @@ const ParserBuilder: React.FC = () => {
                     </List>)
                   }
                 </AutoSizer>
-                {provided.placeholder}
+                {/* {provided.placeholder}
               </DragRef>
             )}
           </Droppable>
-        </DragDropContext>
+        </DragDropContext> */}
       </RulesContent>
     </Wrapper>
   );

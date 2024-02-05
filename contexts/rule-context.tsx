@@ -5,7 +5,6 @@ import React, {
   useReducer,
   ReactNode
 } from 'react';
-import { v4 } from 'uuid';
 
 type DisplayContext = 'add' | 'edit' | 'display';
 type RuleActionTypes =
@@ -35,7 +34,11 @@ type RuleAction = {
 type RuleDispatch = (action: RuleAction) => void;
 
 const RuleContext = createContext<
-  { state: RuleState; dispatch: RuleDispatch } | undefined
+  {
+    state: RuleState;
+    dispatch: RuleDispatch;
+    setSize: () => void;
+  } | undefined
 >(undefined);
 
 function ruleReducer(state: RuleState, action: RuleAction): RuleState {
@@ -84,6 +87,7 @@ type RuleProviderProps = {
   isCollapsed: boolean;
   index: number;
   rule: any; // TODO fix
+  setSize: () => void;
 };
 
 export const getDefaultRuleValuesForIndex = (order = 0) => ({
@@ -111,7 +115,8 @@ export function RuleProvider({
   initialContext = 'display',
   isCollapsed = false,
   index = 0,
-  rule = {}
+  rule = {},
+  setSize
 }: RuleProviderProps) {
   const defaultValues = {
     ...getDefaultRuleValuesForIndex(index),
@@ -126,13 +131,9 @@ export function RuleProvider({
     index,
     hasWarning: false
   });
-  const memoizedContext = useMemo(
-    () => ({ state, dispatch }),
-    [state, dispatch]
-  );
 
   return (
-    <RuleContext.Provider value={memoizedContext}>
+    <RuleContext.Provider value={{ state, dispatch, setSize }}>
       {children}
     </RuleContext.Provider>
   );

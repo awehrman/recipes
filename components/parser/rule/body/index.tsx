@@ -100,10 +100,11 @@ const RuleBody: React.FC = () => {
   }
 
   function renderDefinitions() {
+    console.log(fields.length);
     return fields.map((field: any, index: number) => {
       const definitionId = definitions?.[index]?.id ?? `OPTIMISTIC-${index}`;
       const defaultValue = defaultValues.definitions?.[index];
-
+      console.log({ index });
       return (
         <RuleDefinitionProvider
           key={field.id}

@@ -92,6 +92,7 @@ export function RuleDefinitionProvider({
     type: 'RULE',
     list: []
   };
+  console.log('context', index);
   const [state, dispatch] = useReducer(ruleDefinitionReducer, {
     index,
     definitionId,
