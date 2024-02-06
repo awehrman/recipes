@@ -39,7 +39,7 @@ const RuleFormatter: React.FC = () => {
   } = useRuleDefinitionContext();
   const {
     state: { id, displayContext },
-    setSize
+    recomputeRuleSize
   } = useRuleContext();
   const { control, getValues, register, setValue } = useFormContext();
   const type = useWatch({ control, name: `definitions.${index}.type` });
@@ -96,14 +96,9 @@ const RuleFormatter: React.FC = () => {
   React.useEffect(() => {
     if (wrapperRef?.current && editorHeight > 0) {
       (wrapperRef.current as HTMLDivElement).style.height = `${editorHeight}px`;
-      // rule header + height of comment and rule (18 + 52)
-      // TODO this is likely insufficient
-      console.log(index, editorHeight);
-      const ruleHeight = 81 + editorHeight;
-      // TODO why is my index always 0?
-      // no i'm being dumb, this index is the rule definition index...
-      // i 
-      setSize();
+      if (!!recomputeRuleSize) {
+        recomputeRuleSize();
+      }
     }
   }, [editorHeight]);
 

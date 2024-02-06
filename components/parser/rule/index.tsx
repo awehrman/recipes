@@ -134,8 +134,9 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
   return (
     <Wrapper
       className={displayContext}
-      onMouseEnter={debouncedHandleMouseEnter}
-      onMouseLeave={debouncedHandleMouseLeave}
+      // TODO
+      // onMouseEnter={debouncedHandleMouseEnter}
+      // onMouseLeave={debouncedHandleMouseLeave}
       onSubmit={handleSubmit(handleFormSubmit)}
     >
       <FormProvider {...methods}>
@@ -160,13 +161,12 @@ const Rule: React.FC<RuleComponentProps> = ({
   context = 'display',
   index = 0,
   id,
-  setSize
+  recomputeRuleSize
 }) => {
   const { rule } = useParserRule(id);
   const {
     state: { isCollapsed }
   } = useParserContext();
-
   return (
     <RuleProvider
       rule={rule}
@@ -174,7 +174,7 @@ const Rule: React.FC<RuleComponentProps> = ({
       index={index}
       initialContext={context}
       isCollapsed={isCollapsed}
-      setSize={setSize}
+      recomputeRuleSize={recomputeRuleSize}
     >
       <RuleContent rule={rule} />
     </RuleProvider>

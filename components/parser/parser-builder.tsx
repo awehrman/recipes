@@ -22,8 +22,7 @@ const ParserBuilder: React.FC = () => {
   const { loading, rules = [], updateRulesOrder } = useParserRules();
     const listRef = React.useRef();
   const sizeMap = React.useRef({});
-  const setSize = React.useCallback((index: number, size: number) => {
-    console.log('setting size!', index, size)
+  const recomputeRuleSize = React.useCallback((index: number, size: number) => {
     if (sizeMap?.current && listRef?.current) {
       sizeMap.current = { ...sizeMap.current, [index]: size };
       listRef.current.resetAfterIndex(index);
@@ -49,17 +48,13 @@ const ParserBuilder: React.FC = () => {
   }
 
   // TODO fix type
-  const Row = ({ index, setSize }: any) => {
+  const Row = ({ index, recomputeRuleSize }: any) => {
     const rowRef = React.useRef<HTMLDivElement>(null);
   
-    // TODO fuck sending just setSize, we need this whole ass function including the height lookup
-    // that way i don't have to build it up from the formatter
-    // the formatter component should just holla at every render
     const recomputeRuleHeight = React.useCallback(() => {
-      console.log('recomputeRuleHeight');
       const height = getRuleHeight(rowRef.current);
-      setSize(index, height + 8);
-    }, [rowRef, setSize, index]);
+      recomputeRuleSize(index, height + 8);
+    }, [rowRef, recomputeRuleSize, index]);
   
     return (
       <div ref={rowRef}>
@@ -74,7 +69,7 @@ const ParserBuilder: React.FC = () => {
            </div>
          )}
        </Draggable> */}
-       <Rule key={rules[index].id} index={index} id={rules[index].id} setSize={recomputeRuleHeight} />
+       <Rule key={rules[index].id} index={index} id={rules[index].id} recomputeRuleSize={recomputeRuleHeight} />
       </div>
     );
   };
@@ -152,7 +147,7 @@ const ParserBuilder: React.FC = () => {
                           <Row
                             data={data}
                             index={index}
-                            setSize={setSize}
+                            recomputeRuleSize={recomputeRuleSize}
                             windowWidth={width}
                           />
                         </div>
