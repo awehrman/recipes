@@ -5,31 +5,36 @@ import { VariableSizeList as List } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import styled from 'styled-components';
 
+
 import { Button } from 'components/common';
 import { useParserContext } from 'contexts/parser-context';
 import useParserRules from 'hooks/use-parser-rules';
+import EditIcon from 'public/icons/edit.svg';
 import PlusIcon from 'public/icons/plus.svg';
 
 import Rule from './rule';
 import AddRule from './add-rule';
 
+const DEFAULT_ROW_SIZE = 70; // TODO move
+
 const ParserBuilder: React.FC = () => {
   const {
-    state: { isAddButtonDisplayed, isCollapsed },
+    state: { focusedRuleIndex, isAddButtonDisplayed, isCollapsed },
     dispatch
   } = useParserContext();
 
   const { loading, rules = [], updateRulesOrder } = useParserRules();
     const listRef = React.useRef();
   const sizeMap = React.useRef({});
-  const recomputeRuleSize = React.useCallback((index: number, size: number) => {
+
+  const resize = React.useCallback((index: number, size: number) => {
     if (sizeMap?.current && listRef?.current) {
       sizeMap.current = { ...sizeMap.current, [index]: size };
       listRef.current.resetAfterIndex(index);
     }
   }, []);
-  const getSize = (index: number) => sizeMap?.current?.[index] || DEFAULT_ROW_SIZE;
 
+  const getSize = (index: number) => sizeMap?.current?.[index] || DEFAULT_ROW_SIZE;
   function handleAddRuleClick() {
     dispatch({ type: 'SET_IS_ADD_BUTTON_DISPLAYED', payload: false });
   }
@@ -38,38 +43,48 @@ const ParserBuilder: React.FC = () => {
     dispatch({ type: 'SET_IS_COLLAPSED', payload: !isCollapsed });
   }
 
-  const DEFAULT_ROW_SIZE = 81; // TODO move
-  // TODO move and dry 
-  function getRuleHeight(element: HTMLDivElement | null): number {
-    if (!element) {
-      return 0;
-    }
-    return element.getBoundingClientRect()?.height ?? 0;
-  }
-
-  // TODO fix type
-  const Row = ({ index, recomputeRuleSize }: any) => {
+  // TODO fix type & move
+  const Row = ({ index, dispatch, focusedRuleIndex, style }: any) => {
+    // TODO hmm... bleh this gets initialized at the rule level...
+    // like.... ugh, i guess i can pull that provider up to this level...
+    const displayContext = 'display';
     const rowRef = React.useRef<HTMLDivElement>(null);
-  
-    const recomputeRuleHeight = React.useCallback(() => {
-      const height = getRuleHeight(rowRef.current);
-      recomputeRuleSize(index, height + 8);
-    }, [rowRef, recomputeRuleSize, index]);
-  
+    console.log({ index, focusedRuleIndex });
+    const isFocusedRule = true; // focusedRuleIndex !== null && index === focusedRuleIndex;
+    const showEditButton = displayContext === 'display' && isFocusedRule;
+
+    function handleEditClick() {
+      dispatch({ type: 'SET_DISPLAY_CONTEXT', payload: 'edit' });
+    }
+    
     return (
-      <div ref={rowRef}>
-        {/* <Draggable draggableId={rules[index].id} index={index}>
-         {(provided) => (
-           <div
-             ref={provided.innerRef}
-             {...provided.dragHandleProps}
-             {...provided.draggableProps}
-           >
-             <Rule key={rules[index].id} index={index} id={rules[index].id} />
-           </div>
-         )}
-       </Draggable> */}
-       <Rule key={rules[index].id} index={index} id={rules[index].id} recomputeRuleSize={recomputeRuleHeight} />
+      <div ref={rowRef} style={style}>
+          {/* <Draggable draggableId={rules[index].id} index={index}>
+          {(provided) => (
+            <div
+              ref={provided.innerRef}
+              {...provided.dragHandleProps}
+              {...provided.draggableProps}
+            >
+              <Rule key={rules[index].id} index={index} id={rules[index].id} />
+            </div>
+          )}
+        </Draggable> */}
+        <StyledRule>
+          <EditWrapper>
+            {showEditButton ? (
+            <EditRuleButton icon={<EditIcon />} onClick={handleEditClick} />
+          ) : null}
+          </EditWrapper>
+          <RuleWrapper>
+            <Rule
+              key={rules[index].id}
+              index={index}
+              id={rules[index].id}
+              recomputeRuleSize={resize}
+            />
+          </RuleWrapper>
+        </StyledRule>
       </div>
     );
   };
@@ -143,14 +158,14 @@ const ParserBuilder: React.FC = () => {
                       itemData={rules}
                     >
                       {({ data, index, style }) => (
-                        <div style={style}>
-                          <Row
-                            data={data}
-                            index={index}
-                            recomputeRuleSize={recomputeRuleSize}
-                            windowWidth={width}
-                          />
-                        </div>
+                        <Row
+                          data={data}
+                          dispatch={dispatch}
+                          index={index}
+                          focusedRuleIndex={focusedRuleIndex}
+                          windowWidth={width}
+                          style={style}
+                        />
                       )}
                     </List>)
                   }
@@ -167,13 +182,33 @@ const ParserBuilder: React.FC = () => {
 
 export default ParserBuilder;
 
+const StyledRule = styled.div`
+  background: pink;
+  display: flex;
+  height: 100%;
+`;
+
+// TODO we actually want this entire region to display
+const EditWrapper = styled.div`
+  height: 100%;
+  z-index: 100;
+`;
+
+const RuleWrapper = styled.div`
+  background: orange;
+  height: 100%;
+  z-index: 90;
+  width: 100%;
+`;
+
 const DragRef = styled.div`
   height: 100%;
 `;
 
 const RulesContent = styled.div`
-  background: yellow;
   height: calc(100vh - 220px);
+  position: relative;
+  left: -30px;
 `;
 
 const RuleActions = styled.div`
@@ -201,6 +236,7 @@ const AddRuleButton = styled(Button)`
 
 const Message = styled.div`
   position: relative;
+  margin-left: 30px;
 `;
 
 const Wrapper = styled.div`
@@ -221,4 +257,32 @@ const CollapseRules = styled(Button)`
   margin-left: 10px;
 `;
 
-const Loading = styled.div``;
+const Loading = styled.div`
+margin-left: 30px;
+`;
+
+const EditRuleButton = styled(Button)`
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: ${({ theme }) => theme.colors.highlight};
+  font-weight: 600;
+  font-size: 13px;
+  // position: absolute;
+  // left: -30px;
+  // top: -2px;
+  // z-index: 1;
+  background: transparent;
+  border: 2px solid transparent;
+  display: flex;
+  justify-content: flex-start;
+  padding: 3px 5px 7px 7px;
+
+  svg {
+    height: 13px;
+    width: 13px;
+    top: 2px;
+    position: relative;
+    cursor: pointer;
+  }
+`;

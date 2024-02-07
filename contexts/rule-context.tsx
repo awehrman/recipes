@@ -37,7 +37,7 @@ const RuleContext = createContext<
   {
     state: RuleState;
     dispatch: RuleDispatch;
-    recomputeRuleSize: () => void;
+    // recomputeRuleSize: (() => void) | undefined;
   } | undefined
 >(undefined);
 
@@ -87,7 +87,7 @@ type RuleProviderProps = {
   isCollapsed: boolean;
   index: number;
   rule: any; // TODO fix
-  recomputeRuleSize: () => void;
+  // recomputeRuleSize: (() => void) | undefined;
 };
 
 export const getDefaultRuleValuesForIndex = (order = 0) => ({
@@ -116,7 +116,7 @@ export function RuleProvider({
   isCollapsed = false,
   index = 0,
   rule = {},
-  recomputeRuleSize
+  // recomputeRuleSize
 }: RuleProviderProps) {
   const defaultValues = {
     ...getDefaultRuleValuesForIndex(index),
@@ -133,7 +133,7 @@ export function RuleProvider({
   });
 
   return (
-    <RuleContext.Provider value={{ state, dispatch, recomputeRuleSize }}>
+    <RuleContext.Provider value={{ state, dispatch }}>
       {children}
     </RuleContext.Provider>
   );

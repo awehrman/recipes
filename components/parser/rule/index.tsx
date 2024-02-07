@@ -1,6 +1,7 @@
 import { ParserRuleDefinition, ParserRuleWithRelations } from '@prisma/client';
 import _ from 'lodash';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import useResizeObserver from "use-resize-observer";
 import { FormProvider, useForm } from 'react-hook-form';
 import styled from 'styled-components';
 
@@ -21,7 +22,7 @@ import { RuleComponentProps, RuleContentProps } from '../types';
 import { hasRuleWarning } from '../utils';
 
 const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
-  const [isInit, setIsInit] = React.useState(false);
+  const [isInit, setIsInit] = useState(false);
   const { rules = [] } = useParserRules();
   const {
     dispatch,
@@ -38,7 +39,7 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
   const definedRuleNames = rules.map(
     (rule: ParserRuleWithRelations) => rule.name
   );
-  const ruleDefinitionNames = React.useCallback(
+  const ruleDefinitionNames = useCallback(
     () => [
       ...new Set(
         (rule?.definitions ?? [])
@@ -134,7 +135,6 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
   return (
     <Wrapper
       className={displayContext}
-      // TODO
       // onMouseEnter={debouncedHandleMouseEnter}
       // onMouseLeave={debouncedHandleMouseLeave}
       onSubmit={handleSubmit(handleFormSubmit)}
@@ -167,6 +167,14 @@ const Rule: React.FC<RuleComponentProps> = ({
   const {
     state: { isCollapsed }
   } = useParserContext();
+  const { ref, height = 1 } = useResizeObserver<HTMLDivElement>();
+
+  useEffect(() => {
+    if (recomputeRuleSize !== undefined) {
+      recomputeRuleSize(index, height)
+    }
+  }, [index, height]);
+  
   return (
     <RuleProvider
       rule={rule}
@@ -174,9 +182,10 @@ const Rule: React.FC<RuleComponentProps> = ({
       index={index}
       initialContext={context}
       isCollapsed={isCollapsed}
-      recomputeRuleSize={recomputeRuleSize}
     >
-      <RuleContent rule={rule} />
+      <div ref={ref}>
+        <RuleContent rule={rule} />
+      </div>
     </RuleProvider>
   );
 };

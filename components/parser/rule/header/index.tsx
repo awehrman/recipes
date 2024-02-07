@@ -3,9 +3,7 @@ import styled from 'styled-components';
 
 import { Button } from 'components/common';
 import { useRuleContext } from 'contexts/rule-context';
-import { useParserContext } from 'contexts/parser-context';
 import useParserRule from 'hooks/use-parser-rule';
-import EditIcon from 'public/icons/edit.svg';
 import TrashIcon from 'public/icons/trash-can.svg';
 import WarningIcon from 'public/icons/exclamation-triangle.svg';
 
@@ -20,10 +18,6 @@ const RuleHeader: React.FC<RuleComponentProps> = () => {
     dispatch,
     state: { id, displayContext, hasWarning, index }
   } = useRuleContext();
-  const {
-    state: { focusedRuleIndex }
-  } = useParserContext();
-  const isFocusedRule = focusedRuleIndex !== null && index === focusedRuleIndex;
   const { deleteRule } = useParserRule(id);
 
   function handleEditClick() {
@@ -37,9 +31,10 @@ const RuleHeader: React.FC<RuleComponentProps> = () => {
 
   return (
     <Header>
-      {displayContext === 'display' && isFocusedRule ? (
+      {/* TODO we might need to move this to an outside container */}
+      {/* {showEditButton ? (
         <EditRuleButton icon={<EditIcon />} onClick={handleEditClick} />
-      ) : null}
+      ) : null} */}
       <Name />
       <Label />
       {displayContext === 'display' && hasWarning && <StyledWarningIcon />}

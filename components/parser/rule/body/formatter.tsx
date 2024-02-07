@@ -21,7 +21,7 @@ const insertOrder = (value: string, index: number) => {
   return value.replace(/\${ORDER}/g, index.toString());
 };
 
-function getEditorHeight(element: HTMLDivElement | undefined): number {
+function getFormatterFieldHeight(element: HTMLDivElement | undefined): number {
   if (!element) {
     if (!element) {
       return 0;
@@ -38,8 +38,8 @@ const RuleFormatter: React.FC = () => {
     state: { index, defaultValue, definitionId }
   } = useRuleDefinitionContext();
   const {
-    state: { id, displayContext },
-    recomputeRuleSize
+    state: { id, displayContext, index: ruleIndex },
+    // recomputeRuleSize
   } = useRuleContext();
   const { control, getValues, register, setValue } = useFormContext();
   const type = useWatch({ control, name: `definitions.${index}.type` });
@@ -56,7 +56,7 @@ const RuleFormatter: React.FC = () => {
     displayContext === 'display' ? formattedWithOrder : defaultFormatter;
   const currentValue = getEditorValue();
   const editorRef = React.useRef<CodeMirrorElement>();
-  const editorHeight = getEditorHeight(editorRef?.current?.editor);
+  const formatterFieldHeight = getFormatterFieldHeight(editorRef?.current?.editor);
   const wrapperRef = React.useRef();
 
   function handleOnChange(value: string, _viewUpdate: ViewUpdate) {
@@ -86,21 +86,19 @@ const RuleFormatter: React.FC = () => {
     return formattedWithOrder;
   }
 
+  // TODO i wonder if this is still needed or if the observer takes care of this
+  React.useEffect(() => {
+    if (wrapperRef?.current) {
+      (wrapperRef.current as HTMLDivElement).style.height = `${formatterFieldHeight}px`;
+    }
+  }, [formatterFieldHeight]);
+
   if (
     (displayContext === 'display' && !formattedWithOrder?.length) ||
     !showField
   ) {
     return null;
   }
-
-  React.useEffect(() => {
-    if (wrapperRef?.current && editorHeight > 0) {
-      (wrapperRef.current as HTMLDivElement).style.height = `${editorHeight}px`;
-      if (!!recomputeRuleSize) {
-        recomputeRuleSize();
-      }
-    }
-  }, [editorHeight]);
 
   return (
     <Wrapper ref={wrapperRef}>

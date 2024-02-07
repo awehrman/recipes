@@ -46,7 +46,7 @@ export type RuleComponentProps = {
   context?: DisplayContextTypes;
   id: string;
   index: number;
-  recomputeRuleSize?: () => void
+  recomputeRuleSize?: (index: number, size: number) => void;
 };
 
 export type DisplayContextTypes = 'display' | 'edit' | 'add';
