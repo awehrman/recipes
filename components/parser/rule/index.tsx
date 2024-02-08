@@ -5,6 +5,7 @@ import useResizeObserver from "use-resize-observer";
 import { FormProvider, useForm } from 'react-hook-form';
 import styled from 'styled-components';
 
+
 import {
   getDefaultRuleValuesForIndex,
   RuleProvider,
@@ -15,6 +16,7 @@ import { Button } from 'components/common';
 import { removeTypename } from 'hooks/helpers/parser-rule';
 import useParserRule from 'hooks/use-parser-rule';
 import useParserRules from 'hooks/use-parser-rules';
+import EditIcon from 'public/icons/edit.svg';
 
 import RuleBody from './body';
 import RuleHeader from './header';
@@ -135,6 +137,7 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
   return (
     <Wrapper
       className={displayContext}
+      // TODO this should probably go higher up
       // onMouseEnter={debouncedHandleMouseEnter}
       // onMouseLeave={debouncedHandleMouseLeave}
       onSubmit={handleSubmit(handleFormSubmit)}
@@ -158,15 +161,11 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
 };
 
 const Rule: React.FC<RuleComponentProps> = ({
-  context = 'display',
   index = 0,
   id,
   recomputeRuleSize
 }) => {
   const { rule } = useParserRule(id);
-  const {
-    state: { isCollapsed }
-  } = useParserContext();
   const { ref, height = 1 } = useResizeObserver<HTMLDivElement>();
 
   useEffect(() => {
@@ -176,17 +175,9 @@ const Rule: React.FC<RuleComponentProps> = ({
   }, [index, height]);
   
   return (
-    <RuleProvider
-      rule={rule}
-      id={id}
-      index={index}
-      initialContext={context}
-      isCollapsed={isCollapsed}
-    >
-      <div ref={ref}>
-        <RuleContent rule={rule} />
-      </div>
-    </RuleProvider>
+    <div ref={ref}>
+      <RuleContent rule={rule} />
+    </div>
   );
 };
 
@@ -221,7 +212,7 @@ const SaveButton = styled(Button)`
 const Wrapper = styled.form`
   display: flex;
   flex-direction: column;
-  width: 600px;
+  width: 628px;
   position: relative;
   margin-left: -40px;
   padding-left: 40px;
@@ -244,4 +235,127 @@ const Wrapper = styled.form`
     background: ${({ theme }) => theme.colors.lightGreen};
     margin-bottom: 10px;
   }
+`;
+
+const EditContainer: React.FC = () => {
+  const {
+    dispatch,
+    state: { displayContext, index }
+  } = useRuleContext();
+
+  const {
+    state: { focusedRuleIndex }
+  } = useParserContext();
+
+  const isFocusedRule = focusedRuleIndex !== null && index === focusedRuleIndex;
+  const showEditButton = displayContext === 'display' && isFocusedRule;
+
+  function handleEditClick() {
+    dispatch({ type: 'SET_DISPLAY_CONTEXT', payload: 'edit' });
+  }
+
+  return (
+    <EditWrapper>
+      <EditRuleButton visible={showEditButton} icon={<EditIcon />} onClick={handleEditClick} />
+    </EditWrapper>
+  )
+};
+
+// TODO Add will need to call this instead over Rule; or rather an alt version
+export const Row: React.FC = ({ displayContext = 'display', id, index, recomputeRuleSize, rule, style }: any) => {
+  const rowRef = React.useRef<HTMLDivElement>(null);
+
+  const {
+    state: { isCollapsed }
+  } = useParserContext();
+  
+  return (
+    <StyledRule ref={rowRef} style={style}>
+      <RuleProvider
+        rule={rule}
+        id={id}
+        index={index}
+        initialContext={displayContext}
+        isCollapsed={isCollapsed}
+      >
+        {/* <Draggable draggableId={rules[index].id} index={index}>
+          {(provided) => (
+            <div
+              ref={provided.innerRef}
+              {...provided.dragHandleProps}
+              {...provided.draggableProps}
+            > */}
+        <EditContainer />
+
+        <RuleWrapper>
+          <Rule
+            key={id}
+            index={index}
+            id={id}
+            recomputeRuleSize={recomputeRuleSize}
+          />
+        </RuleWrapper>
+        {/* </div>
+          )}
+          </Draggable> */}
+      </RuleProvider>
+    </StyledRule>
+  );
+};
+
+type EditButtonProps = {
+  visible: boolean;
+}
+const EditRuleButton = styled(Button)<EditButtonProps>`
+  border: 0;
+  background: transparent;
+  cursor: none;
+  color: ${({ theme }) => theme.colors.highlight};
+  font-weight: 600;
+  font-size: 13px;
+  background: transparent;
+  border: 2px solid transparent;
+  display: flex;
+  visibility: hidden;
+  justify-content: flex-start;
+  padding: 3px 5px 7px 7px;
+  width: 28px;
+
+  svg {
+    height: 13px;
+    width: 13px;
+    top: 2px;
+    position: relative;
+    cursor: pointer;
+    visibility: hidden;
+  }
+
+  ${({ visible }) => visible && `
+    visibility: visible;
+    cursor: none;
+
+    svg {
+      cursor: pointer;
+      visibility: visible;
+    }
+  `}
+`;
+
+const StyledRule = styled.div`
+  background: pink;
+  display: flex;
+  height: 100%;
+`;
+
+// TODO we actually want this entire region to display
+const EditWrapper = styled.div`
+  height: 100%;
+  z-index: 100;
+`;
+
+const RuleWrapper = styled.div`
+  background: orange;
+  height: 100%;
+  z-index: 90;
+  width: 100%;
 `;

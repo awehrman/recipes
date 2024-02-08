@@ -20,10 +20,6 @@ const RuleHeader: React.FC<RuleComponentProps> = () => {
   } = useRuleContext();
   const { deleteRule } = useParserRule(id);
 
-  function handleEditClick() {
-    dispatch({ type: 'SET_DISPLAY_CONTEXT', payload: 'edit' });
-  }
-
   function handleRemoveRuleClick() {
     deleteRule(id);
     // TODO launch modal to confirm
@@ -31,10 +27,6 @@ const RuleHeader: React.FC<RuleComponentProps> = () => {
 
   return (
     <Header>
-      {/* TODO we might need to move this to an outside container */}
-      {/* {showEditButton ? (
-        <EditRuleButton icon={<EditIcon />} onClick={handleEditClick} />
-      ) : null} */}
       <Name />
       <Label />
       {displayContext === 'display' && hasWarning && <StyledWarningIcon />}
