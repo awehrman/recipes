@@ -1,7 +1,6 @@
 import React, {
   createContext,
   useContext,
-  useMemo,
   useReducer,
   ReactNode
 } from 'react';
@@ -19,7 +18,7 @@ type RuleActionTypes =
 type RuleState = {
   id: string;
   defaultValues: any; // TODO fix type
-  displayContext: string;
+  displayContext: DisplayContext;
   isExpanded: boolean;
   isFocused: boolean;
   index: number;

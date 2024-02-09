@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { useParserContext } from 'contexts/parser-context';
 
-import Rule from './rule';
+import Rule from './rule/virtualized-rule.jsx';
 import { Button } from 'components/common';
 
 type AddRuleProps = {};
 
 const AddRule: React.FC<AddRuleProps> = () => {
+  // const [isInit, setIsInit] = useState(false);
   const {
     state: { isAddButtonDisplayed }
   } = useParserContext();
@@ -17,10 +18,19 @@ const AddRule: React.FC<AddRuleProps> = () => {
     return null;
   }
 
+  // TODO we need to come back here anyways
+  // useEffect(() => {
+  //   if (!isInit) {
+  //     setFocus('name');
+  //     setIsInit(true);
+  //   }
+  // }, [isInit, setFocus]);
+
   return (
     <Wrapper>
       <Header>Add New Rule</Header>
-      <Rule index={0} context="add" id="-1" />
+      {/* TODO come back to the add route post virtualization  */}
+      {/* <Rule index={0} context="add" id="-1" /> */}
     </Wrapper>
   );
 };

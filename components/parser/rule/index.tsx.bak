@@ -28,7 +28,7 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
   const { rules = [] } = useParserRules();
   const {
     dispatch,
-    state: { defaultValues, displayContext, index, isExpanded, isFocused }
+    state: { defaultValues, displayContext, isExpanded }
   } = useRuleContext();
   const {
     state: { isCollapsed },
@@ -90,20 +90,6 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
     dispatch({ type: 'SET_DISPLAY_CONTEXT', payload: 'display' });
   }
 
-  const debouncedHandleMouseEnter = _.debounce(() => {
-    if (!isFocused && displayContext === 'display') {
-      dispatch({ type: 'SET_IS_FOCUSED', payload: true });
-      parserDispatch({ type: 'SET_FOCUSED_RULE_INDEX', payload: index });
-    }
-  }, 50);
-
-  const debouncedHandleMouseLeave = _.debounce(() => {
-    if (isFocused) {
-      dispatch({ type: 'SET_IS_FOCUSED', payload: false });
-      parserDispatch({ type: 'SET_FOCUSED_RULE_INDEX', payload: null });
-    }
-  }, 50);
-
   useEffect(() => {
     dispatch({ type: 'SET_IS_EXPANDED', payload: !isCollapsed });
   }, [dispatch, isCollapsed]);
@@ -114,13 +100,6 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
       setIsInit(true);
     }
   }, [displayContext, isInit, setFocus]);
-
-  useEffect(() => {
-    return () => {
-      debouncedHandleMouseEnter.cancel();
-      debouncedHandleMouseLeave.cancel();
-    };
-  }, [debouncedHandleMouseEnter, debouncedHandleMouseLeave]);
 
   useEffect(() => {
     let triggedWarning = false;
@@ -137,9 +116,6 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
   return (
     <Wrapper
       className={displayContext}
-      // TODO this should probably go higher up
-      // onMouseEnter={debouncedHandleMouseEnter}
-      // onMouseLeave={debouncedHandleMouseLeave}
       onSubmit={handleSubmit(handleFormSubmit)}
     >
       <FormProvider {...methods}>
@@ -160,6 +136,7 @@ const RuleContent: React.FC<RuleContentProps> = ({ rule }) => {
   );
 };
 
+// TODO this may not be needed anymore
 const Rule: React.FC<RuleComponentProps> = ({
   index = 0,
   id,
@@ -175,7 +152,8 @@ const Rule: React.FC<RuleComponentProps> = ({
   }, [index, height]);
   
   return (
-    <div ref={ref}>
+    // TODO this is really only to skip my forwardRef so this can be simplified
+    <div ref={ref} >
       <RuleContent rule={rule} />
     </div>
   );
@@ -247,6 +225,7 @@ const EditContainer: React.FC = () => {
     state: { focusedRuleIndex }
   } = useParserContext();
 
+  // TODO this shit should be in context
   const isFocusedRule = focusedRuleIndex !== null && index === focusedRuleIndex;
   const showEditButton = displayContext === 'display' && isFocusedRule;
 
@@ -268,7 +247,7 @@ export const Row: React.FC = ({ displayContext = 'display', id, index, recompute
   const {
     state: { isCollapsed }
   } = useParserContext();
-  
+
   return (
     <StyledRule ref={rowRef} style={style}>
       <RuleProvider
@@ -278,30 +257,87 @@ export const Row: React.FC = ({ displayContext = 'display', id, index, recompute
         initialContext={displayContext}
         isCollapsed={isCollapsed}
       >
-        {/* <Draggable draggableId={rules[index].id} index={index}>
-          {(provided) => (
-            <div
-              ref={provided.innerRef}
-              {...provided.dragHandleProps}
-              {...provided.draggableProps}
-            > */}
-        <EditContainer />
-
-        <RuleWrapper>
-          <Rule
-            key={id}
-            index={index}
-            id={id}
-            recomputeRuleSize={recomputeRuleSize}
-          />
-        </RuleWrapper>
-        {/* </div>
-          )}
-          </Draggable> */}
+        <FullRuleRow
+          id={id}
+          index={index}
+          recomputeRuleSize={recomputeRuleSize}
+        />
       </RuleProvider>
     </StyledRule>
   );
 };
+
+const FullRuleRow: React.FC<any> = ({ id, index, recomputeRuleSize }) => {
+  const {
+    dispatch,
+    state: { displayContext, isFocused }
+  } = useRuleContext();
+  const {
+    state: { focusedRuleIndex },
+    dispatch: parserDispatch
+  } = useParserContext();
+
+  const isFocusedRule = focusedRuleIndex !== null && index === focusedRuleIndex;
+  
+  const debouncedHandleMouseEnter = _.debounce(() => {
+    if (!isFocused && displayContext === 'display') {
+      dispatch({ type: 'SET_IS_FOCUSED', payload: true });
+      parserDispatch({ type: 'SET_FOCUSED_RULE_INDEX', payload: index });
+    }
+  }, 50);
+
+  const debouncedHandleMouseLeave = _.debounce(() => {
+    if (isFocused) {
+      dispatch({ type: 'SET_IS_FOCUSED', payload: false });
+      parserDispatch({ type: 'SET_FOCUSED_RULE_INDEX', payload: null });
+    }
+  }, 50);
+
+  useEffect(() => {
+    return () => {
+      debouncedHandleMouseEnter.cancel();
+      debouncedHandleMouseLeave.cancel();
+    };
+  }, [debouncedHandleMouseEnter, debouncedHandleMouseLeave]);
+
+  
+  return (
+    <FullRuleRowWrapper
+      onMouseEnter={debouncedHandleMouseEnter}
+      onMouseLeave={debouncedHandleMouseLeave}
+      focused={isFocusedRule}
+    >
+    {/* <Draggable draggableId={rules[index].id} index={index}>
+      {(provided) => (
+        <div
+          ref={provided.innerRef}
+          {...provided.dragHandleProps}
+          {...provided.draggableProps}
+        > */}
+        <EditContainer />
+
+        <RuleWrapper>
+          {/* <Rule
+            key={id}
+            index={index}
+            id={id}
+            recomputeRuleSize={recomputeRuleSize}
+          /> */}
+        </RuleWrapper>
+        {/* </div>
+      )}
+      </Draggable> */}
+    </FullRuleRowWrapper> 
+  );
+};
+
+const FullRuleRowWrapper = styled.div<any>`
+  background: green;
+  width: 100%;
+  ${({ focused }) => focused && `
+    border: 2px solid blue;
+  `}
+`;
 
 type EditButtonProps = {
   visible: boolean;

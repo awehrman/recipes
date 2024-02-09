@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { Button } from 'components/common';
@@ -13,7 +13,8 @@ import Label from './label';
 
 type RuleComponentProps = {};
 
-const RuleHeader: React.FC<RuleComponentProps> = () => {
+const RuleHeader: React.FC<any> = (setFocus: any) => {
+  const [isInit, setIsInit] = useState<boolean>(false);
   const {
     dispatch,
     state: { id, displayContext, hasWarning, index }
@@ -24,6 +25,13 @@ const RuleHeader: React.FC<RuleComponentProps> = () => {
     deleteRule(id);
     // TODO launch modal to confirm
   }
+
+  useEffect(() => {
+    if (displayContext === 'add' && !isInit) {
+      setFocus('name');
+      setIsInit(true);
+    }
+  }, [displayContext, isInit, setFocus]);
 
   return (
     <Header>
