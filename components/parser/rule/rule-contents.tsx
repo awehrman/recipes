@@ -35,11 +35,10 @@ const RuleContents: React.FC<any> = ({ recomputeRuleSize }) => {
   // but i think this can be cleaned up
   const { handleSubmit, reset, setFocus } = methods;
 
-  const { ref, height = DEFAULT_ROW_SIZE } = useResizeObserver<HTMLDivElement>();
-
+  const { ref, height: heightWithoutMargins = DEFAULT_ROW_SIZE } = useResizeObserver<HTMLFormElement>();
+  const height = heightWithoutMargins;
   const resizeRow = useCallback(() => {
     if (recomputeRuleSize !== undefined) {
-      console.log('row', index, height)
       if (height >= MIN_ROW_SIZE) {
         recomputeRuleSize(index, height)
       }
@@ -48,7 +47,7 @@ const RuleContents: React.FC<any> = ({ recomputeRuleSize }) => {
 
   useEffect(() => {
     resizeRow();
-  }, [index, height]);
+  }, [height]);
 
   function handleOnSubmit() {
     // TODO can i access any of my contexts from this method?
@@ -101,9 +100,27 @@ export default RuleContents;
 
 const Wrapper = styled.div`
   height: 100%;
+  width: 100%;
 `;
 
-const InnerWrapper = styled.div`
-  background: tomato;
-  flex-grow: 1;
+const InnerWrapper = styled.form`
+  // margin-bottom: 10px;
+  /* keep some kind of background so we can maintain hover */
+  background: khaki;
+
+  &.edit {
+    left: -40px;
+    padding: 10px 0 10px 80px;
+    width: 640px;
+    background: ${({ theme }) => theme.colors.lightBlue};
+    // margin-bottom: 10px;
+  }
+
+  &.add {
+    left: -40px;
+    padding: 10px 0 10px 80px;
+    width: 640px;
+    background: ${({ theme }) => theme.colors.lightGreen};
+    // margin-bottom: 10px;
+  }
 `;

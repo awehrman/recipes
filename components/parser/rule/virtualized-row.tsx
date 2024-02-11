@@ -70,11 +70,18 @@ type WrapperProps = {
   isVisible: boolean;
 };
 
+const BORDER_SIZE = 2;
 const Wrapper = styled.div<WrapperProps>`
   display: flex;
   flex-grow: 1;
+  border: ${BORDER_SIZE}px solid transparent;
+  width: 100%;
 
   ${({ isVisible }) => isVisible && `
     // TODO consider putting a drop shadow over this whole rule
+    border: ${BORDER_SIZE}px solid aqua;
+    z-index: 500;
+    position: absolute;
+    margin: ${BORDER_SIZE}px;
   `}
 `;

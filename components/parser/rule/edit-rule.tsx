@@ -40,7 +40,6 @@ const EditRule: React.FC = () => {
 export default EditRule;
 
 const Wrapper = styled.div`
-  background: orange;
   flex-basis: ${DEFAULT_GUTTER_SIZE}px;
 `;
 

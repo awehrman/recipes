@@ -19,7 +19,12 @@ const RuleDefinition: React.FC<any> = (reset: UseFormReset<any>) => {
     state: { displayContext, isExpanded }
   } = useRuleContext();
 
-  const { control, setValue } = useFormContext();
+  const {
+    control,
+    getValues,
+    register,
+    setValue
+  } = useFormContext();
   const {
     state: {
       index,
@@ -71,7 +76,15 @@ const RuleDefinition: React.FC<any> = (reset: UseFormReset<any>) => {
       <Type onTypeSwitch={() => handleTypeChange(index, type)} />
       <Example />
       <Rule />
-      <Formatter />
+      <Formatter
+        // NOTE: tacky right?? but this serves a purpose!
+        // if we can avoid re-calling useFormContext we can save a bunch of useless
+        // re-renders, which causes a bunch of chaos in our virtualized list
+        control={control}
+        getValues={getValues}
+        register={register}
+        setValue={setValue}
+      />
       <List />
       {/* TODO move this into its own component */}
       {showDeleteDefinitionButton() && (

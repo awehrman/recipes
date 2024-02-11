@@ -49,5 +49,4 @@ export default VirtualizedRule;
 
 const Wrapper = styled.div`
   display: flex;
-  // border: 2px solid red;
-`;
+  `;

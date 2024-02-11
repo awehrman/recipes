@@ -75,9 +75,9 @@ type ContentProps = {
 };
 
 const Content = styled.article<ContentProps>`
-  padding: 20px 40px;
+  padding: 20px 40px 0;
   background: #fff;
-  min-height: 100vh;
+  min-height: calc(100vh - 120px);
   color: ${({ theme }) => theme.colors.bodyText};
   font-size: 16px;
   font-family: 'Source Sans Pro', Verdana, sans-serif;

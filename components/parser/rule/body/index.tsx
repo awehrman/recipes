@@ -87,4 +87,5 @@ const AddNewDefinition = styled(Button)`
   }
 `;
 
-const Wrapper = styled.div``;
+const Wrapper = styled.div`
+`;

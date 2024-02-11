@@ -19,7 +19,6 @@ const VirtualizedRules: React.FC = () => {
   // TODO i hate all this naming
   const resize = React.useCallback((index: number, size: number) => {
     if (sizeMap?.current && listRef?.current) {
-      console.log('resize', { index, size });
       sizeMap.current = { ...sizeMap.current, [index]: size };
       // TODO fix type
       (listRef.current as any).resetAfterIndex(index);
@@ -102,8 +101,7 @@ const DragRef = styled.div`
 `;
 
 const RulesContent = styled.div`
-  height: calc(100vh - 220px);
-  background: yellow;
+  height: calc(100vh - 210px);
 `;
 
 const Message = styled.div`

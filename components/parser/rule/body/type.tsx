@@ -37,7 +37,6 @@ const RuleType: React.FC<RuleTypeComponentProps> = ({ onTypeSwitch }) => {
         <HiddenFormInput
           {...register(fieldName)}
           defaultValue={defaultValue.type}
-          disabled={displayContext === 'display'}
           name={fieldName}
           type="hidden"
         />

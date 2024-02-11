@@ -1,6 +1,7 @@
 import React, {
   createContext,
   useContext,
+  useMemo,
   useReducer,
   ReactNode
 } from 'react';
@@ -131,8 +132,13 @@ export function RuleProvider({
     hasWarning: false
   });
 
+  const memoizedContext = useMemo(
+    () => ({ state, dispatch }),
+    [state, dispatch]
+  );
+
   return (
-    <RuleContext.Provider value={{ state, dispatch }}>
+    <RuleContext.Provider value={memoizedContext}>
       {children}
     </RuleContext.Provider>
   );

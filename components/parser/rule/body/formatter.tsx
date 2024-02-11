@@ -3,7 +3,7 @@ import * as events from '@uiw/codemirror-extensions-events';
 import CodeMirror, { ViewUpdate } from '@uiw/react-codemirror';
 import { js_beautify } from 'js-beautify';
 import _ from 'lodash';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 
@@ -21,27 +21,54 @@ const insertOrder = (value: string, index: number) => {
   return value.replace(/\${ORDER}/g, index.toString());
 };
 
-const RuleFormatter: React.FC = () => {
+type CodeMirrorElement = {
+  editor: HTMLDivElement | undefined;
+};
+
+const RuleFormatter: React.FC<any> = ({
+  control,
+  getValues,
+  register,
+  setValue
+}) => {
   const {
     state: { index, defaultValue, definitionId }
   } = useRuleDefinitionContext();
   const {
     state: { id, displayContext },
   } = useRuleContext();
-  const { control, getValues, register, setValue } = useFormContext();
-  const type = useWatch({ control, name: `definitions.${index}.type` });
-  const showField = type === 'RULE';
+
   const fieldName = `definitions.${index}.formatter`;
   const { rule } = useParserRule(id);
   const { name = '' } = rule;
-  const watchedName = useWatch({ name: 'name', defaultValue: name });
+  // TODO fix param type
+  const type = useCallback((rule: any): string => {
+    // TODO types
+    if (displayContext === 'display') {
+      const defaultType = (rule?.definitions ?? [])?.[index].type;
+      return defaultType;
+    }
+    return useWatch({ control, name: `definitions.${index}.type` });
+  }, [displayContext]);
+  const showField = type(rule) === 'RULE';
 
-  const defaultFormatter = getDefaultFormatter(watchedName);
+  const watchedName = useCallback((defaultName: string) => {
+    if (displayContext === 'display') {
+      return defaultName;
+    }
+    // TODO this may require a bit more scrutiny
+    return useWatch({ name: 'name', defaultValue: name });
+  }, [displayContext]);
+
+  const defaultFormatter = getDefaultFormatter(watchedName(name));
   const formattedWithOrder = insertOrder(`${defaultValue.formatter}`, index);
   const uniqueId = `${id}-${fieldName}`;
   const defaultComputedValue =
     displayContext === 'display' ? formattedWithOrder : defaultFormatter;
   const currentValue = getEditorValue();
+
+  const editorRef = React.useRef<CodeMirrorElement>(null);
+  const wrapperRef = React.useRef<HTMLDivElement>(null);
 
   function handleOnChange(value: string, _viewUpdate: ViewUpdate) {
     setValue(fieldName, value);
@@ -70,15 +97,31 @@ const RuleFormatter: React.FC = () => {
     return formattedWithOrder;
   }
 
+  const extensions = [javascript({ jsx: true }), handleOnBlur];
+  const editorProps = useCallback(() => ({
+    ref: editorRef,
+    basicSetup: formatterSetup,
+    editable: displayContext !== 'display',
+    extensions: extensions,
+    height: "auto",
+    // indentWithTab,
+    onChange: handleOnChange,
+    placeholder: displayContext === 'display' ? '' : '/* format rule return */',
+    readOnly: displayContext === 'display',
+    theme: themeOptions[displayContext as ThemeOptionKey],
+    width: "525px",
+    value: currentValue,
+  }), [displayContext, currentValue]);
+
   if (
-    (displayContext === 'display' && !formattedWithOrder?.length) ||
+    (displayContext === 'display' && formattedWithOrder.length === 0) ||
     !showField
   ) {
     return null;
   }
 
   return (
-    <Wrapper>
+    <Wrapper ref={wrapperRef}>
       <EditFormatter htmlFor={uniqueId}>
         <HiddenFormInput
           {...register(fieldName)}
@@ -92,19 +135,7 @@ const RuleFormatter: React.FC = () => {
         />
         {/* TODO this is a focus trap */}
         <StyledEditor
-          basicSetup={formatterSetup}
-          editable={displayContext !== 'display'}
-          extensions={[javascript({ jsx: true }), handleOnBlur]}
-          height="auto"
-          indentWithTab
-          onChange={handleOnChange}
-          placeholder={
-            displayContext === 'display' ? '' : '/* format rule return */'
-          }
-          readOnly={displayContext === 'display'}
-          theme={themeOptions[displayContext as ThemeOptionKey]}
-          width="525px"
-          value={currentValue}
+          {...editorProps()}
         />
       </EditFormatter>
     </Wrapper>
@@ -113,10 +144,11 @@ const RuleFormatter: React.FC = () => {
 
 export default RuleFormatter;
 
-// RuleFormatter.whyDidYouRender = true;
+RuleFormatter.whyDidYouRender = true;
 
 const Wrapper = styled.div`
   position: relative;
+  min-height: 31px;
 `;
 
 const LabelWrapper = styled.label`
