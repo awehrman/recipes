@@ -32,7 +32,6 @@ export const startLocalNotesImport = async (
   }
 
   const importedNotes = await readLocalCategoryFiles();
-  // return importedNotes;
   console.log('parsing note content...');
   const { parsedNotes, ingHash } = await getLocalParsedNoteContent(
     importedNotes
@@ -185,10 +184,34 @@ export const parseNoteFromCategoryFile = (
 
   const title = getLocalNoteTitle(noteElement);
   const source = getLocalNoteSource(noteElement);
+  
+  const { content, image, tags } = getLocalNoteContent($, siblings);
+  const categories = getLocalNoteCategories(category);
+  
+  return {
+    title,
+    source,
+    image,
+    categories,
+    tags,
+    content
+  };
+};
 
+export const getLocalNoteTitle = (noteElement: Cheerio<Element>) =>
+  noteElement.prop('content');
+
+export const getLocalNoteSource = (noteElement: Cheerio<Element>) =>
+  noteElement
+    .nextAll('note-attributes')
+    .first()
+    .find('meta[itemprop="source-url"]')
+    .attr('content');
+
+export const getLocalNoteContent = ($: CheerioAPI, siblings: Cheerio<Element>) => {
+  let noteContent: string[] = [];
   let foundEnd = false;
   let image = '';
-  let noteContent: string[] = [];
   const tags: string[] = [];
 
   noteContent.push('<en-note>');
@@ -208,7 +231,7 @@ export const parseNoteFromCategoryFile = (
     if (isMetaTag) {
       const isTag = $(sibling).attr('itemprop') === 'tag';
       if (isTag) {
-        const tag = $(sibling).attr('content');
+        const tag = getLocalNoteTag($, sibling);
         tags.push(`${tag}`);
       }
     }
@@ -217,12 +240,13 @@ export const parseNoteFromCategoryFile = (
     // but save our image
     const isImage = $(sibling).is('img');
     if (isImage) {
-      image = `${$(sibling).attr('src')}`;
+      image = getLocalNoteImage($, sibling)
     }
-    const validLine =
+   
+    const isValidContentLine =
       !isNoteAttributesTag && !isMetaTag && !isImage && !isTitleTag;
 
-    const isRecipeLine = foundEnd ? false : validLine;
+    const isRecipeLine = foundEnd ? false : isValidContentLine;
     if (isRecipeLine) {
       noteContent.push(`<div>${$(sibling).html()?.trim()}</div>`);
     }
@@ -230,31 +254,29 @@ export const parseNoteFromCategoryFile = (
 
   noteContent.push('</en-note>');
   const content = noteContent.join('');
+  
   return {
-    title,
-    source,
+    content,
     image,
-    categories: [category],
-    tags,
-    content
+    tags
   };
 };
 
-export const getLocalNoteTitle = (noteElement: Cheerio<Element>) =>
-  noteElement.prop('content');
+export const getLocalNoteCategories = (category: string) => {
+  // TODO we'll eventually dig further into the content to auto assign
+  // categories, but for now we'll just passed back the assigned category
+  return [category];
+};
 
-export const getLocalNoteSource = (noteElement: Cheerio<Element>) =>
-  noteElement
-    .nextAll('note-attributes')
-    .first()
-    .find('meta[itemprop="source-url"]')
-    .attr('content');
+export const getLocalNoteTag = ($: CheerioAPI, sibling: Element) => {
+  // TODO similarly this will get more complicated, but we'll pass anything 
+  // assigned along
+  return $(sibling).attr('content');
+};
 
-export const getLocalNoteContent = () => {};
-
-export const getLocalNoteCategories = () => {};
-
-export const getLocalNoteTags = () => {};
+export const getLocalNoteImage = ($: CheerioAPI, sibling: Element) => {
+  return `${$(sibling).attr('src')}`;
+};
 
 export const getLocalParsedNoteContent = async (
   importedNotes: any[]
@@ -291,54 +313,61 @@ export const saveLocalNotes = async (
   ingHash: IngredientHash,
   prisma: PrismaClient
 ): Promise<NoteWithRelations[]> => {
+  let basicNotes: NoteWithRelations[] = [];
   // create notes with content, ingredients and instruction lines
-  const basicNotes: NoteWithRelations = await prisma.$transaction(
-    parsedNotes.map((note: NoteWithRelations) => {
-      const ingredients: Prisma.IngredientLineUpdateManyWithoutNoteNestedInput =
-        formatIngredientLinesUpsert(note.ingredients, ingHash);
-      const instructions: Prisma.InstructionLineUpdateManyWithoutNoteNestedInput =
-        formatInstructionLinesUpsert(note.instructions);
-      const data: Prisma.NoteCreateInput = {
-        title: note.title,
-        source: note.source,
-        // TODO categories?:
-        // TODO tags?:
-        image: note.image,
-        content: note.content,
-        ingredients,
-        instructions,
-        isParsed: true
-      };
+  try {
+    basicNotes = await prisma.$transaction(
+      parsedNotes.map((note: NoteWithRelations) => {
+        const ingredients: Prisma.IngredientLineUpdateManyWithoutNoteNestedInput =
+          formatIngredientLinesUpsert(note.ingredients, ingHash);
+        const instructions: Prisma.InstructionLineUpdateManyWithoutNoteNestedInput =
+          formatInstructionLinesUpsert(note.instructions);
+        const data: Prisma.NoteCreateInput = {
+          title: note.title,
+          source: note.source,
+          // TODO categories?:
+          // TODO tags?:
+          image: note.image,
+          content: note.content,
+          ingredients,
+          instructions,
+          isParsed: true
+        };
 
-      return prisma.note.create({
-        data,
-        select: {
-          id: true,
-          source: true,
-          title: true,
-          image: true,
-          content: true,
-          isParsed: true,
-          ingredients: {
-            select: {
-              id: true,
-              reference: true,
-              blockIndex: true,
-              lineIndex: true,
-              isParsed: true
-            }
-          },
-          instructions: {
-            select: {
-              id: true,
-              blockIndex: true,
-              reference: true
+        return prisma.note.create({
+          data,
+          select: {
+            id: true,
+            source: true,
+            title: true,
+            image: true,
+            content: true,
+            isParsed: true,
+            ingredients: {
+              select: {
+                id: true,
+                reference: true,
+                blockIndex: true,
+                lineIndex: true,
+                isParsed: true
+              }
+            },
+            instructions: {
+              select: {
+                id: true,
+                blockIndex: true,
+                reference: true
+              }
             }
           }
-        }
-      });
-    })
-  );
+        });
+      })
+    );
+  } catch (error) {
+    console.log({ error });
+    throw new Error('An error occurred while attempting to create a basic note structure.');
+  }
+
   const noteIds: string[] = basicNotes.map(
     (note: NoteWithRelations) => note.id
   );
@@ -373,57 +402,65 @@ export const saveLocalNotes = async (
     });
   });
 
-  await prisma.parsedSegment.createMany({
-    data,
-    skipDuplicates: true
-  });
+  try {
+    await prisma.parsedSegment.createMany({
+      data,
+      skipDuplicates: true
+    });
+  } catch (error) {
+    console.log({ error });
+    throw new Error('An error occurred while attempting to create parsed segments.');
+  }
 
-  console.log({ noteIds });
   // fetch updated note
-  const notes = await prisma.note.findMany({
-    where: {
-      id: {
-        in: noteIds
-      }
-    },
-    select: {
-      id: true,
-      source: true,
-      title: true,
-      image: true,
-      content: true,
-      isParsed: true,
-      ingredients: {
-        select: {
-          id: true,
-          reference: true,
-          blockIndex: true,
-          lineIndex: true,
-          isParsed: true,
-          parsed: {
-            select: {
-              value: true
-            }
-          },
-          ingredient: {
-            select: {
-              id: true,
-              isComposedIngredient: true,
-              isValidated: true
-            }
-          }
+  try {
+    const notes = await prisma.note.findMany({
+      where: {
+        id: {
+          in: noteIds
         }
       },
-      instructions: {
-        select: {
-          id: true,
-          blockIndex: true,
-          reference: true
+      select: {
+        id: true,
+        source: true,
+        title: true,
+        image: true,
+        content: true,
+        isParsed: true,
+        ingredients: {
+          select: {
+            id: true,
+            reference: true,
+            blockIndex: true,
+            lineIndex: true,
+            isParsed: true,
+            parsed: {
+              select: {
+                value: true
+              }
+            },
+            ingredient: {
+              select: {
+                id: true,
+                isComposedIngredient: true,
+                isValidated: true
+              }
+            }
+          }
+        },
+        instructions: {
+          select: {
+            id: true,
+            blockIndex: true,
+            reference: true
+          }
         }
       }
-    }
-  });
-
-  console.log({ notes });
-  return notes;
+    });
+    // console.log({ notes });
+    return notes;
+  } catch (error) {
+    console.log({ error });
+    throw new Error('An error occurred while attempting to re-fetch notes.');
+  }
 };

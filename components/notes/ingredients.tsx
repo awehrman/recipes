@@ -28,7 +28,7 @@ const Ingredients: React.FC<IngredientsProps> = ({
   status
 }) => {
   const ingBlocks = [...new Set(ingredients.map((i) => i.blockIndex))];
-
+  
   function renderParsed(parsed: ParsedSegmentWithIngredient[] = []) {
     const sortedParsed = parsed?.length
       ? [...parsed].sort(sortByIndexAsc)
