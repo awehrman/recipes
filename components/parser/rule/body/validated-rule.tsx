@@ -1,5 +1,5 @@
 import { ParserRuleWithRelations } from '@prisma/client';
-import React, { useCallback } from 'react';
+import React, { useCallback, memo } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 
@@ -11,7 +11,7 @@ import useParserRules from 'hooks/use-parser-rules';
 
 import { generateParsedRule } from '../../utilities';
 
-const ValidatedRule: React.FC<ValidatedRuleComponentProps> = ({
+const ValidatedRule: React.FC<ValidatedRuleComponentProps> = memo(({
   fieldName,
   placeholder,
   onFocus = () => {},
@@ -63,9 +63,11 @@ const ValidatedRule: React.FC<ValidatedRuleComponentProps> = ({
       {components}
     </Wrapper>
   );
-};
+});
 
 export default ValidatedRule;
+
+ValidatedRule.whyDidYouRender = true;
 
 const Wrapper = styled.div`
   position: relative;

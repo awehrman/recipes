@@ -66,6 +66,8 @@ const VirtualizedRow: React.FC<VirtualizedRuleProps> = ({
 
 export default VirtualizedRow;
 
+VirtualizedRow.whyDidYouRender = true;
+
 type WrapperProps = {
   isVisible: boolean;
 };

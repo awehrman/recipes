@@ -3,7 +3,7 @@ import * as events from '@uiw/codemirror-extensions-events';
 import CodeMirror, { ViewUpdate } from '@uiw/react-codemirror';
 import { js_beautify } from 'js-beautify';
 import _ from 'lodash';
-import React, { useCallback } from 'react';
+import React, { useCallback, memo } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 
@@ -25,12 +25,13 @@ type CodeMirrorElement = {
   editor: HTMLDivElement | undefined;
 };
 
-const RuleFormatter: React.FC<any> = ({
-  control,
-  getValues,
-  register,
-  setValue
-}) => {
+const RuleFormatter: React.FC<any> = memo(() => {
+  const {
+    control,
+    getValues,
+    register,
+    setValue
+  } = useFormContext()
   const {
     state: { index, defaultValue, definitionId }
   } = useRuleDefinitionContext();
@@ -140,7 +141,7 @@ const RuleFormatter: React.FC<any> = ({
       </EditFormatter>
     </Wrapper>
   );
-};
+});
 
 export default RuleFormatter;
 

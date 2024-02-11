@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 
@@ -12,7 +12,7 @@ import AutoWidthInput from '../auto-width-input';
 import { isDuplicateRule, isNotEmpty } from '../validators';
 import ValidatedRule from './validated-rule';
 
-const Rule: React.FC = () => {
+const Rule: React.FC = memo(() => {
   const [isActiveElement, setIsActiveElement] = React.useState(false);
   const { rules = [] } = useParserRules();
   const {
@@ -78,9 +78,11 @@ const Rule: React.FC = () => {
       )}
     </Wrapper>
   );
-};
+});
 
 export default Rule;
+
+Rule.whyDidYouRender = true;
 
 const Wrapper = styled.fieldset`
   border: 0;

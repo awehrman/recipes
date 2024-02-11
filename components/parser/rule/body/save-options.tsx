@@ -39,8 +39,10 @@ const SaveOptions: React.FC<any> = ({ reset }) => {
 
 export default SaveOptions;
 
+SaveOptions.whyDidYouRender = true;
+
 const Wrapper = styled.div`
-  margin: 10px 15px;
+  margin-top: 20px;
   align-self: flex-end;
 `;
 

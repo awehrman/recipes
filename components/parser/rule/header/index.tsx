@@ -11,9 +11,7 @@ import ExpandButton from './expand-button';
 import Name from './name';
 import Label from './label';
 
-type RuleComponentProps = {};
-
-const RuleHeader: React.FC<any> = (setFocus: any) => {
+const RuleHeader: React.FC<any> = ({ setFocus }: any) => {
   const [isInit, setIsInit] = useState<boolean>(false);
   const {
     dispatch,

@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, memo } from 'react';
 import { useFormContext, useWatch, UseFormReset } from 'react-hook-form';
 import styled from 'styled-components';
 
@@ -14,11 +14,11 @@ import Rule from './rule';
 import Type from './type';
 import List from './list';
 
-const RuleDefinition: React.FC<any> = (reset: UseFormReset<any>) => {
+const RuleDefinition: React.FC<any> = memo(
+  ({ reset }) => {
   const {
     state: { displayContext, isExpanded }
   } = useRuleContext();
-
   const {
     control,
     getValues,
@@ -42,13 +42,9 @@ const RuleDefinition: React.FC<any> = (reset: UseFormReset<any>) => {
     defaultValue: defaultType
   });
   const definitions = useWatch({ control, name: 'definitions' });
-
-  const showDeleteDefinitionButton = useCallback(
-    () =>
-      displayContext !== 'display' &&
-      ((type === 'LIST' && list.length > 0) || type === 'RULE'),
-    [displayContext, type, list]
-  );
+  
+  const showDeleteDefinitionButton = displayContext !== 'display' &&
+    ((type === 'LIST' && list.length > 0) || type === 'RULE');
 
   function handleRemoveDefinitionClick(index: number) {
     const updatedDefinitions = [
@@ -72,22 +68,12 @@ const RuleDefinition: React.FC<any> = (reset: UseFormReset<any>) => {
 
   return (
     <Wrapper>
-      {/* TODO move this into its own component */}
       <Type onTypeSwitch={() => handleTypeChange(index, type)} />
       <Example />
       <Rule />
-      <Formatter
-        // NOTE: tacky right?? but this serves a purpose!
-        // if we can avoid re-calling useFormContext we can save a bunch of useless
-        // re-renders, which causes a bunch of chaos in our virtualized list
-        control={control}
-        getValues={getValues}
-        register={register}
-        setValue={setValue}
-      />
+      <Formatter />
       <List />
-      {/* TODO move this into its own component */}
-      {showDeleteDefinitionButton() && (
+      {showDeleteDefinitionButton && (
         <DeleteButton
           onClick={() => handleRemoveDefinitionClick(index)}
           label="Remove"
@@ -95,9 +81,11 @@ const RuleDefinition: React.FC<any> = (reset: UseFormReset<any>) => {
       )}
     </Wrapper>
   );
-};
+});
 
 export default RuleDefinition;
+
+RuleDefinition.whyDidYouRender = true;
 
 const Wrapper = styled.div`
   margin: 6px 20px;

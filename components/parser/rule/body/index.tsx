@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import styled from 'styled-components';
 
@@ -14,15 +14,17 @@ import { getOptimisticParserRuleDefinition } from '../../utils';
 import SaveOptions from './save-options';
 import RuleDefinition from './rule-definition';
 
-const RuleBody: React.FC<any> = ({ reset }) => {
+// NOTE: memoizing up ere cause useFormContext and useFieldArray are noisy
+const RuleBody: React.FC<any> = React.memo(({ reset }) => {
   const {
-    state: { id, defaultValues, displayContext, index }
+    state: { id, defaultValues, displayContext }
   } = useRuleContext();
   const { control } = useFormContext();
   const { fields, append } = useFieldArray({
     control,
     name: 'definitions'
   });
+
   const { rule } = useParserRule(id);
   const { definitions = [] } = rule;
 
@@ -66,9 +68,11 @@ const RuleBody: React.FC<any> = ({ reset }) => {
       ) : null}
     </Wrapper>
   );
-};
+});
 
 export default RuleBody;
+
+RuleBody.whyDidYouRender = true;
 
 const AddNewDefinition = styled(Button)`
   background: transparent;
@@ -77,6 +81,7 @@ const AddNewDefinition = styled(Button)`
   border: 0;
   padding: 0;
   font-size: 12px;
+  margin-top: 20px;
 
   svg {
     position: relative;

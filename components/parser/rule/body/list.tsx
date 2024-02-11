@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, memo } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 
@@ -138,7 +138,7 @@ const KeywordInput = styled.input`
   }
 `;
 
-const RuleList: React.FC = () => {
+const RuleList: React.FC = memo(() => {
   const {
     state: { displayContext }
   } = useRuleContext();
@@ -186,9 +186,11 @@ const RuleList: React.FC = () => {
       {showListInput ? <KeywordListInput ref={inputRef} /> : null}
     </Wrapper>
   );
-};
+});
 
 export default RuleList;
+
+RuleList.whyDidYouRender = true;
 
 const AddToListButton = styled(Button)`
   display: inline-block;

@@ -39,10 +39,11 @@ const EditRule: React.FC = () => {
 
 export default EditRule;
 
+EditRule.whyDidYouRender = true;
+
 const Wrapper = styled.div`
   flex-basis: ${DEFAULT_GUTTER_SIZE}px;
 `;
-
 
 type EditButtonProps = {
   isVisible: boolean;

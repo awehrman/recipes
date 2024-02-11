@@ -2,14 +2,16 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { useParserContext } from 'contexts/parser-context';
+import { RuleProvider } from 'contexts/rule-context';
 
-import Rule from './rule/virtualized-rule.jsx';
-import { Button } from 'components/common';
+import RuleContents from './rule-contents';
+import useParserRules from 'hooks/use-parser-rules';
 
 type AddRuleProps = {};
 
 const AddRule: React.FC<AddRuleProps> = () => {
   // const [isInit, setIsInit] = useState(false);
+  const { rules = [] } = useParserRules();
   const {
     state: { isAddButtonDisplayed }
   } = useParserContext();
@@ -26,11 +28,25 @@ const AddRule: React.FC<AddRuleProps> = () => {
   //   }
   // }, [isInit, setFocus]);
 
+  function recomputeRuleSize() {
+    // TODO idk do we need to do things here?
+  }
+
   return (
     <Wrapper>
       <Header>Add New Rule</Header>
-      {/* TODO come back to the add route post virtualization  */}
-      {/* <Rule index={0} context="add" id="-1" /> */}
+      {/* TODO is it bad practice to have multiple rule providers? */}
+      <RuleProvider
+        rule={{
+          id: '-1',
+        }}
+        id={"-1"}
+        index={rules.length}
+        initialContext="add"
+        isCollapsed={false}
+      >
+        <RuleContents recomputeRuleSize={recomputeRuleSize} /> 
+        </RuleProvider>
     </Wrapper>
   );
 };

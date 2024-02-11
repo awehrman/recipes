@@ -63,7 +63,7 @@ const RuleContents: React.FC<any> = ({ recomputeRuleSize }) => {
     handleSubmit((data) => saveRule({ data, ...props }))
   };
 
-  // TODO i feel like this should live in its own hook
+  // TODO i feel like this should live in its own warnings hook
   const definedRuleNames = rules.map(
     (rule: ParserRuleWithRelations) => rule.name
   );
@@ -101,26 +101,23 @@ export default RuleContents;
 const Wrapper = styled.div`
   height: 100%;
   width: 100%;
+  margin-bottom: 20px;
 `;
 
 const InnerWrapper = styled.form`
   // margin-bottom: 10px;
   /* keep some kind of background so we can maintain hover */
   background: khaki;
+  max-width: 600px;
+  // margin-bottom: 10px;
 
   &.edit {
-    left: -40px;
-    padding: 10px 0 10px 80px;
-    width: 640px;
+    padding: 20px;
     background: ${({ theme }) => theme.colors.lightBlue};
-    // margin-bottom: 10px;
   }
 
   &.add {
-    left: -40px;
-    padding: 10px 0 10px 80px;
-    width: 640px;
+    padding: 20px;
     background: ${({ theme }) => theme.colors.lightGreen};
-    // margin-bottom: 10px;
   }
 `;

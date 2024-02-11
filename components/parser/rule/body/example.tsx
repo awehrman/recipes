@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 
@@ -7,7 +7,7 @@ import { useRuleDefinitionContext } from 'contexts/rule-definition-context';
 
 import AutoWidthInput from '../auto-width-input';
 
-const RuleExample: React.FC = () => {
+const RuleExample: React.FC = memo(() => {
   const {
     state: { displayContext }
   } = useRuleContext();
@@ -41,9 +41,11 @@ const RuleExample: React.FC = () => {
       />
     </Wrapper>
   );
-};
+});
 
 export default RuleExample;
+
+RuleExample.whyDidYouRender = true;
 
 const Wrapper = styled.fieldset`
   border: 0;

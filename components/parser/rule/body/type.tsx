@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 
@@ -12,7 +12,7 @@ type RuleTypeComponentProps = {
   onTypeSwitch: any;
 };
 
-const RuleType: React.FC<RuleTypeComponentProps> = ({ onTypeSwitch }) => {
+const RuleType: React.FC<RuleTypeComponentProps> = memo(({ onTypeSwitch }) => {
   const {
     state: { displayContext }
   } = useRuleContext();
@@ -47,9 +47,11 @@ const RuleType: React.FC<RuleTypeComponentProps> = ({ onTypeSwitch }) => {
       </Label>
     </Wrapper>
   );
-};
+});
 
 export default RuleType;
+
+RuleType.whyDidYouRender = true;
 
 const HiddenFormInput = styled.input`
   display: none;

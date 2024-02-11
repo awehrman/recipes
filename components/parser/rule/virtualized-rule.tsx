@@ -47,6 +47,8 @@ const VirtualizedRule: React.FC<VirtualizedRuleProps> = ({
 
 export default VirtualizedRule;
 
+VirtualizedRule.whyDidYouRender = true;
+
 const Wrapper = styled.div`
   display: flex;
   `;
