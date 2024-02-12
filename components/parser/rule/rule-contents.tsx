@@ -68,7 +68,7 @@ const RuleContents: React.FC<any> = ({ recomputeRuleSize }) => {
   //   handleSubmit((data) => saveRule({ data, ...props }))
   // };
 
-  const props: any = {
+  const props = {
     order: rules.length,
     displayContext,
     reset,

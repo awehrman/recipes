@@ -10,24 +10,32 @@ import { DEFAULT_GUTTER_SIZE, DEFAULT_ROW_SIZE } from './rule/constants';
 
 // TODO move
 type DisplayContext = 'add' | 'edit' | 'display';
+type ListProps = {
+  height: number;
+  width: number;
+  ref: React.MutableRefObject<List | null>;
+};
+type VirtualizedRuleProps = {
+  index: number;
+  style: React.CSSProperties;
+};
 
 const VirtualizedRules: React.FC = () => {
   const { loading, rules = [], updateRulesOrder } = useParserRules();
-  const listRef = React.useRef();
-  const sizeMap = React.useRef({});
+  const listRef = React.useRef<List | null>(null);
+  const sizeMap = React.useRef<{ [index: number]: number }>({});
 
   // TODO i hate all this naming
   const resize = React.useCallback((index: number, size: number) => {
     if (sizeMap?.current && listRef?.current) {
       sizeMap.current = { ...sizeMap.current, [index]: size };
-      // TODO fix type
-      (listRef.current as any).resetAfterIndex(index);
+      listRef.current.resetAfterIndex(index);
     }
   }, []);
 
   const getSize = (index: number) =>
-    (sizeMap?.current as any)?.[index] || DEFAULT_ROW_SIZE;
-  const getListProps = ({ height, width, ref }: any) => ({
+    sizeMap?.current?.[index] || DEFAULT_ROW_SIZE;
+  const getListProps = ({ height, width, ref }: ListProps) => ({
     ref,
     height,
     width: width + DEFAULT_GUTTER_SIZE, // add in edit gutter
@@ -36,7 +44,7 @@ const VirtualizedRules: React.FC = () => {
     itemData: rules
   });
 
-  const getVirtualizedRuleProps = ({ index, style }: any) => ({
+  const getVirtualizedRuleProps = ({ index, style }: VirtualizedRuleProps) => ({
     id: rules[index].id,
     displayContext: 'display' as DisplayContext,
     index,

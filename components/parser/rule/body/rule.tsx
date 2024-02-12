@@ -30,8 +30,7 @@ const Rule: React.FC = memo(() => {
   const updatedFormValue = getFieldUpdates({
     definitionId,
     fieldName: 'rule',
-    state: formUpdates,
-    index
+    state: formUpdates
   });
   const showParsedRule =
     (displayContext === 'display' || !isActiveElement) &&

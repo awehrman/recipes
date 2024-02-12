@@ -107,11 +107,10 @@ const generateUnlabeledRule = (
   return components;
 };
 
-// TODO fix return type
 const generateLabeledRule = (
   ruleString: string = '',
   ruleNames: string[] = []
-): any => {
+): React.ReactNode[] => {
   const components: React.ReactNode[] = [];
   const [label, rule] = ruleString.split(':');
   const key = v4();
@@ -144,7 +143,7 @@ export const generateParsedRule = (
       components.push([...unlabeledRule]);
     } else {
       const labeledRule = generateLabeledRule(ruleInstance, ruleNames);
-      components.push([labeledRule]);
+      components.push([...labeledRule]);
     }
   });
 

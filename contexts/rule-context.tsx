@@ -1,3 +1,4 @@
+import { ParserRuleWithRelations } from '@prisma/client';
 import React, {
   createContext,
   useContext,
@@ -6,8 +7,9 @@ import React, {
   ReactNode
 } from 'react';
 
+// TODO move these
 type DisplayContext = 'add' | 'edit' | 'display';
-type RuleActionTypes =
+export type RuleActionTypes =
   | 'SET_DISPLAY_CONTEXT'
   | 'SET_IS_EXPANDED'
   | 'SET_IS_FOCUSED'
@@ -18,7 +20,7 @@ type RuleActionTypes =
 
 type RuleState = {
   id: string;
-  defaultValues: any; // TODO fix type
+  defaultValues: ParserRuleWithRelations;
   displayContext: DisplayContext;
   isExpanded: boolean;
   isFocused: boolean;
@@ -26,12 +28,16 @@ type RuleState = {
   hasWarning: boolean;
 };
 
-type RuleAction = {
-  type: RuleActionTypes;
-  payload: any; // TODO fix this
-};
+type RuleAction =
+  | { type: 'SET_DISPLAY_CONTEXT'; payload: DisplayContext }
+  | { type: 'SET_IS_EXPANDED'; payload: boolean }
+  | { type: 'SET_IS_FOCUSED'; payload: boolean }
+  | { type: 'SET_INDEX'; payload: number }
+  | { type: 'RESET_DEFAULT_VALUES'; payload: ParserRuleWithRelations }
+  | { type: 'UPDATE_FORM_STATE'; payload: ParserRuleWithRelations }
+  | { type: 'SET_HAS_WARNING'; payload: boolean };
 
-type RuleDispatch = (action: RuleAction) => void;
+export type RuleDispatch = (action: RuleAction) => void;
 
 const RuleContext = createContext<
   | {
@@ -76,8 +82,6 @@ function ruleReducer(state: RuleState, action: RuleAction): RuleState {
       return { ...state, hasWarning: !!action.payload };
     case 'UPDATE_FORM_STATE':
       return { ...state, defaultValues: { ...action.payload } };
-    default:
-      throw new Error(`Unhandled action type: ${action.type}`);
   }
 }
 
@@ -87,7 +91,7 @@ type RuleProviderProps = {
   initialContext: DisplayContext;
   isCollapsed: boolean;
   index: number;
-  rule: any; // TODO fix
+  rule: ParserRuleWithRelations;
   // recomputeRuleSize: (() => void) | undefined;
 };
 

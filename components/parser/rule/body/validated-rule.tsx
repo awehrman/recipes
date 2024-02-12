@@ -33,8 +33,7 @@ const ValidatedRule: React.FC<ValidatedRuleComponentProps> = memo(
     const updatedFormValue = getFieldUpdates({
       definitionId,
       fieldName,
-      state: formUpdates,
-      index
+      state: formUpdates
     });
     const dirtyValue = !isDirty ? defaultValue.rule : updatedFormValue;
 

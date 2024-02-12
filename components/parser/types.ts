@@ -24,11 +24,16 @@ export type AutoWidthInputProps = {
   // onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   placeholder?: string;
   spellcheck?: boolean;
-  validators?: any; // TODO
+  validators?: ValidatorsProps;
+};
+
+type ValidatorsProps = {
+  isDuplicateRule?: (value: string) => boolean | string;
+  isNotEmpty?: (value: string) => boolean | string;
 };
 
 export type WatchParserForm = {
-  state: any; // TODO
+  state: ParserRuleWithRelations;
   fieldName: string;
   getValues?: (str: string) => string | undefined;
   definitionId?: string | null;
@@ -40,14 +45,6 @@ export type ValidatedRuleComponentProps = {
   placeholder: string;
   index: number;
   onFocus?: () => void;
-};
-
-export type RuleComponentProps = {
-  context?: DisplayContextTypes;
-  id: string;
-  index: number;
-  recomputeRuleSize?: (index: number, size: number) => void;
-  style?: any; // TODO
 };
 
 export type DisplayContextTypes = 'display' | 'edit' | 'add';

@@ -21,8 +21,7 @@ export const findRuleDefinition = (
 export const getFieldUpdates = ({
   definitionId = null,
   fieldName = '',
-  state = {},
-  index
+  state = {}
 }: WatchParserForm): string | null => {
   const { definitions = [] } = state;
   const isTopLevelFormField = fieldName === 'name' || fieldName === 'label';
@@ -58,42 +57,41 @@ export const formatEmbeddedList = (rule: string): string => {
   return `[${keywords.join(', ')}]`;
 };
 
-// TODO fix return type
-export const validateIndividualRule = (
-  ruleInstanceName: string,
-  rules: string[]
-): any => {
-  const undefinedRules: any = [];
-  const definedRules: any = [];
-  const syntax: any = [];
-  const ordered: any = [];
+// export const validateIndividualRule = (
+//   ruleInstanceName: string,
+//   rules: string[]
+// ) => {
+//   const undefinedRules: any = [];
+//   const definedRules: any = [];
+//   const syntax: any = [];
+//   const ordered: any = [];
 
-  const splitArray = ruleInstanceName.split(/([*!+$|()[\]])/).filter(Boolean);
-  splitArray.forEach((splitPiece, index) => {
-    const isSpecialCharacter = PEG_CHARACTERS.find(
-      (char) => char === splitPiece
-    );
-    const isMissingRule = !rules.includes(splitPiece) && !isSpecialCharacter;
-    if (isMissingRule) {
-      ordered.push({ index, name: splitPiece, type: 'undefined' });
-      return undefinedRules.push({ index, name: splitPiece });
-    }
-    const isDefinedRule = !rules.includes(splitPiece) && !isSpecialCharacter;
-    if (isDefinedRule) {
-      ordered.push({ index, name: splitPiece, type: 'defined' });
-      return definedRules.push({ index, name: splitPiece });
-    }
-    ordered.push({ index, name: splitPiece, type: 'syntax' });
-    return syntax.push({ index, name: splitPiece });
-  });
+//   const splitArray = ruleInstanceName.split(/([*!+$|()[\]])/).filter(Boolean);
+//   splitArray.forEach((splitPiece, index) => {
+//     const isSpecialCharacter = PEG_CHARACTERS.find(
+//       (char) => char === splitPiece
+//     );
+//     const isMissingRule = !rules.includes(splitPiece) && !isSpecialCharacter;
+//     if (isMissingRule) {
+//       ordered.push({ index, name: splitPiece, type: 'undefined' });
+//       return undefinedRules.push({ index, name: splitPiece });
+//     }
+//     const isDefinedRule = !rules.includes(splitPiece) && !isSpecialCharacter;
+//     if (isDefinedRule) {
+//       ordered.push({ index, name: splitPiece, type: 'defined' });
+//       return definedRules.push({ index, name: splitPiece });
+//     }
+//     ordered.push({ index, name: splitPiece, type: 'syntax' });
+//     return syntax.push({ index, name: splitPiece });
+//   });
 
-  return {
-    undefinedRules,
-    definedRules,
-    syntax,
-    ordered
-  };
-};
+//   return {
+//     undefinedRules,
+//     definedRules,
+//     syntax,
+//     ordered
+//   };
+// };
 
 export const isEmbeddedList = (str: string) =>
   str.startsWith('[') && (str.endsWith(']') || str.endsWith(']i'));
@@ -106,7 +104,7 @@ function excludeCharacters(inputString: string) {
 export const hasRuleWarning = (
   ruleString: string = '',
   ruleNames: string[] = []
-): any => {
+) => {
   let hasWarning = false;
   const isList = isEmbeddedList(ruleString);
   if (isList) {
@@ -132,7 +130,7 @@ export const hasRuleWarning = (
 };
 
 export const getOptimisticParserRuleDefinition = (
-  fields: any[],
+  fields: Record<'id', string>[],
   id: string = '-1'
 ): ParserRuleDefinitionPreSave => ({
   id: `OPTIMISTIC-${(fields ?? []).length}`,

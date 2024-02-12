@@ -35,8 +35,7 @@ const AutoWidthInput: React.FC<AutoWidthInputProps> = ({
   const updatedFormValue = getFieldUpdates({
     definitionId,
     fieldName,
-    state: formUpdates,
-    index
+    state: formUpdates
   });
   const dirtyValue = !isDirty ? defaultValue : updatedFormValue;
   const displaySizePlaceholder =

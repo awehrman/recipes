@@ -1,8 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { useParserContext } from 'contexts/parser-context';
-import { RuleProvider } from 'contexts/rule-context';
+import {
+  RuleProvider,
+  getDefaultRuleValuesForIndex
+} from 'contexts/rule-context';
 
 import RuleContents from './rule-contents';
 import useParserRules from 'hooks/use-parser-rules';
@@ -37,10 +40,7 @@ const AddRule: React.FC<AddRuleProps> = () => {
       <Header>Add New Rule</Header>
       {/* TODO is it bad practice to have multiple rule providers? */}
       <RuleProvider
-        rule={{
-          id: '-1'
-          // TODO provide a constant for this
-        }}
+        rule={getDefaultRuleValuesForIndex(rules.length)}
         id={'-1'}
         index={rules.length}
         initialContext="add"

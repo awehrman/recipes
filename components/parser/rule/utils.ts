@@ -1,9 +1,28 @@
-import { ParserRuleDefinition } from '@prisma/client';
+import { ParserRuleDefinition, ParserRuleWithRelations } from '@prisma/client';
 
 import { removeTypename } from 'hooks/helpers/parser-rule';
-import { getDefaultRuleValuesForIndex } from 'contexts/rule-context';
+import {
+  getDefaultRuleValuesForIndex,
+  RuleDispatch
+} from 'contexts/rule-context';
+import { ParserDispatch } from 'contexts/parser-context';
+import { DisplayContextTypes } from '../types';
 
-// TODO fix type
+type SaveRuleInputProps = CreateInputProps & {
+  displayContext: DisplayContextTypes;
+  reset: (input: ParserRuleWithRelations) => void;
+  updateRule: (input: ParserRuleWithRelations) => void;
+  dispatch: RuleDispatch;
+  addRule: (input: ParserRuleWithRelations) => void;
+  parserDispatch: ParserDispatch;
+};
+
+type CreateInputProps = {
+  data: ParserRuleWithRelations;
+  order: number;
+};
+
+// TODO do i really need to pass all of these? can i just get away with calling some of these locally?
 export const saveRule = ({
   data,
   order,
@@ -13,7 +32,7 @@ export const saveRule = ({
   dispatch,
   addRule,
   parserDispatch
-}: any) => {
+}: SaveRuleInputProps) => {
   const { payload, input } = createInput({ data, order });
 
   if (displayContext === 'edit') {
@@ -34,8 +53,7 @@ export const saveRule = ({
   dispatch({ type: 'SET_DISPLAY_CONTEXT', payload: 'display' });
 };
 
-// TODO continue to give a fuck about types wehrman
-const createInput = ({ data, order }: any) => {
+const createInput = ({ data, order }: CreateInputProps) => {
   // TODO we'll probably pass this explicitly in, but for now just throw it at the bottom
   if (data.order === 'undefined' || data.order === null) {
     data.order = order;

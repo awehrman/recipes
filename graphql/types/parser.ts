@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from '@prisma/client';
+import { ParserRuleWithRelations, Prisma, PrismaClient } from '@prisma/client';
 import { AppContext } from '../context';
 import {
   enumType,
@@ -262,8 +262,7 @@ const updateParserRule = async (
   if (order) {
     data.order = order;
   }
-  // TODO fix type
-  const response: any = { id };
+  const response: ParserRuleWithRelations = { id };
 
   try {
     const result = await prisma.parserRule.update({
@@ -299,7 +298,7 @@ const updateParserRulesOrder = async (
   const { prisma } = ctx;
   const { input } = args;
   let { parserRules = [] } = input || {};
-  const response: any = parserRules;
+  const response = parserRules;
   try {
     await prisma.$transaction(
       (parserRules ?? []).map(({ id, order }: any) =>

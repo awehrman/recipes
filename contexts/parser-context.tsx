@@ -18,7 +18,7 @@ type ParserAction = {
   payload: any; // TODO
 };
 
-type ParserDispatch = (action: ParserAction) => void;
+export type ParserDispatch = (action: ParserAction) => void;
 
 const ParserContext = createContext<
   { state: ParserState; dispatch: ParserDispatch } | undefined

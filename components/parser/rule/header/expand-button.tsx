@@ -7,9 +7,7 @@ import WindowMinimize from 'public/icons/window-minimize.svg';
 
 import { Button } from 'components/common';
 
-type RuleComponentProps = {};
-
-const RuleExpandButton: React.FC<RuleComponentProps> = () => {
+const RuleExpandButton: React.FC = () => {
   const {
     dispatch,
     state: { isExpanded }
