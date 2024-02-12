@@ -25,14 +25,7 @@ export const Note = objectType({
     });
     t.string('image');
     t.string('content');
-    // t.boolean('isParsed');
-    // not really sure why this comes thru as undefined when just set to t.boolean
-    t.field('isParsed', {
-      type: 'Boolean',
-      resolve: async (root: IngredientLineWithParsed) => {
-        return !!root?.parsed;
-      }
-    });
+    t.boolean('isParsed');
     t.list.field('ingredients', {
       type: 'IngredientLine'
     });
@@ -59,14 +52,7 @@ export const NoteMeta = objectType({
     });
     t.string('image');
     t.string('content');
-    // t.boolean('isParsed');
-    // not really sure why this comes thru as undefined when just set to t.boolean
-    t.field('isParsed', {
-      type: 'Boolean',
-      resolve: async (root: IngredientLineWithParsed) => {
-        return !!root?.parsed;
-      }
-    });
+    t.boolean('isParsed');
   }
 });
 

@@ -38,8 +38,9 @@ export const formatIngredientLinesUpsert = (
   };
 
   lines.forEach((line: IngredientLineWithParsed, index: number) => {
+    const isParsed = line?.parsed?.length > 0;
     // TODO it would be dope to put the parsed value on the fucking line in the schema
-    const ingredientValue = line?.parsed
+    const ingredientValue = isParsed
       ? line.parsed.find((p: ParsedSegment) => p.type === 'ingredient')?.value
       : null;
     const ingredientId = ingHash.valueHash?.[ingredientValue]?.id ?? null;
@@ -49,7 +50,7 @@ export const formatIngredientLinesUpsert = (
         lineIndex: index,
         reference: line.reference,
         rule: line?.rule ?? null,
-        isParsed: !!line?.parsed,
+        isParsed,
         ingredientId
       });
     } else {
@@ -60,7 +61,7 @@ export const formatIngredientLinesUpsert = (
           lineIndex: index,
           reference: line.reference,
           rule: line?.rule ?? null,
-          isParsed: !!line?.parsed,
+          isParsed,
           ingredientId
         }
       });

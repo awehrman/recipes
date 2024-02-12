@@ -14,9 +14,7 @@ export const IngredientLine = objectType({
     // not really sure why this comes thru as undefined when just set to t.boolean
     t.field('isParsed', {
       type: 'Boolean',
-      resolve: async (root: IngredientLineWithParsed) => {
-        return !!root?.parsed;
-      }
+      resolve: async (root: IngredientLineWithParsed) => root?.parsed?.length > 0
     });
     t.list.field('parsed', {
       type: 'ParsedSegment',

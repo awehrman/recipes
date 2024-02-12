@@ -55,20 +55,21 @@ const Ingredients: React.FC<IngredientsProps> = ({
 
   function renderBlock(index: number, status: StatusProps) {
     const blockIngredients = ingredients.filter((i) => i.blockIndex === index);
-    return blockIngredients.map((line: IngredientLineWithParsed, lineIndex) => (
+    return blockIngredients.map((line: IngredientLineWithParsed, lineIndex) => {
+      return (
       <IngredientListItem
         key={`${noteId}_parsed_ingredient_block_${index}_${
           line?.id ?? lineIndex
         }`}
         className={status.content ? 'loading' : ''}
       >
-        {line.isParsed && line?.parsed ? (
+        {line.isParsed && line?.parsed?.length > 0 ? (
           <Parsed>{renderParsed(line.parsed)}</Parsed>
         ) : (
           <span className="unparsed">{line.reference}</span>
         )}
       </IngredientListItem>
-    ));
+    )});
   }
 
   // TODO need better keys here
