@@ -28,7 +28,7 @@ const Ingredients: React.FC<IngredientsProps> = ({
   status
 }) => {
   const ingBlocks = [...new Set(ingredients.map((i) => i.blockIndex))];
-  
+
   function renderParsed(parsed: ParsedSegmentWithIngredient[] = []) {
     const sortedParsed = parsed?.length
       ? [...parsed].sort(sortByIndexAsc)
@@ -57,19 +57,20 @@ const Ingredients: React.FC<IngredientsProps> = ({
     const blockIngredients = ingredients.filter((i) => i.blockIndex === index);
     return blockIngredients.map((line: IngredientLineWithParsed, lineIndex) => {
       return (
-      <IngredientListItem
-        key={`${noteId}_parsed_ingredient_block_${index}_${
-          line?.id ?? lineIndex
-        }`}
-        className={status.content ? 'loading' : ''}
-      >
-        {line.isParsed && line?.parsed?.length > 0 ? (
-          <Parsed>{renderParsed(line.parsed)}</Parsed>
-        ) : (
-          <span className="unparsed">{line.reference}</span>
-        )}
-      </IngredientListItem>
-    )});
+        <IngredientListItem
+          key={`${noteId}_parsed_ingredient_block_${index}_${
+            line?.id ?? lineIndex
+          }`}
+          className={status.content ? 'loading' : ''}
+        >
+          {line.isParsed && line?.parsed?.length > 0 ? (
+            <Parsed>{renderParsed(line.parsed)}</Parsed>
+          ) : (
+            <span className="unparsed">{line.reference}</span>
+          )}
+        </IngredientListItem>
+      );
+    });
   }
 
   // TODO need better keys here

@@ -4,9 +4,7 @@ import styled from 'styled-components';
 
 import { Button } from 'components/common';
 import { useRuleContext } from 'contexts/rule-context';
-import {
-  useRuleDefinitionContext,
-} from 'contexts/rule-definition-context';
+import { useRuleDefinitionContext } from 'contexts/rule-definition-context';
 
 import Example from './example';
 import Formatter from './formatter';
@@ -14,17 +12,11 @@ import Rule from './rule';
 import Type from './type';
 import List from './list';
 
-const RuleDefinition: React.FC<any> = memo(
-  ({ reset }) => {
+const RuleDefinition: React.FC<any> = memo(({ reset }) => {
   const {
     state: { displayContext, isExpanded }
   } = useRuleContext();
-  const {
-    control,
-    getValues,
-    register,
-    setValue
-  } = useFormContext();
+  const { control, getValues, register, setValue } = useFormContext();
   const {
     state: {
       index,
@@ -42,8 +34,9 @@ const RuleDefinition: React.FC<any> = memo(
     defaultValue: defaultType
   });
   const definitions = useWatch({ control, name: 'definitions' });
-  
-  const showDeleteDefinitionButton = displayContext !== 'display' &&
+
+  const showDeleteDefinitionButton =
+    displayContext !== 'display' &&
     ((type === 'LIST' && list.length > 0) || type === 'RULE');
 
   function handleRemoveDefinitionClick(index: number) {

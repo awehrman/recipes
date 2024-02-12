@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 import AddRule from './rule/add-rule';
 import RuleActions from './rule/rule-actions';
-import VirtualizedRules from './virtualized-rules'; 
+import VirtualizedRules from './virtualized-rules';
 
 const ParserBuilder: React.FC = () => {
   return (

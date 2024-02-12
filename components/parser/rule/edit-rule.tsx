@@ -33,7 +33,7 @@ const EditRule: React.FC = () => {
         icon={<EditIcon />}
         onClick={handleEditClick}
       />
-    </Wrapper> 
+    </Wrapper>
   );
 };
 
@@ -47,7 +47,7 @@ const Wrapper = styled.div`
 
 type EditButtonProps = {
   isVisible: boolean;
-}
+};
 const EditButton = styled(Button)<EditButtonProps>`
   border: 0;
   background: transparent;
@@ -72,7 +72,9 @@ const EditButton = styled(Button)<EditButtonProps>`
     visibility: hidden;
   }
 
-  ${({ isVisible }) => isVisible && `
+  ${({ isVisible }) =>
+    isVisible &&
+    `
     visibility: visible;
     cursor: none;
 

@@ -20,12 +20,14 @@ const RuleContents: React.FC<any> = ({ recomputeRuleSize }) => {
     dispatch,
     state: { defaultValues, displayContext, id = '-1', index }
   } = useRuleContext();
+  const { dispatch: parserDispatch } = useParserContext();
   const {
-    dispatch: parserDispatch
-  } = useParserContext();
-  const { addRule, updateRule, rule: { definitions = [] } } = useParserRule(id);
+    addRule,
+    updateRule,
+    rule: { definitions = [] }
+  } = useParserRule(id);
   const { rules = [] } = useParserRules();
-  
+
   const methods = useForm<ParserRuleWithRelations>({
     defaultValues,
     mode: 'onBlur'
@@ -35,12 +37,13 @@ const RuleContents: React.FC<any> = ({ recomputeRuleSize }) => {
   // but i think this can be cleaned up
   const { handleSubmit, reset, setFocus } = methods;
 
-  const { ref, height: heightWithoutMargins = DEFAULT_ROW_SIZE } = useResizeObserver<HTMLFormElement>();
+  const { ref, height: heightWithoutMargins = DEFAULT_ROW_SIZE } =
+    useResizeObserver<HTMLFormElement>();
   const height = heightWithoutMargins; // + 4 + 6; // plus border size + ??? = profit?
   const resizeRow = useCallback(() => {
     if (recomputeRuleSize !== undefined) {
       if (height >= MIN_ROW_SIZE) {
-        recomputeRuleSize(index, height)
+        recomputeRuleSize(index, height);
       }
     }
   }, [index, height, recomputeRuleSize, displayContext]);
@@ -79,7 +82,7 @@ const RuleContents: React.FC<any> = ({ recomputeRuleSize }) => {
   const definedRuleNames = rules.map(
     (rule: ParserRuleWithRelations) => rule.name
   );
-  const ruleDefinitionNames = getAllParserRuleDefinitionNames(definitions)
+  const ruleDefinitionNames = getAllParserRuleDefinitionNames(definitions);
   useEffect(() => {
     let triggedWarning = false;
     for (const rule of ruleDefinitionNames) {

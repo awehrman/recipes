@@ -38,15 +38,15 @@ const AddRule: React.FC<AddRuleProps> = () => {
       {/* TODO is it bad practice to have multiple rule providers? */}
       <RuleProvider
         rule={{
-          id: '-1',
+          id: '-1'
           // TODO provide a constant for this
         }}
-        id={"-1"}
+        id={'-1'}
         index={rules.length}
         initialContext="add"
         isCollapsed={false}
       >
-        <RuleContents recomputeRuleSize={recomputeRuleSize} /> 
+        <RuleContents recomputeRuleSize={recomputeRuleSize} />
       </RuleProvider>
     </Wrapper>
   );

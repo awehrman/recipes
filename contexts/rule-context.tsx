@@ -34,11 +34,12 @@ type RuleAction = {
 type RuleDispatch = (action: RuleAction) => void;
 
 const RuleContext = createContext<
-  {
-    state: RuleState;
-    dispatch: RuleDispatch;
-    // recomputeRuleSize: (() => void) | undefined;
-  } | undefined
+  | {
+      state: RuleState;
+      dispatch: RuleDispatch;
+      // recomputeRuleSize: (() => void) | undefined;
+    }
+  | undefined
 >(undefined);
 
 function ruleReducer(state: RuleState, action: RuleAction): RuleState {
@@ -115,9 +116,9 @@ export function RuleProvider({
   initialContext = 'display',
   isCollapsed = false,
   index = 0,
-  rule = {},
-  // recomputeRuleSize
-}: RuleProviderProps) {
+  rule = {}
+}: // recomputeRuleSize
+RuleProviderProps) {
   const defaultValues = {
     ...getDefaultRuleValuesForIndex(index),
     ...(initialContext !== 'add' ? rule : {})

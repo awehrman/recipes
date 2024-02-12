@@ -12,7 +12,7 @@ const RuleActions: React.FC = () => {
   } = useParserContext();
 
   const { loading, rules = [] } = useParserRules();
-  
+
   function handleAddRuleClick() {
     dispatch({ type: 'SET_IS_ADD_BUTTON_DISPLAYED', payload: false });
   }

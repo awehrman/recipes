@@ -1,10 +1,12 @@
 import { IngredientLineWithParsed } from '@prisma/client';
 import { extendType, FieldResolver, idArg, objectType, stringArg } from 'nexus';
 
+import { importLocalNotes } from '../resolvers/note';
 import {
-  importLocalNotes
-} from '../resolvers/note';
-import { getNotesMeta, getNotesContent, saveRecipes } from 'graphql/resolvers/helpers/note/evernote-importer';
+  getNotesMeta,
+  getNotesContent,
+  saveRecipes
+} from 'graphql/resolvers/helpers/note/evernote-importer';
 import { resetDatabase } from '../resolvers/admin-tools';
 
 // TODO can this be an extension of NoteMeta?

@@ -26,17 +26,12 @@ type CodeMirrorElement = {
 };
 
 const RuleFormatter: React.FC<any> = memo(() => {
-  const {
-    control,
-    getValues,
-    register,
-    setValue
-  } = useFormContext()
+  const { control, getValues, register, setValue } = useFormContext();
   const {
     state: { index, defaultValue, definitionId }
   } = useRuleDefinitionContext();
   const {
-    state: { id, displayContext },
+    state: { id, displayContext }
   } = useRuleContext();
 
   const fieldName = `definitions.${index}.formatter`;
@@ -44,11 +39,16 @@ const RuleFormatter: React.FC<any> = memo(() => {
   const { name = '' } = rule;
 
   const watchedType = useWatch({ control, name: `definitions.${index}.type` });
-  const type = displayContext === 'display' ? (rule?.definitions ?? [])?.[index].type : watchedType;
+  const type =
+    displayContext === 'display'
+      ? (rule?.definitions ?? [])?.[index].type
+      : watchedType;
   const showField = type === 'RULE';
 
-  const watchedName = useWatch({ name: 'name', defaultValue: name });;
-  const defaultFormatter = getDefaultFormatter((displayContext === 'display') ? watchedName : name);
+  const watchedName = useWatch({ name: 'name', defaultValue: name });
+  const defaultFormatter = getDefaultFormatter(
+    displayContext === 'display' ? watchedName : name
+  );
   const formattedWithOrder = insertOrder(`${defaultValue.formatter}`, index);
   const uniqueId = `${id}-${fieldName}`;
   const defaultComputedValue =
@@ -86,20 +86,24 @@ const RuleFormatter: React.FC<any> = memo(() => {
   }
 
   const extensions = [javascript({ jsx: true }), handleOnBlur];
-  const editorProps = useCallback(() => ({
-    ref: editorRef,
-    basicSetup: formatterSetup,
-    editable: displayContext !== 'display',
-    extensions: extensions,
-    height: "auto",
-    // indentWithTab,
-    onChange: handleOnChange,
-    placeholder: displayContext === 'display' ? '' : '/* format rule return */',
-    readOnly: displayContext === 'display',
-    theme: themeOptions[displayContext as ThemeOptionKey],
-    width: "480px",
-    value: currentValue,
-  }), [displayContext, currentValue]);
+  const editorProps = useCallback(
+    () => ({
+      ref: editorRef,
+      basicSetup: formatterSetup,
+      editable: displayContext !== 'display',
+      extensions: extensions,
+      height: 'auto',
+      // indentWithTab,
+      onChange: handleOnChange,
+      placeholder:
+        displayContext === 'display' ? '' : '/* format rule return */',
+      readOnly: displayContext === 'display',
+      theme: themeOptions[displayContext as ThemeOptionKey],
+      width: '480px',
+      value: currentValue
+    }),
+    [displayContext, currentValue]
+  );
 
   if (
     (displayContext === 'display' && formattedWithOrder.length === 0) ||

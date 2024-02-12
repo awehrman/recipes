@@ -49,7 +49,7 @@ const createInput = ({ data, order }: any) => {
   return {
     input,
     payload: data
-  }
+  };
 };
 
 // TODO this is probably a shitty data format so come back and think this through

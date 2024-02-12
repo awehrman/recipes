@@ -122,7 +122,6 @@ export const parseHTML = (
     }
   });
 
-
   (blocks ?? []).forEach((innerBlocks, blockIndex) => {
     // console.log({ innerBlocks, blockIndex })
     // if we only have a single line in the block, and it's not our initial line,

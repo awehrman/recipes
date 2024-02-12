@@ -70,7 +70,7 @@ export function ParserProvider({
     isAddButtonDisplayed,
     isCollapsed,
     view,
-    focusedRuleIndex,
+    focusedRuleIndex
   });
 
   return (

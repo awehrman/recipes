@@ -25,14 +25,15 @@ const VirtualizedRules: React.FC = () => {
     }
   }, []);
 
-  const getSize = (index: number) => (sizeMap?.current as any)?.[index] || DEFAULT_ROW_SIZE;
+  const getSize = (index: number) =>
+    (sizeMap?.current as any)?.[index] || DEFAULT_ROW_SIZE;
   const getListProps = ({ height, width, ref }: any) => ({
     ref,
     height,
     width: width + DEFAULT_GUTTER_SIZE, // add in edit gutter
     itemCount: rules.length,
     itemSize: getSize,
-    itemData: rules,
+    itemData: rules
   });
 
   const getVirtualizedRuleProps = ({ index, style }: any) => ({
@@ -66,26 +67,26 @@ const VirtualizedRules: React.FC = () => {
 
   return (
     <RulesContent>
-        {/* <DragDropContext onDragEnd={handleOnDragEnd}>
+      {/* <DragDropContext onDragEnd={handleOnDragEnd}>
           <Droppable droppableId="list-container">
             {(provided) => (
               <DragRef {...provided.droppableProps} ref={provided.innerRef}> */}
-                {renderMessages()}
-                <AutoSizer>
-                  {({ height, width }) => (
-                    <StyledList {...getListProps({ height, width, ref: listRef })} >
-                      {({ index, style }) => (
-                        <VirtualizedRule {...getVirtualizedRuleProps({ index, style })} />
-                      )}
-                    </StyledList>)
-                  }
-                </AutoSizer>
-                {/* {provided.placeholder}
+      {renderMessages()}
+      <AutoSizer>
+        {({ height, width }) => (
+          <StyledList {...getListProps({ height, width, ref: listRef })}>
+            {({ index, style }) => (
+              <VirtualizedRule {...getVirtualizedRuleProps({ index, style })} />
+            )}
+          </StyledList>
+        )}
+      </AutoSizer>
+      {/* {provided.placeholder}
               </DragRef>
             )}
           </Droppable>
         </DragDropContext> */}
-      </RulesContent>
+    </RulesContent>
   );
 };
 
@@ -108,5 +109,4 @@ const Message = styled.div`
   position: relative;
 `;
 
-const Loading = styled.div`
-`;
+const Loading = styled.div``;

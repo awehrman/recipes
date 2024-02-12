@@ -7,9 +7,7 @@ import { useParserContext } from 'contexts/parser-context';
 
 // TODO i beg you wehrman please fix your types
 const SaveOptions: React.FC<any> = ({ reset }) => {
-  const {
-    dispatch: parserDispatch
-  } = useParserContext();
+  const { dispatch: parserDispatch } = useParserContext();
   const {
     dispatch,
     state: { defaultValues, displayContext, isExpanded }
@@ -30,7 +28,9 @@ const SaveOptions: React.FC<any> = ({ reset }) => {
       <CancelButton
         type="button"
         label="Cancel"
-        onClick={(e: React.MouseEvent<HTMLButtonElement>) => handleCancelClick(e)}
+        onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
+          handleCancelClick(e)
+        }
       />
       <SaveButton type="submit" label={label} />
     </Wrapper>

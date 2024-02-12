@@ -24,7 +24,7 @@ const VirtualizedRow: React.FC<VirtualizedRuleProps> = ({
     state: { focusedRuleIndex },
     dispatch: parserDispatch
   } = useParserContext();
-  
+
   const isFocusedRule = focusedRuleIndex !== null && index === focusedRuleIndex;
 
   // TODO this is like fine, but we also need to watch for the cursor moving outside the list completely
@@ -59,8 +59,8 @@ const VirtualizedRow: React.FC<VirtualizedRuleProps> = ({
       isVisible={isFocusedRule}
     >
       <EditRule />
-      <RuleContents recomputeRuleSize={recomputeRuleSize} /> 
-    </Wrapper> 
+      <RuleContents recomputeRuleSize={recomputeRuleSize} />
+    </Wrapper>
   );
 };
 
@@ -79,7 +79,9 @@ const Wrapper = styled.div<WrapperProps>`
   border: ${BORDER_SIZE}px solid pink;
   width: 100%;
 
-  ${({ isVisible }) => isVisible && `
+  ${({ isVisible }) =>
+    isVisible &&
+    `
     // TODO consider putting a drop shadow over this whole rule
     border: ${BORDER_SIZE}px solid aqua;
     z-index: 500;

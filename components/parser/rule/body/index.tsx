@@ -4,9 +4,7 @@ import styled from 'styled-components';
 
 import { Button } from 'components/common';
 import { useRuleContext } from 'contexts/rule-context';
-import {
-  RuleDefinitionProvider
-} from 'contexts/rule-definition-context';
+import { RuleDefinitionProvider } from 'contexts/rule-definition-context';
 import useParserRule from 'hooks/use-parser-rule';
 import PlusIcon from 'public/icons/plus.svg';
 
@@ -14,8 +12,8 @@ import { getOptimisticParserRuleDefinition } from '../../utils';
 import SaveOptions from './save-options';
 import RuleDefinition from './rule-definition';
 
-// NOTE: memoizing up ere cause useFormContext and useFieldArray are noisy
-const RuleBody: React.FC<any> = React.memo(({ reset }) => {
+// NOTE: memoizing up here cause useFormContext and useFieldArray are noisy
+const RuleBody: React.FC<any> = memo(({ reset }) => {
   const {
     state: { id, defaultValues, displayContext }
   } = useRuleContext();
@@ -37,7 +35,7 @@ const RuleBody: React.FC<any> = React.memo(({ reset }) => {
     return fields.map((field: any, index: number) => {
       const definitionId = definitions?.[index]?.id ?? `OPTIMISTIC-${index}`;
       const defaultValue = defaultValues.definitions?.[index];
-      
+
       return (
         <RuleDefinitionProvider
           key={field.id}
@@ -63,9 +61,7 @@ const RuleBody: React.FC<any> = React.memo(({ reset }) => {
         />
       ) : null}
 
-      {displayContext !== 'display' ? (
-        <SaveOptions reset={reset} />
-      ) : null}
+      {displayContext !== 'display' ? <SaveOptions reset={reset} /> : null}
     </Wrapper>
   );
 });
@@ -93,5 +89,4 @@ const AddNewDefinition = styled(Button)`
   }
 `;
 
-const Wrapper = styled.div`
-`;
+const Wrapper = styled.div``;

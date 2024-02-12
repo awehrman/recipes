@@ -26,7 +26,7 @@ const VirtualizedRule: React.FC<VirtualizedRuleProps> = ({
   style
 }) => {
   const {
-    state: { isCollapsed },
+    state: { isCollapsed }
   } = useParserContext();
 
   return (
@@ -41,7 +41,7 @@ const VirtualizedRule: React.FC<VirtualizedRuleProps> = ({
       >
         <VirtualizedRow recomputeRuleSize={recomputeRuleSize} />
       </RuleProvider>
-    </Wrapper> 
+    </Wrapper>
   );
 };
 
