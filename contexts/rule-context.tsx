@@ -134,7 +134,7 @@ export function RuleProvider({
 
   const memoizedContext = useMemo(
     () => ({ state, dispatch }),
-    [state, dispatch]
+    [state, dispatch, initialContext]
   );
 
   return (

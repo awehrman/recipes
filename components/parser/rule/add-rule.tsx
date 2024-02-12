@@ -39,6 +39,7 @@ const AddRule: React.FC<AddRuleProps> = () => {
       <RuleProvider
         rule={{
           id: '-1',
+          // TODO provide a constant for this
         }}
         id={"-1"}
         index={rules.length}
@@ -46,7 +47,7 @@ const AddRule: React.FC<AddRuleProps> = () => {
         isCollapsed={false}
       >
         <RuleContents recomputeRuleSize={recomputeRuleSize} /> 
-        </RuleProvider>
+      </RuleProvider>
     </Wrapper>
   );
 };

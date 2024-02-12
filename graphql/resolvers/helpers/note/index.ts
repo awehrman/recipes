@@ -244,10 +244,15 @@ export const saveNoteIngredients = async (
   prisma: PrismaClient
 ): Promise<IngredientHash> => {
   // attempt to create new ingredients; any existing should be skipped
-  await prisma.ingredient.createMany({
-    data: ingHash.createData,
-    skipDuplicates: true
-  });
+  try {
+    await prisma.ingredient.createMany({
+      data: ingHash.createData,
+      skipDuplicates: true
+    });
+  } catch (err) {
+    console.log({ err });
+    throw new Error('An error occurred while saving note ingredients.');
+  }
 
   const select = {
     id: true,
@@ -288,14 +293,20 @@ export const saveNoteIngredients = async (
   };
 
   // lookup these new ingredients
-  const ingredients = await prisma.ingredient.findMany({
-    where,
-    select
-  });
+  let ingredients = [];
+  try {
+    ingredients = await prisma.ingredient.findMany({
+      where,
+      select
+    });
+  } catch (err) {
+    console.log({ err });
+    throw new Error('An error occurred while attempting to find ingredients.');
+  }
 
   // setup quick ingredient access by value
   const valueHash: IngredientValueHash = {};
-  ingredients.forEach((ing) => {
+  (ingredients ?? []).forEach((ing) => {
     valueHash[ing.name] = ing;
     if (ing?.plural) {
       valueHash[ing.plural] = ing;
@@ -316,70 +327,73 @@ const saveNotes = async (
   prisma: PrismaClient
 ): Promise<NoteWithRelations[]> => {
   const noteIds: string[] = [];
-
+  let basicNotes: NoteWithRelations = [];
   // update notes with content, ingredients and instruction lines
-  const basicNotes: NoteWithRelations = await prisma.$transaction(
-    parsedNotes.map((note: NoteWithRelations) => {
-      noteIds.push(note.id);
-      const ingredients: Prisma.IngredientLineUpdateManyWithoutNoteNestedInput =
-        formatIngredientLinesUpsert(note.ingredients, ingHash);
-      const instructions: Prisma.InstructionLineUpdateManyWithoutNoteNestedInput =
-        formatInstructionLinesUpsert(note.instructions);
-      const data: Prisma.NoteUpdateInput = {
-        title: note.title,
-        source: note.source,
-        // TODO categories?:
-        // TODO tags?:
-        image: note.image,
-        content: note.content,
-        ingredients,
-        instructions,
-        isParsed: true
-      };
+  try {
+    basicNotes = await prisma.$transaction(
+      parsedNotes.map((note: NoteWithRelations) => {
+        noteIds.push(note.id);
+        const ingredients: Prisma.IngredientLineUpdateManyWithoutNoteNestedInput =
+          formatIngredientLinesUpsert(note.ingredients, ingHash);
+        const instructions: Prisma.InstructionLineUpdateManyWithoutNoteNestedInput =
+          formatInstructionLinesUpsert(note.instructions);
+        const data: Prisma.NoteUpdateInput = {
+          title: note.title,
+          source: note.source,
+          // TODO categories?:
+          // TODO tags?:
+          image: note.image,
+          content: note.content,
+          ingredients,
+          instructions,
+          isParsed: true
+        };
 
-      return prisma.note.update({
-        data,
-        where: { id: note.id },
-        select: {
-          id: true,
-          source: true,
-          title: true,
-          evernoteGUID: true,
-          image: true,
-          content: true,
-          isParsed: true,
-          ingredients: {
-            select: {
-              id: true,
-              reference: true,
-              blockIndex: true,
-              lineIndex: true,
-              isParsed: true
-            }
-          },
-          instructions: {
-            select: {
-              id: true,
-              blockIndex: true,
-              reference: true
+        return prisma.note.update({
+          data,
+          where: { id: note.id },
+          select: {
+            id: true,
+            source: true,
+            title: true,
+            evernoteGUID: true,
+            image: true,
+            content: true,
+            isParsed: true,
+            ingredients: {
+              select: {
+                id: true,
+                reference: true,
+                blockIndex: true,
+                lineIndex: true,
+                isParsed: true
+              }
+            },
+            instructions: {
+              select: {
+                id: true,
+                blockIndex: true,
+                reference: true
+              }
             }
           }
-        }
-      });
-    })
-  );
+        });
+      })
+    );
+  } catch (err) {
+    console.log({ err });
+    throw new Error('An error occurred while saving basic note structure.');
+  }
 
   // update the parsedSegments and link to our ingredients line
   const data: Prisma.ParsedSegmentCreateManyInput[] = [];
-
-  parsedNotes.forEach((note: NoteWithRelations, noteIndex: number) => {
-    const { ingredients } = note;
-    ingredients.forEach((line: IngredientLineWithParsed, lineIndex: number) => {
+  (parsedNotes ?? []).forEach((note: NoteWithRelations, noteIndex: number) => {
+    const { ingredients = [] } = note;
+    (ingredients ?? []).forEach((line: IngredientLineWithParsed, lineIndex: number) => {
       const ingredientLineId: string | null =
         basicNotes?.[noteIndex]?.ingredients?.[lineIndex]?.id ?? null;
-
       if (ingredientLineId) {
-        line.parsed.forEach((parsed: ParsedSegment) => {
+        (line?.parsed ?? []).forEach((parsed: ParsedSegment) => {
           const ingredientId: string | null =
             parsed.type === 'ingredient'
               ? ingHash.valueHash?.[parsed.value]?.id ?? null
@@ -399,56 +413,67 @@ const saveNotes = async (
     });
   });
 
-  await prisma.parsedSegment.createMany({
-    data,
-    skipDuplicates: true
-  });
+  try {
+    await prisma.parsedSegment.createMany({
+      data,
+      skipDuplicates: true
+    });
+  } catch (err) {
+    console.log({ err });
+    throw new Error('An error occurred while creating parsed segments.');
+  }
 
   // fetch updated note
-  const notes = await prisma.note.findMany({
-    where: {
-      id: {
-        in: noteIds
-      }
-    },
-    select: {
-      id: true,
-      source: true,
-      title: true,
-      evernoteGUID: true,
-      image: true,
-      content: true,
-      isParsed: true,
-      ingredients: {
-        select: {
-          id: true,
-          reference: true,
-          blockIndex: true,
-          lineIndex: true,
-          isParsed: true,
-          parsed: {
-            select: {
-              value: true
-            }
-          },
-          ingredient: {
-            select: {
-              id: true,
-              isComposedIngredient: true,
-              isValidated: true
-            }
-          }
+  let notes = [];
+  try {
+    notes = await prisma.note.findMany({
+      where: {
+        id: {
+          in: noteIds
         }
       },
-      instructions: {
-        select: {
-          id: true,
-          blockIndex: true,
-          reference: true
+      select: {
+        id: true,
+        source: true,
+        title: true,
+        evernoteGUID: true,
+        image: true,
+        content: true,
+        isParsed: true,
+        ingredients: {
+          select: {
+            id: true,
+            reference: true,
+            blockIndex: true,
+            lineIndex: true,
+            isParsed: true,
+            parsed: {
+              select: {
+                value: true
+              }
+            },
+            ingredient: {
+              select: {
+                id: true,
+                isComposedIngredient: true,
+                isValidated: true
+              }
+            }
+          }
+        },
+        instructions: {
+          select: {
+            id: true,
+            blockIndex: true,
+            reference: true
+          }
         }
       }
-    }
-  });
+    });
+  } catch (err) {
+    console.log({ err });
+    throw new Error('An error occurred re-finding notes.');
+  }
 
   return notes;
 };

@@ -84,6 +84,10 @@ export const readLocalCategoryFile = async (
     $('style').remove();
     $('icons').remove();
 
+    // re-write a cleaner file
+    const modifiedContent = $.html();
+    await fs.writeFile(filePath, modifiedContent, 'utf-8');
+
     const metaTags = $('meta[itemprop="title"]');
     const notes: any[] = [];
     metaTags.each((_index, element) => {
@@ -375,14 +379,14 @@ export const saveLocalNotes = async (
   // update the parsedSegments and link to our ingredients line
   const data: Prisma.ParsedSegmentCreateManyInput[] = [];
 
-  parsedNotes.forEach((note: NoteWithRelations, noteIndex: number) => {
+  (parsedNotes ?? []).forEach((note: NoteWithRelations, noteIndex: number) => {
     const { ingredients } = note;
-    ingredients.forEach((line: IngredientLineWithParsed, lineIndex: number) => {
+    (ingredients ?? []).forEach((line: IngredientLineWithParsed, lineIndex: number) => {
       const ingredientLineId: string | null =
         basicNotes?.[noteIndex]?.ingredients?.[lineIndex]?.id ?? null;
 
       if (ingredientLineId) {
-        line.parsed.forEach((parsed: ParsedSegment) => {
+        (line?.parsed ?? []).forEach((parsed: ParsedSegment) => {
           const ingredientId: string | null =
             parsed.type === 'ingredient'
               ? ingHash.valueHash?.[parsed.value]?.id ?? null

@@ -42,26 +42,13 @@ const RuleFormatter: React.FC<any> = memo(() => {
   const fieldName = `definitions.${index}.formatter`;
   const { rule } = useParserRule(id);
   const { name = '' } = rule;
-  // TODO fix param type
-  const type = useCallback((rule: any): string => {
-    // TODO types
-    if (displayContext === 'display') {
-      const defaultType = (rule?.definitions ?? [])?.[index].type;
-      return defaultType;
-    }
-    return useWatch({ control, name: `definitions.${index}.type` });
-  }, [displayContext]);
-  const showField = type(rule) === 'RULE';
 
-  const watchedName = useCallback((defaultName: string) => {
-    if (displayContext === 'display') {
-      return defaultName;
-    }
-    // TODO this may require a bit more scrutiny
-    return useWatch({ name: 'name', defaultValue: name });
-  }, [displayContext]);
+  const watchedType = useWatch({ control, name: `definitions.${index}.type` });
+  const type = displayContext === 'display' ? (rule?.definitions ?? [])?.[index].type : watchedType;
+  const showField = type === 'RULE';
 
-  const defaultFormatter = getDefaultFormatter(watchedName(name));
+  const watchedName = useWatch({ name: 'name', defaultValue: name });;
+  const defaultFormatter = getDefaultFormatter((displayContext === 'display') ? watchedName : name);
   const formattedWithOrder = insertOrder(`${defaultValue.formatter}`, index);
   const uniqueId = `${id}-${fieldName}`;
   const defaultComputedValue =
@@ -110,7 +97,7 @@ const RuleFormatter: React.FC<any> = memo(() => {
     placeholder: displayContext === 'display' ? '' : '/* format rule return */',
     readOnly: displayContext === 'display',
     theme: themeOptions[displayContext as ThemeOptionKey],
-    width: "525px",
+    width: "480px",
     value: currentValue,
   }), [displayContext, currentValue]);
 
@@ -135,9 +122,9 @@ const RuleFormatter: React.FC<any> = memo(() => {
           }
         />
         {/* TODO this is a focus trap */}
-        <StyledEditor
+        {/* <StyledEditor
           {...editorProps()}
-        />
+        /> */}
       </EditFormatter>
     </Wrapper>
   );

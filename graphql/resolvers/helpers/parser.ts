@@ -83,7 +83,7 @@ export const parseHTML = (
   const enNote = $('en-note');
   const firstNonEmptyLine = enNote
     .find('div')
-    .filter((index, element) => $(element).text().trim() !== '')
+    .filter((i, element) => $(element).text().trim() !== '')
     .first();
 
   const children = firstNonEmptyLine.parent().children('div');
@@ -122,19 +122,21 @@ export const parseHTML = (
     }
   });
 
-  blocks.forEach((innerBlocks, blockIndex) => {
+
+  (blocks ?? []).forEach((innerBlocks, blockIndex) => {
+    // console.log({ innerBlocks, blockIndex })
     // if we only have a single line in the block, and it's not our initial line,
     // then its an instruction line
     const isInstructionLine = innerBlocks.length === 1 && blockIndex !== 0;
 
-    innerBlocks.forEach((block) => {
+    (innerBlocks ?? []).forEach((block) => {
       if (isInstructionLine) {
         instructions.push(block as InstructionLine);
       } else {
         // parse ingredient line
         const response = parseIngredientLine(block as IngredientLine, ingHash);
         if (!response?.line) {
-          console.log({ block, response });
+          console.log('no line!', { block, response });
         } else {
           ingredients.push(response.line);
           newHash = { ...response.ingHash };
@@ -245,6 +247,7 @@ export const parseIngredientLine = (
     console.log(`!!! Parsing Error !!!: ${reference}`);
     console.log({ ingredientLine });
   }
+
   return {
     line: ingredientLine,
     ingHash

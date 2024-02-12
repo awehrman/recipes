@@ -36,31 +36,43 @@ const RuleContents: React.FC<any> = ({ recomputeRuleSize }) => {
   const { handleSubmit, reset, setFocus } = methods;
 
   const { ref, height: heightWithoutMargins = DEFAULT_ROW_SIZE } = useResizeObserver<HTMLFormElement>();
-  const height = heightWithoutMargins;
+  const height = heightWithoutMargins; // + 4 + 6; // plus border size + ??? = profit?
   const resizeRow = useCallback(() => {
     if (recomputeRuleSize !== undefined) {
       if (height >= MIN_ROW_SIZE) {
         recomputeRuleSize(index, height)
       }
     }
-  }, [index, height, recomputeRuleSize]);
+  }, [index, height, recomputeRuleSize, displayContext]);
 
   useEffect(() => {
     resizeRow();
-  }, [height]);
+  }, [index, height, displayContext]);
 
-  function handleOnSubmit() {
-    // TODO can i access any of my contexts from this method?
-    const props: any = {
-      order: rules.length,
-      displayContext,
-      reset,
-      updateRule,
-      dispatch,
-      addRule,
-      parserDispatch
-    };
-    handleSubmit((data) => saveRule({ data, ...props }))
+  // function handleOnSubmit(e: r) {
+  //   console.log("handleOnSubmit")
+  //   e?.preventDefault();
+  //   // TODO can i access any of my contexts from this method?
+  //   const props: any = {
+  //     order: rules.length,
+  //     displayContext,
+  //     reset,
+  //     updateRule,
+  //     dispatch,
+  //     addRule,
+  //     parserDispatch
+  //   };
+  //   handleSubmit((data) => saveRule({ data, ...props }))
+  // };
+
+  const props: any = {
+    order: rules.length,
+    displayContext,
+    reset,
+    updateRule,
+    dispatch,
+    addRule,
+    parserDispatch
   };
 
   // TODO i feel like this should live in its own warnings hook
@@ -84,7 +96,7 @@ const RuleContents: React.FC<any> = ({ recomputeRuleSize }) => {
     <Wrapper>
       <InnerWrapper
         className={displayContext}
-        onSubmit={handleOnSubmit}
+        onSubmit={handleSubmit((data) => saveRule({ data, ...props }))}
         ref={ref}
       >
         <FormProvider {...methods}>
@@ -101,15 +113,12 @@ export default RuleContents;
 const Wrapper = styled.div`
   height: 100%;
   width: 100%;
-  margin-bottom: 20px;
 `;
 
 const InnerWrapper = styled.form`
-  // margin-bottom: 10px;
   /* keep some kind of background so we can maintain hover */
-  background: khaki;
+  background: white;
   max-width: 600px;
-  // margin-bottom: 10px;
 
   &.edit {
     padding: 20px;

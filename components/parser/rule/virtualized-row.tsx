@@ -76,7 +76,7 @@ const BORDER_SIZE = 2;
 const Wrapper = styled.div<WrapperProps>`
   display: flex;
   flex-grow: 1;
-  border: ${BORDER_SIZE}px solid transparent;
+  border: ${BORDER_SIZE}px solid pink;
   width: 100%;
 
   ${({ isVisible }) => isVisible && `
@@ -84,6 +84,7 @@ const Wrapper = styled.div<WrapperProps>`
     border: ${BORDER_SIZE}px solid aqua;
     z-index: 500;
     position: absolute;
+    right: -${BORDER_SIZE}px;
     margin: ${BORDER_SIZE}px;
   `}
 `;
