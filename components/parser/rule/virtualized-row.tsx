@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { useRuleContext } from 'contexts/rule-context';
 import { useParserContext } from 'contexts/parser-context';
 
+import { RULE_BORDER_SIZE } from './constants';
 import EditRule from './edit-rule';
 import RuleContents from './rule-contents';
 
@@ -72,21 +73,19 @@ type WrapperProps = {
   isVisible: boolean;
 };
 
-const BORDER_SIZE = 2;
 const Wrapper = styled.div<WrapperProps>`
   display: flex;
   flex-grow: 1;
-  border: ${BORDER_SIZE}px solid pink;
+  border: ${RULE_BORDER_SIZE}px solid pink;
   width: 100%;
+  z-index: 500;
+  position: absolute;
 
   ${({ isVisible }) =>
     isVisible &&
     `
     // TODO consider putting a drop shadow over this whole rule
-    border: ${BORDER_SIZE}px solid aqua;
-    z-index: 500;
-    position: absolute;
-    right: -${BORDER_SIZE}px;
-    margin: ${BORDER_SIZE}px;
+    border: ${RULE_BORDER_SIZE}px solid aqua;
+    z-index: 600;
   `}
 `;

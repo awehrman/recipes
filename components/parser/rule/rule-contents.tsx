@@ -13,7 +13,12 @@ import { hasRuleWarning } from '../utils';
 import RuleHeader from './header';
 import RuleBody from './body';
 import { getAllParserRuleDefinitionNames, saveRule } from './utils';
-import { DEFAULT_ROW_SIZE, MIN_ROW_SIZE } from './constants';
+import {
+  DEFAULT_ROW_SIZE,
+  MIN_ROW_SIZE,
+  RULE_BORDER_SIZE,
+  RULE_BOTTOM_MARGIN
+} from './constants';
 
 const RuleContents: React.FC<any> = ({ recomputeRuleSize }) => {
   const {
@@ -39,18 +44,30 @@ const RuleContents: React.FC<any> = ({ recomputeRuleSize }) => {
 
   const { ref, height: heightWithoutMargins = DEFAULT_ROW_SIZE } =
     useResizeObserver<HTMLFormElement>();
-  const height = heightWithoutMargins; // + 4 + 6; // plus border size + ??? = profit?
+  const height = heightWithoutMargins;
+  // + RULE_BORDER_SIZE * 2
+  // 2 +
+  // RULE_BOTTOM_MARGIN;
   const resizeRow = useCallback(() => {
-    if (recomputeRuleSize !== undefined) {
-      if (height >= MIN_ROW_SIZE) {
-        recomputeRuleSize(index, height);
-      }
+    if (recomputeRuleSize !== undefined && height >= MIN_ROW_SIZE) {
+      recomputeRuleSize(index, height);
     }
-  }, [index, height, recomputeRuleSize, displayContext]);
+  }, [index, height, displayContext]);
+
+  // only grow
+  useEffect(() => {
+    // if (height + 8 > lastHeight) {
+    //   setLastHeight(height);
+
+    console.log(index, height);
+    resizeRow();
+    // }
+  }, [height]);
 
   useEffect(() => {
+    // setLastHeight(0);
     resizeRow();
-  }, [index, height, displayContext]);
+  }, [displayContext]);
 
   // function handleOnSubmit(e: r) {
   //   console.log("handleOnSubmit")

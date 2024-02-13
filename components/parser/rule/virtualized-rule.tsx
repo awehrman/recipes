@@ -51,4 +51,5 @@ VirtualizedRule.whyDidYouRender = true;
 
 const Wrapper = styled.div`
   display: flex;
+  background: mediumseagreen;
 `;

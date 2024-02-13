@@ -81,7 +81,7 @@ export default RuleDefinition;
 RuleDefinition.whyDidYouRender = true;
 
 const Wrapper = styled.div`
-  margin: 6px 20px;
+  margin: 6px 20px 0px;
   font-size: 14px;
   position: relative;
   display: flex;

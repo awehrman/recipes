@@ -141,6 +141,7 @@ RuleFormatter.whyDidYouRender = true;
 const Wrapper = styled.div`
   position: relative;
   min-height: 31px;
+  background: ghostwhite;
 `;
 
 const LabelWrapper = styled.label`
