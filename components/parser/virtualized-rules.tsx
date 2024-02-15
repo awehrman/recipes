@@ -9,7 +9,8 @@ import VirtualizedRule from './rule/virtualized-rule';
 import {
   DEFAULT_GUTTER_SIZE,
   DEFAULT_ROW_SIZE,
-  RULE_BOTTOM_MARGIN
+  RULE_BOTTOM_MARGIN,
+  RULE_BORDER_SIZE
 } from './rule/constants';
 
 // TODO move
@@ -30,33 +31,33 @@ const VirtualizedRules: React.FC = () => {
   const sizeMap = React.useRef<{ [index: number]: number }>({});
 
   // TODO i hate all this naming
-  const resize = React.useCallback((index: number, size: number) => {
-    if (sizeMap?.current && listRef?.current) {
-      const borderSize = 8; // index === 0 || index === rules.length - 1 ? 4 : 8;
-      const height = size + borderSize; // + RULE_BOTTOM_MARGIN;
-      console.log({
-        index,
-        height,
-        current: sizeMap.current?.[index],
-        willSave: !sizeMap.current?.[index] || height > sizeMap.current?.[index]
-      });
-      if (!sizeMap.current?.[index] || height > sizeMap.current?.[index]) {
-        if (index === 1) {
-          // TODO should we add in borders and bottom margins here?
-          console.log(index, size, height, {
-            current: sizeMap.current?.[index],
-            height
-          });
-          // debugger;
+  const resize = React.useCallback(
+    (index: number, size: number) => {
+      if (sizeMap?.current && listRef?.current) {
+        let height = size;
+        // add in top and bottom border height
+        height += RULE_BORDER_SIZE * 2;
+        // add bottom margin
+        height += RULE_BOTTOM_MARGIN;
+
+        // TODO currently only letting this grow
+        // we'll need a separate flag to allow shrinking height
+        if (!sizeMap.current?.[index] || height > sizeMap.current?.[index]) {
+          // console.log(index, size, height, {
+          //   current: sizeMap.current?.[index],
+          //   height
+          // });
+          sizeMap.current = { ...sizeMap.current, [index]: height };
+          listRef.current.resetAfterIndex(index);
         }
-        sizeMap.current = { ...sizeMap.current, [index]: height };
-        listRef.current.resetAfterIndex(index);
       }
-    }
-  }, []);
+    },
+    [loading]
+  );
 
   const getSize = (index: number) =>
     sizeMap?.current?.[index] || DEFAULT_ROW_SIZE;
+
   const getListProps = ({ height, width, ref }: ListProps) => ({
     ref,
     height,
@@ -66,14 +67,14 @@ const VirtualizedRules: React.FC = () => {
     itemData: rules
   });
 
-  // const getVirtualizedRuleProps = ({ index, style }: VirtualizedRuleProps) => ({
-  //   id: rules[index].id,
-  //   displayContext: 'display' as DisplayContext,
-  //   index,
-  //   recomputeRuleSize: resize,
-  //   rule: rules[index],
-  //   style
-  // });
+  const getVirtualizedRuleProps = ({ index, style }: VirtualizedRuleProps) => ({
+    id: rules[index].id,
+    displayContext: 'display' as DisplayContext,
+    index,
+    recomputeRuleSize: resize,
+    rule: rules[index],
+    style
+  });
 
   // TODO i want to throw all of this drag crap into its own hook
   // function handleOnDragEnd(item: any) {
@@ -95,6 +96,10 @@ const VirtualizedRules: React.FC = () => {
     }
   }
 
+  if (loading) {
+    return null;
+  }
+
   return (
     <RulesContent>
       {/* <DragDropContext onDragEnd={handleOnDragEnd}>
@@ -105,24 +110,10 @@ const VirtualizedRules: React.FC = () => {
       <Wrapper>
         <AutoSizer>
           {({ height, width }) => (
-            <StyledList
-              // {...getListProps({ height, width, ref: listRef })
-              ref={listRef}
-              height={height}
-              width={width + DEFAULT_GUTTER_SIZE}
-              itemCount={rules.length}
-              itemSize={getSize}
-              itemData={rules}
-            >
+            <StyledList {...getListProps({ height, width, ref: listRef })}>
               {({ index, style }) => (
                 <VirtualizedRule
-                  // {...getVirtualizedRuleProps({ index, style })}
-                  id={rules[index].id}
-                  displayContext={'display' as DisplayContext}
-                  index={index}
-                  recomputeRuleSize={resize}
-                  rule={rules[index]}
-                  style={style}
+                  {...getVirtualizedRuleProps({ index, style })}
                 />
               )}
             </StyledList>
@@ -141,7 +132,6 @@ const VirtualizedRules: React.FC = () => {
 export default VirtualizedRules;
 
 const Wrapper = styled.div`
-  background: orange;
   display: flex;
   flex-grow: 1;
   height: 100%;
@@ -158,8 +148,6 @@ const DragRef = styled.div`
 
 const RulesContent = styled.div`
   height: calc(100vh - 210px);
-  background: purple;
-  // min-height: 500px;
 `;
 
 const Message = styled.div`

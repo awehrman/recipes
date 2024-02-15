@@ -39,7 +39,7 @@ const AddRule: React.FC<AddRuleProps> = () => {
     <Wrapper>
       <Header>Add New Rule</Header>
       {/* TODO is it bad practice to have multiple rule providers? */}
-      <RuleProvider
+      {/* <RuleProvider
         rule={getDefaultRuleValuesForIndex(rules.length)}
         id={'-1'}
         index={rules.length}
@@ -47,7 +47,7 @@ const AddRule: React.FC<AddRuleProps> = () => {
         isCollapsed={false}
       >
         <RuleContents recomputeRuleSize={recomputeRuleSize} />
-      </RuleProvider>
+      </RuleProvider> */}
     </Wrapper>
   );
 };

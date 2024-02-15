@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  ReactNode,
+  useMemo
+} from 'react';
 
 type ParserActionTypes =
   | 'SET_IS_ADD_BUTTON_DISPLAYED'
@@ -41,6 +47,7 @@ function ruleReducer(state: ParserState, action: ParserAction): ParserState {
         return state;
       }
       return { ...state, isCollapsed: action.payload };
+    // TODO lets try putting this in its own thing
     case 'SET_FOCUSED_RULE_INDEX':
       if (action.payload === state.focusedRuleIndex) {
         return state;
@@ -73,8 +80,12 @@ export function ParserProvider({
     focusedRuleIndex
   });
 
+  const memoizedContext = useMemo(() => {
+    return { state, dispatch };
+  }, [state, dispatch]);
+
   return (
-    <ParserContext.Provider value={{ state, dispatch }}>
+    <ParserContext.Provider value={memoizedContext}>
       {children}
     </ParserContext.Provider>
   );
@@ -86,4 +97,44 @@ export function useParserContext() {
     throw new Error('useParserContext must be used within a ParserProvider');
   }
   return context;
+}
+
+// TODO lets try it!
+
+const FocusedIndexStateContext = React.createContext();
+const FocusedIndexUpdaterContext = React.createContext();
+
+export function FocusedIndexProvider({ children }: any) {
+  const [focusedIndex, setFocusedIndex] = React.useState<number | null>(null);
+  return (
+    <FocusedIndexStateContext.Provider value={focusedIndex}>
+      <FocusedIndexUpdaterContext.Provider value={setFocusedIndex}>
+        {children}
+      </FocusedIndexUpdaterContext.Provider>
+    </FocusedIndexStateContext.Provider>
+  );
+}
+
+export function useFocusedIndexState() {
+  const countState = React.useContext(FocusedIndexStateContext);
+  if (typeof countState === 'undefined') {
+    throw new Error(
+      'useFocusedIndexState must be used within a FocusedIndexProvider'
+    );
+  }
+  return countState;
+}
+
+export function useFocusedIndexUpdater() {
+  const setFocusedIndex = React.useContext(FocusedIndexUpdaterContext);
+  if (typeof setFocusedIndex === 'undefined') {
+    throw new Error(
+      'useFocusedIndexUpdater must be used within a FocusedIndexProvider'
+    );
+  }
+  const setIndex = React.useCallback(
+    (index: number | null) => setFocusedIndex(index),
+    [setFocusedIndex]
+  );
+  return setIndex;
 }

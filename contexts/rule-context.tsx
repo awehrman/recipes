@@ -54,6 +54,7 @@ function ruleReducer(state: RuleState, action: RuleAction): RuleState {
       if (action.payload === state.displayContext) {
         return state;
       }
+      console.log(action.payload);
       return { ...state, displayContext: action.payload };
     case 'SET_IS_EXPANDED':
       if (action.payload === state.isExpanded) {
@@ -137,10 +138,9 @@ RuleProviderProps) {
     hasWarning: false
   });
 
-  const memoizedContext = useMemo(
-    () => ({ state, dispatch }),
-    [state, dispatch, initialContext]
-  );
+  const memoizedContext = useMemo(() => {
+    return { state, dispatch };
+  }, [state, dispatch]);
 
   return (
     <RuleContext.Provider value={memoizedContext}>

@@ -236,13 +236,21 @@ export const fetchNotesContent = async (
 
   const notes = await saveNotes(parsedNotes, updatedHash, prisma);
 
+  // TODO should we remove any un-validated ingredients with no references that were created?
+
   return notes;
 };
 
+// TODO
+// sooooo i guess the way i have this setup is that we auto create ing
+// before we know whether or not we've parsed, and that gives us a lot
+// of false positives... maybe we want a process to auto clean those?
+// idk think about it!
 export const saveNoteIngredients = async (
   ingHash: IngredientHash,
   prisma: PrismaClient
 ): Promise<IngredientHash> => {
+  console.log(JSON.stringify(ingHash.createData, null, 2));
   // attempt to create new ingredients; any existing should be skipped
   try {
     await prisma.ingredient.createMany({
@@ -389,28 +397,30 @@ const saveNotes = async (
   const data: Prisma.ParsedSegmentCreateManyInput[] = [];
   (parsedNotes ?? []).forEach((note: NoteWithRelations, noteIndex: number) => {
     const { ingredients = [] } = note;
-    (ingredients ?? []).forEach((line: IngredientLineWithParsed, lineIndex: number) => {
-      const ingredientLineId: string | null =
-        basicNotes?.[noteIndex]?.ingredients?.[lineIndex]?.id ?? null;
-      if (ingredientLineId) {
-        (line?.parsed ?? []).forEach((parsed: ParsedSegment) => {
-          const ingredientId: string | null =
-            parsed.type === 'ingredient'
-              ? ingHash.valueHash?.[parsed.value]?.id ?? null
-              : null;
-          const segment: CreateParsedSegment = {
-            // updatedAt
-            index: parsed.index,
-            rule: parsed.rule,
-            type: parsed.type,
-            value: parsed.value,
-            ingredientId: parsed.type === 'ingredient' ? ingredientId : null,
-            ingredientLineId
-          };
-          data.push(segment);
-        });
+    (ingredients ?? []).forEach(
+      (line: IngredientLineWithParsed, lineIndex: number) => {
+        const ingredientLineId: string | null =
+          basicNotes?.[noteIndex]?.ingredients?.[lineIndex]?.id ?? null;
+        if (ingredientLineId) {
+          (line?.parsed ?? []).forEach((parsed: ParsedSegment) => {
+            const ingredientId: string | null =
+              parsed.type === 'ingredient'
+                ? ingHash.valueHash?.[parsed.value]?.id ?? null
+                : null;
+            const segment: CreateParsedSegment = {
+              // updatedAt
+              index: parsed.index,
+              rule: parsed.rule,
+              type: parsed.type,
+              value: parsed.value,
+              ingredientId: parsed.type === 'ingredient' ? ingredientId : null,
+              ingredientLineId
+            };
+            data.push(segment);
+          });
+        }
       }
-    });
+    );
   });
 
   try {

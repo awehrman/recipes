@@ -51,7 +51,7 @@ const ListItems: React.FC = () => {
   function renderList() {
     return list.map((keyword: string, listIndex: number) => (
       <ListItem
-        key={`parser-rule-${listIndex}-${keyword}`}
+        key={`parser-rule-${keyword}`}
         onMouseOver={() => handleMouseOver(listIndex)}
         onMouseLeave={() => handleMouseLeave(listIndex)}
       >

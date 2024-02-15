@@ -85,6 +85,7 @@ export const NoteQuery = extendType({
   }
 });
 
+// TODO we'll want to paginate this
 export const NotesQuery = extendType({
   type: 'Query',
   definition(t) {
@@ -93,6 +94,7 @@ export const NotesQuery = extendType({
       resolve: async (_root, _args, ctx) => {
         // TODO move these selects somewhere so we can re-use them
         const notes = await ctx.prisma.note.findMany({
+          take: 20,
           select: {
             id: true,
             source: true,

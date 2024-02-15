@@ -50,6 +50,7 @@ export const saveRule = ({
   // TODO on success only? where to handle validation?
   // seems like these should happen on update
   parserDispatch({ type: 'SET_IS_ADD_BUTTON_DISPLAYED', payload: true });
+  console.log('[saveRule] setting display');
   dispatch({ type: 'SET_DISPLAY_CONTEXT', payload: 'display' });
 };
 

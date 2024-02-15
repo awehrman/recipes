@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import styled from 'styled-components';
 
 import { RuleProvider } from 'contexts/rule-context';
-import { useParserContext } from 'contexts/parser-context';
+import {
+  useParserContext,
+  FocusedIndexProvider
+} from 'contexts/parser-context';
 
 import VirtualizedRow from './virtualized-row';
 
@@ -14,7 +17,7 @@ type VirtualizedRuleProps = {
   index: number;
   recomputeRuleSize: (index: number, size: number) => void;
   rule: any; // TODO
-  style: any; // TODO
+  style: CSSProperties;
 };
 
 const VirtualizedRule: React.FC<VirtualizedRuleProps> = ({
@@ -28,18 +31,20 @@ const VirtualizedRule: React.FC<VirtualizedRuleProps> = ({
   const {
     state: { isCollapsed }
   } = useParserContext();
-
   return (
     // TODO i wonder if i can just style the RuleProvider so this is less nested
     <Wrapper style={style}>
       <RuleProvider
+        // TODO should all of this live in a ref??
         rule={rule}
         id={id}
         index={index}
         initialContext={displayContext}
         isCollapsed={isCollapsed}
       >
-        <VirtualizedRow recomputeRuleSize={recomputeRuleSize} />
+        <FocusedIndexProvider>
+          <VirtualizedRow recomputeRuleSize={recomputeRuleSize} />
+        </FocusedIndexProvider>
       </RuleProvider>
     </Wrapper>
   );
@@ -52,4 +57,9 @@ VirtualizedRule.whyDidYouRender = true;
 const Wrapper = styled.div`
   display: flex;
   background: mediumseagreen;
+  height: 100%;
+
+  &:nth-child(odd) {
+    background: blue;
+  }
 `;

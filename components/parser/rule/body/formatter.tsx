@@ -1,9 +1,14 @@
 import { javascript } from '@codemirror/lang-javascript';
 import * as events from '@uiw/codemirror-extensions-events';
-import CodeMirror, { ViewUpdate } from '@uiw/react-codemirror';
+import CodeMirror, {
+  ViewUpdate,
+  Statistics,
+  EditorState,
+  EditorView
+} from '@uiw/react-codemirror';
 import { js_beautify } from 'js-beautify';
 import _ from 'lodash';
-import React, { useCallback, memo } from 'react';
+import React, { forwardRef, memo, useCallback } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 
@@ -24,6 +29,15 @@ const insertOrder = (value: string, index: number) => {
 type CodeMirrorElement = {
   editor: HTMLDivElement | undefined;
 };
+
+// TODO revisit focus trap
+// ugh i hate this component; i can't track down why this constantly
+// has the need to re-render the entire CodeMirror gizmo and it can cause jank
+// on auto height rows
+const MemoizedEditor = memo(
+  forwardRef((props, ref: any) => <StyledEditor {...props} ref={ref} />)
+);
+MemoizedEditor.whyDidYouRender = true;
 
 const RuleFormatter: React.FC<any> = memo(() => {
   const { control, getValues, register, setValue } = useFormContext();
@@ -85,7 +99,13 @@ const RuleFormatter: React.FC<any> = memo(() => {
     return formattedWithOrder;
   }
 
+  // TODO
   const extensions = [javascript({ jsx: true }), handleOnBlur];
+
+  const onUpdate = (viewUpdate: ViewUpdate) => {
+    console.log('onUpdate', { viewUpdate });
+  };
+
   const editorProps = useCallback(
     () => ({
       ref: editorRef,
@@ -100,7 +120,9 @@ const RuleFormatter: React.FC<any> = memo(() => {
       readOnly: displayContext === 'display',
       theme: themeOptions[displayContext as ThemeOptionKey],
       width: '480px',
-      value: currentValue
+      value: currentValue,
+      //
+      onUpdate
     }),
     [displayContext, currentValue]
   );
@@ -125,10 +147,11 @@ const RuleFormatter: React.FC<any> = memo(() => {
             displayContext === 'display' ? '' : '/* format rule return */'
           }
         />
-        {/* TODO this is a focus trap */}
-        {/* <StyledEditor
-          {...editorProps()}
-        /> */}
+        {displayContext === 'display' ? (
+          <DisplayFormatter>{defaultComputedValue}</DisplayFormatter>
+        ) : (
+          <MemoizedEditor {...editorProps()} />
+        )}
       </EditFormatter>
     </Wrapper>
   );
@@ -138,10 +161,19 @@ export default RuleFormatter;
 
 RuleFormatter.whyDidYouRender = true;
 
+// TODO we loose all our cute auto formatting with this but oh well
+const DisplayFormatter = styled.div`
+  font-size: 12px;
+  font-family: Menlo, Monaco, 'Courier New', monospace;
+  font-weight: 400;
+  white-space: pre-line;
+`;
+
 const Wrapper = styled.div`
   position: relative;
-  min-height: 31px;
-  background: ghostwhite;
+  // min-height: 31px;
+  background: khaki;
+  margin-top: 6px;
 `;
 
 const LabelWrapper = styled.label`
@@ -158,7 +190,6 @@ const HiddenFormInput = styled.textarea`
 
 const EditFormatter = styled(LabelWrapper)`
   margin-right: 10px;
-  margin-top: 6px;
   position: relative;
 `;
 

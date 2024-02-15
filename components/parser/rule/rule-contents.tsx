@@ -16,7 +16,6 @@ import { getAllParserRuleDefinitionNames, saveRule } from './utils';
 import {
   DEFAULT_ROW_SIZE,
   MIN_ROW_SIZE,
-  RULE_BORDER_SIZE,
   RULE_BOTTOM_MARGIN
 } from './constants';
 
@@ -45,9 +44,6 @@ const RuleContents: React.FC<any> = ({ recomputeRuleSize }) => {
   const { ref, height: heightWithoutMargins = DEFAULT_ROW_SIZE } =
     useResizeObserver<HTMLFormElement>();
   const height = heightWithoutMargins;
-  // + RULE_BORDER_SIZE * 2
-  // 2 +
-  // RULE_BOTTOM_MARGIN;
   const resizeRow = useCallback(() => {
     if (recomputeRuleSize !== undefined && height >= MIN_ROW_SIZE) {
       recomputeRuleSize(index, height);
@@ -56,18 +52,8 @@ const RuleContents: React.FC<any> = ({ recomputeRuleSize }) => {
 
   // only grow
   useEffect(() => {
-    // if (height + 8 > lastHeight) {
-    //   setLastHeight(height);
-
-    console.log(index, height);
     resizeRow();
-    // }
-  }, [height]);
-
-  useEffect(() => {
-    // setLastHeight(0);
-    resizeRow();
-  }, [displayContext]);
+  }, [height, displayContext]);
 
   // function handleOnSubmit(e: r) {
   //   console.log("handleOnSubmit")
@@ -100,17 +86,17 @@ const RuleContents: React.FC<any> = ({ recomputeRuleSize }) => {
     (rule: ParserRuleWithRelations) => rule.name
   );
   const ruleDefinitionNames = getAllParserRuleDefinitionNames(definitions);
-  useEffect(() => {
-    let triggedWarning = false;
-    for (const rule of ruleDefinitionNames) {
-      const containsWarnings = hasRuleWarning(`${rule}`, definedRuleNames);
-      if (containsWarnings) {
-        triggedWarning = true;
-        break;
-      }
-    }
-    dispatch({ type: 'SET_HAS_WARNING', payload: triggedWarning });
-  }, [ruleDefinitionNames, definedRuleNames, dispatch]);
+  // useEffect(() => {
+  //   let triggedWarning = false;
+  //   for (const rule of ruleDefinitionNames) {
+  //     const containsWarnings = hasRuleWarning(`${rule}`, definedRuleNames);
+  //     if (containsWarnings) {
+  //       triggedWarning = true;
+  //       break;
+  //     }
+  //   }
+  //   dispatch({ type: 'SET_HAS_WARNING', payload: triggedWarning });
+  // }, [ruleDefinitionNames, definedRuleNames, dispatch]);
 
   return (
     <Wrapper>
@@ -139,6 +125,7 @@ const InnerWrapper = styled.form`
   /* keep some kind of background so we can maintain hover */
   background: white;
   max-width: 600px;
+  padding-bottom: ${RULE_BOTTOM_MARGIN}px;
 
   &.edit {
     padding: 20px;
@@ -148,5 +135,6 @@ const InnerWrapper = styled.form`
   &.add {
     padding: 20px;
     background: ${({ theme }) => theme.colors.lightGreen};
+    margin-bottom: 10px;
   }
 `;

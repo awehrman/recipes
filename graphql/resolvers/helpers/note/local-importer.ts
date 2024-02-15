@@ -48,7 +48,10 @@ export const startLocalNotesImport = async (
 
 export const readLocalCategoryFiles = async () => {
   let importedNotes = [];
-  const directoryPath = path.resolve('./public', process.env.APP_ENV === 'test' ? 'test-data' : 'data');
+  const directoryPath = path.resolve(
+    './public',
+    process.env.APP_ENV === 'test' ? 'test-data' : 'data'
+  );
 
   try {
     const categoryFiles = await fs.readdir(directoryPath);
@@ -188,10 +191,10 @@ export const parseNoteFromCategoryFile = (
 
   const title = getLocalNoteTitle(noteElement);
   const source = getLocalNoteSource(noteElement);
-  
+
   const { content, image, tags } = getLocalNoteContent($, siblings);
   const categories = getLocalNoteCategories(category);
-  
+
   return {
     title,
     source,
@@ -212,7 +215,10 @@ export const getLocalNoteSource = (noteElement: Cheerio<Element>) =>
     .find('meta[itemprop="source-url"]')
     .attr('content');
 
-export const getLocalNoteContent = ($: CheerioAPI, siblings: Cheerio<Element>) => {
+export const getLocalNoteContent = (
+  $: CheerioAPI,
+  siblings: Cheerio<Element>
+) => {
   let noteContent: string[] = [];
   let foundEnd = false;
   let image = '';
@@ -244,9 +250,9 @@ export const getLocalNoteContent = ($: CheerioAPI, siblings: Cheerio<Element>) =
     // but save our image
     const isImage = $(sibling).is('img');
     if (isImage) {
-      image = getLocalNoteImage($, sibling)
+      image = getLocalNoteImage($, sibling);
     }
-   
+
     const isValidContentLine =
       !isNoteAttributesTag && !isMetaTag && !isImage && !isTitleTag;
 
@@ -258,7 +264,7 @@ export const getLocalNoteContent = ($: CheerioAPI, siblings: Cheerio<Element>) =
 
   noteContent.push('</en-note>');
   const content = noteContent.join('');
-  
+
   return {
     content,
     image,
@@ -273,7 +279,7 @@ export const getLocalNoteCategories = (category: string) => {
 };
 
 export const getLocalNoteTag = ($: CheerioAPI, sibling: Element) => {
-  // TODO similarly this will get more complicated, but we'll pass anything 
+  // TODO similarly this will get more complicated, but we'll pass anything
   // assigned along
   return $(sibling).attr('content');
 };
@@ -369,7 +375,9 @@ export const saveLocalNotes = async (
     );
   } catch (error) {
     console.log({ error });
-    throw new Error('An error occurred while attempting to create a basic note structure.');
+    throw new Error(
+      'An error occurred while attempting to create a basic note structure.'
+    );
   }
 
   const noteIds: string[] = basicNotes.map(
@@ -381,29 +389,31 @@ export const saveLocalNotes = async (
 
   (parsedNotes ?? []).forEach((note: NoteWithRelations, noteIndex: number) => {
     const { ingredients } = note;
-    (ingredients ?? []).forEach((line: IngredientLineWithParsed, lineIndex: number) => {
-      const ingredientLineId: string | null =
-        basicNotes?.[noteIndex]?.ingredients?.[lineIndex]?.id ?? null;
+    (ingredients ?? []).forEach(
+      (line: IngredientLineWithParsed, lineIndex: number) => {
+        const ingredientLineId: string | null =
+          basicNotes?.[noteIndex]?.ingredients?.[lineIndex]?.id ?? null;
 
-      if (ingredientLineId) {
-        (line?.parsed ?? []).forEach((parsed: ParsedSegment) => {
-          const ingredientId: string | null =
-            parsed.type === 'ingredient'
-              ? ingHash.valueHash?.[parsed.value]?.id ?? null
-              : null;
-          const segment: CreateParsedSegment = {
-            // updatedAt
-            index: parsed.index,
-            rule: parsed.rule,
-            type: parsed.type,
-            value: parsed.value,
-            ingredientId: parsed.type === 'ingredient' ? ingredientId : null,
-            ingredientLineId
-          };
-          data.push(segment);
-        });
+        if (ingredientLineId) {
+          (line?.parsed ?? []).forEach((parsed: ParsedSegment) => {
+            const ingredientId: string | null =
+              parsed.type === 'ingredient'
+                ? ingHash.valueHash?.[parsed.value]?.id ?? null
+                : null;
+            const segment: CreateParsedSegment = {
+              // updatedAt
+              index: parsed.index,
+              rule: parsed.rule,
+              type: parsed.type,
+              value: parsed.value,
+              ingredientId: parsed.type === 'ingredient' ? ingredientId : null,
+              ingredientLineId
+            };
+            data.push(segment);
+          });
+        }
       }
-    });
+    );
   });
 
   try {
@@ -413,15 +423,21 @@ export const saveLocalNotes = async (
     });
   } catch (error) {
     console.log({ error });
-    throw new Error('An error occurred while attempting to create parsed segments.');
+    throw new Error(
+      'An error occurred while attempting to create parsed segments.'
+    );
   }
+
+  // TODO we need a better lon term approach
+  const NOTES_OFFSET = 20;
+  const filteredNoteIds = noteIds.slice(0, 20);
 
   // fetch updated note
   try {
     const notes = await prisma.note.findMany({
       where: {
         id: {
-          in: noteIds
+          in: filteredNoteIds
         }
       },
       select: {

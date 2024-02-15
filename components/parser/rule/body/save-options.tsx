@@ -6,7 +6,7 @@ import { useRuleContext } from 'contexts/rule-context';
 import { useParserContext } from 'contexts/parser-context';
 
 // TODO i beg you wehrman please fix your types
-const SaveOptions: React.FC<any> = ({ reset }) => {
+const SaveOptions: React.FC<any> = React.memo(({ reset }) => {
   const { dispatch: parserDispatch } = useParserContext();
   const {
     dispatch,
@@ -19,6 +19,7 @@ const SaveOptions: React.FC<any> = ({ reset }) => {
     // TODO should any of these useParserRule calls actually be dispatched from the ruleContext?
     // whats the performance difference?
     parserDispatch({ type: 'SET_IS_ADD_BUTTON_DISPLAYED', payload: true });
+    console.log('[handleCancelClick] setting display');
     dispatch({ type: 'SET_DISPLAY_CONTEXT', payload: 'display' });
     reset({ ...defaultValues });
   }
@@ -35,7 +36,7 @@ const SaveOptions: React.FC<any> = ({ reset }) => {
       <SaveButton type="submit" label={label} />
     </Wrapper>
   );
-};
+});
 
 export default SaveOptions;
 
