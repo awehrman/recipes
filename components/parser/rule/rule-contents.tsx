@@ -16,13 +16,20 @@ import { getAllParserRuleDefinitionNames, saveRule } from './utils';
 import {
   DEFAULT_ROW_SIZE,
   MIN_ROW_SIZE,
-  RULE_BOTTOM_MARGIN
+  RULE_BOTTOM_MARGIN,
+  RULE_BORDER_SIZE
 } from './constants';
 
 const RuleContents: React.FC<any> = ({ recomputeRuleSize }) => {
   const {
     dispatch,
-    state: { defaultValues, displayContext, id = '-1', index }
+    state: {
+      defaultValues,
+      displayContext,
+      id = '-1',
+      index,
+      previousDisplayContext
+    }
   } = useRuleContext();
   const { dispatch: parserDispatch } = useParserContext();
   const {
@@ -43,17 +50,25 @@ const RuleContents: React.FC<any> = ({ recomputeRuleSize }) => {
 
   const { ref, height: heightWithoutMargins = DEFAULT_ROW_SIZE } =
     useResizeObserver<HTMLFormElement>();
-  const height = heightWithoutMargins;
-  const resizeRow = useCallback(() => {
-    if (recomputeRuleSize !== undefined && height >= MIN_ROW_SIZE) {
-      recomputeRuleSize(index, height);
-    }
-  }, [index, height, displayContext]);
+  const resizeRow = useCallback(
+    (force: boolean = false) => {
+      let height = heightWithoutMargins;
+      height += RULE_BORDER_SIZE * 2;
+      height +=
+        displayContext === 'edit' ? RULE_BOTTOM_MARGIN * 2 : RULE_BOTTOM_MARGIN;
+      if (recomputeRuleSize !== undefined && height >= MIN_ROW_SIZE) {
+        recomputeRuleSize(index, height, force);
+      }
+    },
+    [index, heightWithoutMargins, displayContext]
+  );
 
-  // only grow
   useEffect(() => {
-    resizeRow();
-  }, [height, displayContext]);
+    const force =
+      previousDisplayContext === 'edit' && displayContext === 'display';
+    console.log({ index, force, heightWithoutMargins });
+    resizeRow(force);
+  }, [heightWithoutMargins, index, displayContext, previousDisplayContext]);
 
   // function handleOnSubmit(e: r) {
   //   console.log("handleOnSubmit")
@@ -128,8 +143,9 @@ const InnerWrapper = styled.form`
   padding-bottom: ${RULE_BOTTOM_MARGIN}px;
 
   &.edit {
-    padding: 20px;
-    background: ${({ theme }) => theme.colors.lightBlue};
+    // background: ${({ theme }) => theme.colors.lightBlue};
+    background: khaki;
+    padding-top: ${RULE_BOTTOM_MARGIN}px;
   }
 
   &.add {

@@ -171,8 +171,6 @@ const DisplayFormatter = styled.div`
 
 const Wrapper = styled.div`
   position: relative;
-  // min-height: 31px;
-  background: khaki;
   margin-top: 6px;
 `;
 

@@ -13,18 +13,13 @@ const EditRule: React.FC = React.memo(() => {
     dispatch,
     state: { displayContext, index }
   } = useRuleContext();
-
-  // const {
-  //   state: { focusedRuleIndex }
-  // } = useParserContext();
   const focusedRuleIndex = useFocusedIndexState();
 
   // TODO this shit should be in context
-  const isFocusedRule = focusedRuleIndex !== null && index === focusedRuleIndex;
+  const isFocusedRule = index === focusedRuleIndex;
   const showEditButton = displayContext === 'display' && isFocusedRule;
 
   function handleEditClick() {
-    console.log('[handleEditClick] setting edit');
     dispatch({ type: 'SET_DISPLAY_CONTEXT', payload: 'edit' });
   }
 

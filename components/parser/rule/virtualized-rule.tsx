@@ -15,7 +15,7 @@ type VirtualizedRuleProps = {
   id: string;
   displayContext: DisplayContext;
   index: number;
-  recomputeRuleSize: (index: number, size: number) => void;
+  recomputeRuleSize: (index: number, size: number, force?: boolean) => void;
   rule: any; // TODO
   style: CSSProperties;
 };
@@ -35,7 +35,6 @@ const VirtualizedRule: React.FC<VirtualizedRuleProps> = ({
     // TODO i wonder if i can just style the RuleProvider so this is less nested
     <Wrapper style={style}>
       <RuleProvider
-        // TODO should all of this live in a ref??
         rule={rule}
         id={id}
         index={index}

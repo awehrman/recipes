@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 // import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { VariableSizeList as List } from 'react-window';
@@ -32,22 +32,14 @@ const VirtualizedRules: React.FC = () => {
 
   // TODO i hate all this naming
   const resize = React.useCallback(
-    (index: number, size: number) => {
+    (index: number, size: number, force: boolean = false) => {
       if (sizeMap?.current && listRef?.current) {
-        let height = size;
-        // add in top and bottom border height
-        height += RULE_BORDER_SIZE * 2;
-        // add bottom margin
-        height += RULE_BOTTOM_MARGIN;
-
-        // TODO currently only letting this grow
-        // we'll need a separate flag to allow shrinking height
-        if (!sizeMap.current?.[index] || height > sizeMap.current?.[index]) {
-          // console.log(index, size, height, {
-          //   current: sizeMap.current?.[index],
-          //   height
-          // });
-          sizeMap.current = { ...sizeMap.current, [index]: height };
+        if (
+          force ||
+          !sizeMap.current?.[index] ||
+          size > sizeMap.current?.[index]
+        ) {
+          sizeMap.current = { ...sizeMap.current, [index]: size };
           listRef.current.resetAfterIndex(index);
         }
       }

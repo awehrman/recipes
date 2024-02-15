@@ -14,7 +14,7 @@ import RuleContents from './rule-contents';
 
 // TODO move & fix types
 type VirtualizedRuleProps = {
-  recomputeRuleSize: (index: number, size: number) => void;
+  recomputeRuleSize: (index: number, size: number, force?: boolean) => void;
 };
 
 const VirtualizedRow: React.FC<VirtualizedRuleProps> = React.memo(
@@ -24,48 +24,31 @@ const VirtualizedRow: React.FC<VirtualizedRuleProps> = React.memo(
       state: { displayContext, index, isFocused }
     } = useRuleContext();
     const focusedRuleIndex = useFocusedIndexState();
-    // const {
-    //   state: { focusedRuleIndex }
-    //   // dispatch: parserDispatch
-    // } = useParserContext();
 
     const setIndex = useFocusedIndexUpdater();
-    const isFocusedRule =
-      focusedRuleIndex !== null && index === focusedRuleIndex;
-    console.log({ focusedRuleIndex, isFocusedRule });
+    const isFocusedRule = index === focusedRuleIndex;
 
-    // TODO this is like fine, but we also need to watch for the cursor moving outside the list completely
-    // not via the rule itself. it can leave a lingering active edit state
-    const debouncedHandleMouseEnter = _.debounce(() => {
+    function debouncedHandleMouseEnter() {
       if (!isFocused && displayContext === 'display') {
-        console.log('dispatching focus');
         dispatch({ type: 'SET_IS_FOCUSED', payload: true });
-        // TODO this parserDispatch is the one causing havoc
         setIndex(index);
-        // parserDispatch({ type: 'SET_FOCUSED_RULE_INDEX', payload: index });
       }
-      // TODO keep thinking about this debounce
-    }, 50);
+    }
 
-    const debouncedHandleMouseLeave = _.debounce(() => {
+    function handleMouseLeave() {
       if (isFocused) {
         dispatch({ type: 'SET_IS_FOCUSED', payload: false });
-        // parserDispatch({ type: 'SET_FOCUSED_RULE_INDEX', payload: null });
+        if (focusedRuleIndex === index) {
+          setIndex(null);
+        }
       }
-    }, 50);
-
-    useEffect(() => {
-      return () => {
-        debouncedHandleMouseEnter.cancel();
-        debouncedHandleMouseLeave.cancel();
-      };
-    }, [debouncedHandleMouseEnter, debouncedHandleMouseLeave]);
+    }
 
     return (
       <Wrapper
         // TODO also move all this mouse over crap into its own hook
         onMouseEnter={debouncedHandleMouseEnter}
-        // onMouseLeave={debouncedHandleMouseLeave}
+        onMouseLeave={handleMouseLeave}
         isVisible={isFocusedRule}
       >
         <EditRule />

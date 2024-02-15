@@ -9,14 +9,12 @@ import React, {
 type ParserActionTypes =
   | 'SET_IS_ADD_BUTTON_DISPLAYED'
   | 'SET_PARSER_VIEW'
-  | 'SET_IS_COLLAPSED'
-  | 'SET_FOCUSED_RULE_INDEX';
+  | 'SET_IS_COLLAPSED';
 
 type ParserState = {
   isAddButtonDisplayed: boolean;
   isCollapsed: boolean;
   view: 'rules' | 'grammar';
-  focusedRuleIndex: number | null;
 };
 
 type ParserAction = {
@@ -47,12 +45,6 @@ function ruleReducer(state: ParserState, action: ParserAction): ParserState {
         return state;
       }
       return { ...state, isCollapsed: action.payload };
-    // TODO lets try putting this in its own thing
-    case 'SET_FOCUSED_RULE_INDEX':
-      if (action.payload === state.focusedRuleIndex) {
-        return state;
-      }
-      return { ...state, focusedRuleIndex: action.payload };
     default:
       throw new Error(`Unhandled action type: ${action.type}`);
   }
@@ -63,21 +55,18 @@ type ParserProviderProps = {
   isAddButtonDisplayed?: boolean;
   isCollapsed?: boolean;
   view?: 'rules' | 'grammar';
-  focusedRuleIndex?: number | null;
 };
 
 export function ParserProvider({
   children,
   isAddButtonDisplayed = true,
   isCollapsed = false,
-  view = 'rules',
-  focusedRuleIndex = null
+  view = 'rules'
 }: ParserProviderProps) {
   const [state, dispatch] = useReducer(ruleReducer, {
     isAddButtonDisplayed,
     isCollapsed,
-    view,
-    focusedRuleIndex
+    view
   });
 
   const memoizedContext = useMemo(() => {
@@ -99,13 +88,18 @@ export function useParserContext() {
   return context;
 }
 
-// TODO lets try it!
+type FocusedIndexUpdaterContextType = React.Dispatch<
+  React.SetStateAction<number | null>
+>;
 
-const FocusedIndexStateContext = React.createContext();
-const FocusedIndexUpdaterContext = React.createContext();
+const FocusedIndexStateContext = React.createContext<number | null>(null);
+const FocusedIndexUpdaterContext = React.createContext<
+  FocusedIndexUpdaterContextType | undefined
+>(undefined);
 
 export function FocusedIndexProvider({ children }: any) {
   const [focusedIndex, setFocusedIndex] = React.useState<number | null>(null);
+
   return (
     <FocusedIndexStateContext.Provider value={focusedIndex}>
       <FocusedIndexUpdaterContext.Provider value={setFocusedIndex}>
