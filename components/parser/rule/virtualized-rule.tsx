@@ -31,6 +31,7 @@ const VirtualizedRule: React.FC<VirtualizedRuleProps> = ({
   const {
     state: { isCollapsed }
   } = useParserContext();
+
   return (
     // TODO i wonder if i can just style the RuleProvider so this is less nested
     <Wrapper style={style}>

@@ -1,5 +1,5 @@
-import React, { useCallback, memo } from 'react';
-import { useFormContext, useWatch, UseFormReset } from 'react-hook-form';
+import React, { memo } from 'react';
+import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 
 import { Button } from 'components/common';
@@ -12,11 +12,11 @@ import Rule from './rule';
 import Type from './type';
 import List from './list';
 
-const RuleDefinition: React.FC<any> = memo(({ reset }) => {
+const RuleDefinition: React.FC<any> = memo(() => {
   const {
     state: { displayContext, isExpanded }
   } = useRuleContext();
-  const { control, getValues, register, setValue } = useFormContext();
+  const { control, setValue } = useFormContext();
   const {
     state: {
       index,

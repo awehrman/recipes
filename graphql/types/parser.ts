@@ -94,6 +94,7 @@ const getRules = async (
     }
   });
   const sortedRules = rules.sort((a, b) => a.order - b.order);
+  console.log({ sortedRules });
   return sortedRules;
 };
 

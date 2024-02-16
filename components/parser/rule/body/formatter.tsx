@@ -99,13 +99,7 @@ const RuleFormatter: React.FC<any> = memo(() => {
     return formattedWithOrder;
   }
 
-  // TODO
   const extensions = [javascript({ jsx: true }), handleOnBlur];
-
-  const onUpdate = (viewUpdate: ViewUpdate) => {
-    console.log('onUpdate', { viewUpdate });
-  };
-
   const editorProps = useCallback(
     () => ({
       ref: editorRef,
@@ -120,9 +114,7 @@ const RuleFormatter: React.FC<any> = memo(() => {
       readOnly: displayContext === 'display',
       theme: themeOptions[displayContext as ThemeOptionKey],
       width: '480px',
-      value: currentValue,
-      //
-      onUpdate
+      value: currentValue
     }),
     [displayContext, currentValue]
   );

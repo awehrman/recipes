@@ -250,7 +250,6 @@ export const saveNoteIngredients = async (
   ingHash: IngredientHash,
   prisma: PrismaClient
 ): Promise<IngredientHash> => {
-  console.log(JSON.stringify(ingHash.createData, null, 2));
   // attempt to create new ingredients; any existing should be skipped
   try {
     await prisma.ingredient.createMany({

@@ -22,7 +22,6 @@ type RuleState = {
   id: string;
   defaultValues: ParserRuleWithRelations;
   displayContext: DisplayContext;
-  previousDisplayContext: DisplayContext;
   isExpanded: boolean;
   isFocused: boolean;
   index: number;
@@ -55,11 +54,9 @@ function ruleReducer(state: RuleState, action: RuleAction): RuleState {
       if (action.payload === state.displayContext) {
         return state;
       }
-      console.log(action.payload);
       return {
         ...state,
-        displayContext: action.payload,
-        previousDisplayContext: state.displayContext
+        displayContext: action.payload
       };
     case 'SET_IS_EXPANDED':
       if (action.payload === state.isExpanded) {
@@ -136,7 +133,6 @@ RuleProviderProps) {
   const [state, dispatch] = useReducer(ruleReducer, {
     id,
     displayContext: initialContext,
-    previousDisplayContext: initialContext,
     defaultValues,
     isExpanded: isCollapsed ? false : true,
     isFocused: initialContext === 'display' ? false : true,

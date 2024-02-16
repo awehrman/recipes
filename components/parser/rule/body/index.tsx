@@ -43,7 +43,7 @@ const RuleBody: React.FC<any> = memo(({ reset }) => {
           definitionId={definitionId}
           defaultValue={defaultValue}
         >
-          <RuleDefinition reset={reset} />
+          <RuleDefinition />
         </RuleDefinitionProvider>
       );
     });

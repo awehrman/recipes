@@ -6,12 +6,7 @@ import styled from 'styled-components';
 
 import useParserRules from 'hooks/use-parser-rules';
 import VirtualizedRule from './rule/virtualized-rule';
-import {
-  DEFAULT_GUTTER_SIZE,
-  DEFAULT_ROW_SIZE,
-  RULE_BOTTOM_MARGIN,
-  RULE_BORDER_SIZE
-} from './rule/constants';
+import { DEFAULT_GUTTER_SIZE, DEFAULT_ROW_SIZE } from './rule/constants';
 
 // TODO move
 type DisplayContext = 'add' | 'edit' | 'display';
@@ -33,13 +28,11 @@ const VirtualizedRules: React.FC = () => {
   // TODO i hate all this naming
   const resize = React.useCallback(
     (index: number, size: number, force: boolean = false) => {
-      if (sizeMap?.current && listRef?.current) {
-        if (
-          force ||
-          !sizeMap.current?.[index] ||
-          size > sizeMap.current?.[index]
-        ) {
-          sizeMap.current = { ...sizeMap.current, [index]: size };
+      const allMounted = sizeMap?.current && listRef?.current;
+
+      if (allMounted) {
+        sizeMap.current = { ...sizeMap.current, [index]: size };
+        if (listRef.current !== null) {
           listRef.current.resetAfterIndex(index);
         }
       }

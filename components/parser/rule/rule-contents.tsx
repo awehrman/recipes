@@ -23,20 +23,10 @@ import {
 const RuleContents: React.FC<any> = ({ recomputeRuleSize }) => {
   const {
     dispatch,
-    state: {
-      defaultValues,
-      displayContext,
-      id = '-1',
-      index,
-      previousDisplayContext
-    }
+    state: { defaultValues, displayContext, id = '-1', index }
   } = useRuleContext();
   const { dispatch: parserDispatch } = useParserContext();
-  const {
-    addRule,
-    updateRule,
-    rule: { definitions = [] }
-  } = useParserRule(id);
+  const { addRule, updateRule } = useParserRule(id);
   const { rules = [] } = useParserRules();
 
   const methods = useForm<ParserRuleWithRelations>({
@@ -64,27 +54,14 @@ const RuleContents: React.FC<any> = ({ recomputeRuleSize }) => {
   );
 
   useEffect(() => {
-    const force =
-      previousDisplayContext === 'edit' && displayContext === 'display';
-    console.log({ index, force, heightWithoutMargins });
-    resizeRow(force);
-  }, [heightWithoutMargins, index, displayContext, previousDisplayContext]);
+    resizeRow(true);
+  }, [heightWithoutMargins, index, displayContext]);
 
-  // function handleOnSubmit(e: r) {
-  //   console.log("handleOnSubmit")
-  //   e?.preventDefault();
-  //   // TODO can i access any of my contexts from this method?
-  //   const props: any = {
-  //     order: rules.length,
-  //     displayContext,
-  //     reset,
-  //     updateRule,
-  //     dispatch,
-  //     addRule,
-  //     parserDispatch
-  //   };
-  //   handleSubmit((data) => saveRule({ data, ...props }))
-  // };
+  function handleReset(input: any = {}) {
+    console.log('handleReset');
+    reset(input);
+    resizeRow(true);
+  }
 
   const props = {
     order: rules.length,
@@ -95,12 +72,13 @@ const RuleContents: React.FC<any> = ({ recomputeRuleSize }) => {
     addRule,
     parserDispatch
   };
+  // console.log({ index, order: rules.length });
 
   // TODO i feel like this should live in its own warnings hook
-  const definedRuleNames = rules.map(
-    (rule: ParserRuleWithRelations) => rule.name
-  );
-  const ruleDefinitionNames = getAllParserRuleDefinitionNames(definitions);
+  // const definedRuleNames = rules.map(
+  //   (rule: ParserRuleWithRelations) => rule.name
+  // );
+  // const ruleDefinitionNames = getAllParserRuleDefinitionNames(definitions);
   // useEffect(() => {
   //   let triggedWarning = false;
   //   for (const rule of ruleDefinitionNames) {
@@ -117,12 +95,14 @@ const RuleContents: React.FC<any> = ({ recomputeRuleSize }) => {
     <Wrapper>
       <InnerWrapper
         className={displayContext}
-        onSubmit={handleSubmit((data) => saveRule({ data, ...props }))}
+        onSubmit={handleSubmit((data) =>
+          saveRule({ data, ...props, reset: handleReset })
+        )}
         ref={ref}
       >
         <FormProvider {...methods}>
           <RuleHeader setFocus={setFocus} />
-          <RuleBody reset={reset} />
+          <RuleBody reset={handleReset} />
         </FormProvider>
       </InnerWrapper>
     </Wrapper>
