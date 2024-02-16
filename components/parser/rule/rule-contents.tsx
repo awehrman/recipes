@@ -26,7 +26,11 @@ const RuleContents: React.FC<any> = ({ recomputeRuleSize }) => {
     state: { defaultValues, displayContext, id = '-1', index }
   } = useRuleContext();
   const { dispatch: parserDispatch } = useParserContext();
-  const { addRule, updateRule } = useParserRule(id);
+  const {
+    addRule,
+    updateRule,
+    rule: { definitions = [] }
+  } = useParserRule(id);
   const { rules = [] } = useParserRules();
 
   const methods = useForm<ParserRuleWithRelations>({
@@ -40,27 +44,23 @@ const RuleContents: React.FC<any> = ({ recomputeRuleSize }) => {
 
   const { ref, height: heightWithoutMargins = DEFAULT_ROW_SIZE } =
     useResizeObserver<HTMLFormElement>();
-  const resizeRow = useCallback(
-    (force: boolean = false) => {
-      let height = heightWithoutMargins;
-      height += RULE_BORDER_SIZE * 2;
-      height +=
-        displayContext === 'edit' ? RULE_BOTTOM_MARGIN * 2 : RULE_BOTTOM_MARGIN;
-      if (recomputeRuleSize !== undefined && height >= MIN_ROW_SIZE) {
-        recomputeRuleSize(index, height, force);
-      }
-    },
-    [index, heightWithoutMargins, displayContext]
-  );
+  const resizeRow = useCallback(() => {
+    let height = heightWithoutMargins;
+    height += RULE_BORDER_SIZE * 2;
+    height +=
+      displayContext === 'edit' ? RULE_BOTTOM_MARGIN * 2 : RULE_BOTTOM_MARGIN;
+    if (recomputeRuleSize !== undefined && height >= MIN_ROW_SIZE) {
+      recomputeRuleSize(index, height);
+    }
+  }, [index, heightWithoutMargins, displayContext]);
 
   useEffect(() => {
-    resizeRow(true);
+    resizeRow();
   }, [heightWithoutMargins, index, displayContext]);
 
   function handleReset(input: any = {}) {
-    console.log('handleReset');
     reset(input);
-    resizeRow(true);
+    resizeRow();
   }
 
   const props = {
@@ -72,24 +72,23 @@ const RuleContents: React.FC<any> = ({ recomputeRuleSize }) => {
     addRule,
     parserDispatch
   };
-  // console.log({ index, order: rules.length });
 
   // TODO i feel like this should live in its own warnings hook
-  // const definedRuleNames = rules.map(
-  //   (rule: ParserRuleWithRelations) => rule.name
-  // );
-  // const ruleDefinitionNames = getAllParserRuleDefinitionNames(definitions);
-  // useEffect(() => {
-  //   let triggedWarning = false;
-  //   for (const rule of ruleDefinitionNames) {
-  //     const containsWarnings = hasRuleWarning(`${rule}`, definedRuleNames);
-  //     if (containsWarnings) {
-  //       triggedWarning = true;
-  //       break;
-  //     }
-  //   }
-  //   dispatch({ type: 'SET_HAS_WARNING', payload: triggedWarning });
-  // }, [ruleDefinitionNames, definedRuleNames, dispatch]);
+  const definedRuleNames = rules.map(
+    (rule: ParserRuleWithRelations) => rule.name
+  );
+  const ruleDefinitionNames = getAllParserRuleDefinitionNames(definitions);
+  useEffect(() => {
+    let triggedWarning = false;
+    for (const rule of ruleDefinitionNames) {
+      const containsWarnings = hasRuleWarning(`${rule}`, definedRuleNames);
+      if (containsWarnings) {
+        triggedWarning = true;
+        break;
+      }
+    }
+    dispatch({ type: 'SET_HAS_WARNING', payload: triggedWarning });
+  }, [ruleDefinitionNames, definedRuleNames, dispatch]);
 
   return (
     <Wrapper>

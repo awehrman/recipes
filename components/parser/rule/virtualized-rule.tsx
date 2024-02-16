@@ -1,4 +1,5 @@
 import React, { CSSProperties } from 'react';
+import { Draggable } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 
 import { RuleProvider } from 'contexts/rule-context';
@@ -35,17 +36,27 @@ const VirtualizedRule: React.FC<VirtualizedRuleProps> = ({
   return (
     // TODO i wonder if i can just style the RuleProvider so this is less nested
     <Wrapper style={style}>
-      <RuleProvider
-        rule={rule}
-        id={id}
-        index={index}
-        initialContext={displayContext}
-        isCollapsed={isCollapsed}
-      >
-        <FocusedIndexProvider>
-          <VirtualizedRow recomputeRuleSize={recomputeRuleSize} />
-        </FocusedIndexProvider>
-      </RuleProvider>
+      <Draggable key={rule.id} draggableId={rule.id} index={index}>
+        {(provided) => (
+          <DragRef
+            ref={provided.innerRef}
+            {...provided.dragHandleProps}
+            {...provided.draggableProps}
+          >
+            <RuleProvider
+              rule={rule}
+              id={id}
+              index={index}
+              initialContext={displayContext}
+              isCollapsed={isCollapsed}
+            >
+              <FocusedIndexProvider>
+                <VirtualizedRow recomputeRuleSize={recomputeRuleSize} />
+              </FocusedIndexProvider>
+            </RuleProvider>
+          </DragRef>
+        )}
+      </Draggable>
     </Wrapper>
   );
 };
@@ -53,6 +64,11 @@ const VirtualizedRule: React.FC<VirtualizedRuleProps> = ({
 export default VirtualizedRule;
 
 VirtualizedRule.whyDidYouRender = true;
+
+const DragRef = styled.div`
+  background: orange;
+  width: 100%;
+`;
 
 const Wrapper = styled.div`
   display: flex;

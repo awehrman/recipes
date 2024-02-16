@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-// import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import React from 'react';
+import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { VariableSizeList as List } from 'react-window';
 import styled from 'styled-components';
@@ -27,7 +27,7 @@ const VirtualizedRules: React.FC = () => {
 
   // TODO i hate all this naming
   const resize = React.useCallback(
-    (index: number, size: number, force: boolean = false) => {
+    (index: number, size: number) => {
       const allMounted = sizeMap?.current && listRef?.current;
 
       if (allMounted) {
@@ -62,14 +62,14 @@ const VirtualizedRules: React.FC = () => {
   });
 
   // TODO i want to throw all of this drag crap into its own hook
-  // function handleOnDragEnd(item: any) {
-  //   if (!item.destination) return;
-  //   const updatedList = [...rules];
-  //   // re-order list
-  //   const [reorderedItem] = updatedList.splice(item.source.index, 1);
-  //   updatedList.splice(item.destination.index, 0, reorderedItem);
-  //   updateRulesOrder(updatedList);
-  // }
+  function handleOnDragEnd(item: any) {
+    if (!item.destination) return;
+    const updatedList = [...rules];
+    // re-order list
+    const [reorderedItem] = updatedList.splice(item.source.index, 1);
+    updatedList.splice(item.destination.index, 0, reorderedItem);
+    updateRulesOrder(updatedList);
+  }
 
   function renderMessages() {
     if (loading && !rules.length) {
@@ -87,29 +87,32 @@ const VirtualizedRules: React.FC = () => {
 
   return (
     <RulesContent>
-      {/* <DragDropContext onDragEnd={handleOnDragEnd}>
-          <Droppable droppableId="list-container">
-            {(provided) => (
-              <DragRef {...provided.droppableProps} ref={provided.innerRef}> */}
       {renderMessages()}
-      <Wrapper>
-        <AutoSizer>
-          {({ height, width }) => (
-            <StyledList {...getListProps({ height, width, ref: listRef })}>
-              {({ index, style }) => (
-                <VirtualizedRule
-                  {...getVirtualizedRuleProps({ index, style })}
-                />
-              )}
-            </StyledList>
+      <DragDropContext onDragEnd={handleOnDragEnd}>
+        <Droppable droppableId="list-container">
+          {(provided) => (
+            <DragRef {...provided.droppableProps} ref={provided.innerRef}>
+              <Wrapper>
+                <AutoSizer>
+                  {({ height, width }) => (
+                    <StyledList
+                      {...getListProps({ height, width, ref: listRef })}
+                    >
+                      {({ index, style }) => (
+                        // TODO this needs to be wrapped in draggable
+                        <VirtualizedRule
+                          {...getVirtualizedRuleProps({ index, style })}
+                        />
+                      )}
+                    </StyledList>
+                  )}
+                </AutoSizer>
+              </Wrapper>
+              {provided.placeholder}
+            </DragRef>
           )}
-        </AutoSizer>
-      </Wrapper>
-      {/* {provided.placeholder}
-              </DragRef>
-            )}
-          </Droppable>
-        </DragDropContext> */}
+        </Droppable>
+      </DragDropContext>
     </RulesContent>
   );
 };
