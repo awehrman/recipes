@@ -1,10 +1,18 @@
-import { IngredientLineWithParsed } from '@prisma/client';
-import { extendType, FieldResolver, idArg, objectType, stringArg } from 'nexus';
-
-import { importLocalNotes } from '../resolvers/note';
 import {
-  getNotesMeta,
+  scalarType,
+  extendType,
+  FieldResolver,
+  idArg,
+  objectType,
+  stringArg,
+  asNexusMethod
+} from 'nexus';
+import { JSONResolver } from 'graphql-scalars';
+
+import { getPendingCategoriesMeta, importLocalNotes } from '../resolvers/note';
+import {
   getNotesContent,
+  getNotesMeta,
   saveRecipes
 } from 'graphql/resolvers/helpers/note/evernote-importer';
 import { resetDatabase } from '../resolvers/admin-tools';
@@ -138,6 +146,14 @@ export const NotesQuery = extendType({
   }
 });
 
+// export const GetLocalImportMetaQuery = extendType({
+//   type: 'Query',
+//   definition(t) {
+//     t.field('localImportMeta', {
+//       type: LocalImportMeta
+//     });
+//   }
+// });
 // Mutations
 export const GetNotesMeta = extendType({
   type: 'Mutation',
@@ -187,6 +203,33 @@ export const ImportLocalNotes = extendType({
       type: 'EvernoteNotesResponse',
       args: {},
       resolve: importLocalNotes as FieldResolver<'Mutation', 'importLocal'>
+    });
+  }
+});
+// const LocalCategory = objectType({
+//   name: 'LocalCategory',
+//   definition(t) {
+//     t.string('key');
+//     t.int('value');
+//   }
+// });
+
+export const JSON = asNexusMethod(JSONResolver, 'json');
+
+export const CategoriesResponse = objectType({
+  name: 'CategoriesResponse',
+  definition(t) {
+    t.nullable.string('error');
+    t.field('categories', { type: 'JSON' });
+  }
+});
+
+export const GetPendingCategoriesQuery = extendType({
+  type: 'Query',
+  definition(t) {
+    t.field('getPendingCategories', {
+      type: 'CategoriesResponse',
+      resolve: getPendingCategoriesMeta
     });
   }
 });

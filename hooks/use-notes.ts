@@ -1,7 +1,10 @@
 import { useQuery, useMutation, FetchResult } from '@apollo/client';
 import { NoteWithRelations, StatusProps } from '@prisma/client';
 
-import { GET_ALL_NOTES_QUERY } from '../graphql/queries/note';
+import {
+  GET_ALL_NOTES_QUERY,
+  GET_PENDING_CATEGORIES_QUERY
+} from '../graphql/queries/note';
 import {
   GET_NOTES_METADATA_MUTATION,
   GET_NOTES_CONTENT_MUTATION,
@@ -23,6 +26,8 @@ function useNotes(
   const { data = {}, loading, refetch } = useQuery(GET_ALL_NOTES_QUERY, {});
 
   const notes: NoteWithRelations[] = data?.notes ?? [];
+
+  const categories = useQuery(GET_PENDING_CATEGORIES_QUERY, {});
 
   const [getNotesContent] = useMutation(GET_NOTES_CONTENT_MUTATION, {
     update: (cache, { data: { getNotesContent } }) => {
@@ -136,12 +141,21 @@ function useNotes(
     importLocal();
   }
 
+  function getCategoriesMeta() {
+    if (!categories.loading) {
+      const { getPendingCategories } = categories.data;
+      return getPendingCategories.categories;
+    }
+    return {};
+  }
+
   return {
+    meta: getCategoriesMeta(),
+    importLocal,
+    importLocalNotes,
     loading,
     notes,
     refetchNotes: refetch,
-    importLocalNotes,
-    importLocal,
     saveRecipes
   };
 }

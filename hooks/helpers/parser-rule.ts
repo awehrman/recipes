@@ -258,7 +258,6 @@ export const parseTests = (
 };
 
 export const handleUpdateRulesOrder = (cache: ApolloCache<any>, res: any) => {
-  console.log('handleUpdateRulesOrder');
   const rules: ParserRules | null = cache.readQuery({
     query: GET_ALL_PARSER_RULES_QUERY
   });

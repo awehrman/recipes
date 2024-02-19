@@ -46,6 +46,7 @@ export const startLocalNotesImport = async (
   return notes;
 };
 
+// TODO this should keep track of how many images it comes across
 export const readLocalCategoryFiles = async () => {
   let importedNotes = [];
   const directoryPath = path.resolve(
@@ -72,6 +73,78 @@ export const readLocalCategoryFiles = async () => {
   return importedNotes;
 };
 
+async function getCategoryFileCount(directoryPath: string) {
+  const category: Record<string, number> = {};
+  try {
+    const files = await fs.readdir(directoryPath);
+    for (const file of files) {
+      let fileCount = 0;
+      const filePath = `${directoryPath}/${file}`;
+      if (!filePath.includes('.DS_Store')) {
+        const stats = await fs.stat(filePath);
+        if (stats.isDirectory()) {
+          const nestedFiles = await fs.readdir(filePath);
+          fileCount = nestedFiles.filter((item) =>
+            fs.statSync(`${filePath}/${item}`).isFile()
+          ).length;
+          const fileName = file.replace(' files', '');
+          category[fileName] = fileCount;
+        }
+      }
+    }
+  } catch (err: any) {
+    console.error(`Error reading directory: ${err.message}`);
+  }
+  return category;
+}
+
+export const readLocalCategoryFilesMeta = async () => {
+  const directoryPath = path.resolve(
+    './public',
+    process.env.APP_ENV === 'test' ? 'test-data' : 'data'
+  );
+
+  try {
+    const categoryFiles = await fs.readdir(directoryPath);
+    let response: any = {};
+    await Promise.all(
+      categoryFiles.map(async (file) => {
+        const filePath = path.join(directoryPath, file);
+        if (!filePath.includes('.DS_Store')) {
+          const category = await getCategoryFileCount(filePath);
+          response = {
+            ...response,
+            ...category
+          };
+        }
+      })
+    );
+    console.log({ response });
+    return response;
+  } catch (error) {
+    console.log({ error });
+    throw new Error('An error occurred while reading category files.');
+  }
+};
+
+const readNotesContent = async (filePath: string, file: string) => {
+  const content = await fs.readFile(filePath, 'utf-8');
+  const $ = load(content);
+  $('style').remove();
+  $('icons').remove();
+
+  // re-write a cleaner file
+  const modifiedContent = $.html();
+  await fs.writeFile(filePath, modifiedContent, 'utf-8');
+
+  const metaTags = $('meta[itemprop="title"]');
+  const notes: any[] = [];
+  metaTags.each((_index, element) => {
+    const note = parseNoteFromCategoryFile($, element, file);
+    notes.push(note);
+  });
+};
+
 export const readLocalCategoryFile = async (
   file: string,
   directoryPath: string
@@ -82,27 +155,16 @@ export const readLocalCategoryFile = async (
   }
   const isFile = (await fs.stat(filePath)).isFile();
   if (isFile) {
-    const content = await fs.readFile(filePath, 'utf-8');
-    const $ = load(content);
-    $('style').remove();
-    $('icons').remove();
-
-    // re-write a cleaner file
-    const modifiedContent = $.html();
-    await fs.writeFile(filePath, modifiedContent, 'utf-8');
-
-    const metaTags = $('meta[itemprop="title"]');
-    const notes: any[] = [];
-    metaTags.each((_index, element) => {
-      const note = parseNoteFromCategoryFile($, element, file);
-      notes.push(note);
-    });
+    const notes = readNotesContent(filePath, file);
     return notes;
   } else {
     // TODO this is our image directory
+    console.log('what am i actually?', { file, directoryPath });
+    // should we increment a file count?
     return null;
   }
 };
+
 // const asyncPipeline = promisify(pipeline);
 // export const readLocalCategoryFile = async (
 //   file: string,
@@ -225,7 +287,7 @@ export const getLocalNoteContent = (
   const tags: string[] = [];
 
   noteContent.push('<en-note>');
-  siblings.each((i, sibling) => {
+  siblings.each((i: number, sibling: Element) => {
     if (foundEnd) {
       return false;
     }
@@ -258,7 +320,12 @@ export const getLocalNoteContent = (
 
     const isRecipeLine = foundEnd ? false : isValidContentLine;
     if (isRecipeLine) {
-      noteContent.push(`<div>${$(sibling).html()?.trim()}</div>`);
+      // Replace &nbsp; with regular whitespace and apply trim()
+      const lineContent = $(sibling)
+        .html()
+        ?.replace(/&nbsp;/g, ' ')
+        .trim();
+      noteContent.push(`<div>${lineContent}</div>`);
     }
   });
 
@@ -379,7 +446,7 @@ export const saveLocalNotes = async (
       'An error occurred while attempting to create a basic note structure.'
     );
   }
-
+  console.log('finished create notes transactions');
   const noteIds: string[] = basicNotes.map(
     (note: NoteWithRelations) => note.id
   );
@@ -428,9 +495,10 @@ export const saveLocalNotes = async (
     );
   }
 
+  console.log('finished creating segments');
   // TODO we need a better lon term approach
   const NOTES_OFFSET = 20;
-  const filteredNoteIds = noteIds.slice(0, 20);
+  const filteredNoteIds = noteIds.slice(0, NOTES_OFFSET);
 
   // fetch updated note
   try {

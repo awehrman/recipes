@@ -32,7 +32,7 @@ const Notes: React.FC<NotesProps> = ({
       const domain =
         note?.source?.length > 0 && note.source.includes('www.')
           ? new URL(note.source)
-          : { hostname: '' };
+          : { hostname: note?.source ?? '' };
       const source = domain.hostname.replace('www.', '');
       const margin = !!image || ingredients?.length ? '0 0 20px' : '0';
 

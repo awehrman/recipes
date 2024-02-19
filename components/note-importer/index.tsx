@@ -17,6 +17,7 @@ const NoteImporter: React.FC<NoteImporterProps> = () => {
   const [status, setStatus] = useState(defaultLoadingStatus);
   const {
     // importNotes,
+    meta,
     importLocalNotes,
     loading,
     notes = [],
@@ -27,6 +28,17 @@ const NoteImporter: React.FC<NoteImporterProps> = () => {
     importLocalNotes();
   }
 
+  function renderPendingLocalNotesMeta() {
+    return (
+      <Pending>
+        {Object.entries(meta).map(([key, value]) => (
+          <PendingItem key={key}>
+            {`${key}: ${value} note${(value as number) > 1 ? 's' : ''}`}
+          </PendingItem>
+        ))}
+      </Pending>
+    );
+  }
   return (
     <Wrapper>
       <AuthenticateEvernote />
@@ -53,11 +65,17 @@ const NoteImporter: React.FC<NoteImporterProps> = () => {
       {isAuthenticated || notes.length > 0 ? (
         <Notes notes={notes} status={status} />
       ) : null}
+
+      {renderPendingLocalNotesMeta()}
     </Wrapper>
   );
 };
 
 export default NoteImporter;
+
+const Pending = styled.div``;
+
+const PendingItem = styled.div``;
 
 const ImportLocal = styled(Button)`
   border: 0;

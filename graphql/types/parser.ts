@@ -94,7 +94,6 @@ const getRules = async (
     }
   });
   const sortedRules = rules.sort((a, b) => a.order - b.order);
-  console.log({ sortedRules });
   return sortedRules;
 };
 
@@ -287,7 +286,6 @@ const updateParserRule = async (
   } catch (e) {
     console.log({ e });
   }
-  console.log(JSON.stringify({ response }, null, 2));
   return response;
 };
 

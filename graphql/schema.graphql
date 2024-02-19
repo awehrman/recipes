@@ -22,6 +22,11 @@ type AlternateName {
   name: String!
 }
 
+type CategoriesResponse {
+  categories: JSON
+  error: String
+}
+
 type Category {
   evernoteGUID: String
   id: String!
@@ -105,6 +110,11 @@ type InstructionLine {
   reference: String!
   updatedAt: String
 }
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
 
 type Mutation {
   addParserRule(input: ParserRuleInput): ParserRule
@@ -233,6 +243,7 @@ type Query {
   container(id: String): Container
   containers(group: String, view: String): [Container]
   evernoteSession(userId: String): EvernoteSession
+  getPendingCategories: CategoriesResponse
   ingredient(id: ID): Ingredient
   ingredients: [Ingredient]
   note(id: ID): Note

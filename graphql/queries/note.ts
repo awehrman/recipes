@@ -37,6 +37,15 @@ export const GET_ALL_NOTES_QUERY = gql`
   }
 `;
 
+export const GET_PENDING_CATEGORIES_QUERY = gql`
+  query GET_PENDING_CATEGORIES_QUERY {
+    getPendingCategories {
+      error
+      categories
+    }
+  }
+`;
+
 export const GET_DASHBOARD_PARSING_QUERY = gql`
   query GET_DASHBOARD_PARSING_QUERY {
     dashboardParsing {
