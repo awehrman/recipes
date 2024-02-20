@@ -134,32 +134,36 @@ const VirtualizedRules: React.FC = () => {
 };
 
 // not sure we need this?
-// function getStyle({ provided, style, isDragging }: any) {
-//   // If you don't want any spacing between your items
-//   // then you could just return this.
-//   // I do a little bit of magic to have some nice visual space
-//   // between the row items
-//   const combined = {
-//     ...style,
-//     ...provided.draggableProps.style
-//   };
+function getStyle({ index, provided, style, isDragging }: any) {
+  // If you don't want any spacing between your items
+  // then you could just return this.
+  // I do a little bit of magic to have some nice visual space
+  // between the row items
+  const combined = {
+    ...style,
+    ...provided.draggableProps.style
+  };
 
-//   const marginBottom = RULE_BOTTOM_MARGIN;
-//   const withSpacing = {
-//     ...combined,
-//     height: isDragging ? combined.height : combined.height + RULE_BOTTOM_MARGIN,
-//     marginBottom
-//   };
-//   return withSpacing;
-// }
+  const marginBottom = RULE_BOTTOM_MARGIN;
+  const withSpacing = {
+    ...combined,
+    height: isDragging ? combined.height : combined.height + RULE_BOTTOM_MARGIN,
+    marginBottom,
+    // height: 0,
+    background: 'purple !important'
+  };
+  console.log(index, combined.height, withSpacing);
+
+  return withSpacing;
+}
 
 function Item({ provided, item, style, isDragging, index, resize }: any) {
   return (
     <VirtualizedRule
       provided={provided}
       ref={provided.innerRef}
-      style={style}
-      // style={getStyle({ provided, style, isDragging })}
+      // style={style}
+      style={getStyle({ index, provided, style, isDragging })}
       // className={`item ${isDragging ? 'is-dragging' : ''}`}
       id={item.id}
       displayContext="display"
@@ -173,11 +177,16 @@ function Item({ provided, item, style, isDragging, index, resize }: any) {
 const Row = React.memo(function Row(props: any) {
   const { data: rules, index, style, resize } = props;
   const item = rules[index];
-
   return (
     <Draggable draggableId={item.id} index={index} key={item.id}>
       {(provided) => (
-        <Item provided={provided} item={item} style={style} resize={resize} />
+        <Item
+          index={index}
+          item={item}
+          provided={provided}
+          resize={resize}
+          style={style}
+        />
       )}
     </Draggable>
   );

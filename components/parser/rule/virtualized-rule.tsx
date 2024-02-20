@@ -9,6 +9,7 @@ import {
 } from 'contexts/parser-context';
 
 import VirtualizedRow from './virtualized-row';
+import { RULE_BOTTOM_MARGIN } from './constants';
 
 // TODO move & fix types
 type DisplayContext = 'add' | 'edit' | 'display';
@@ -37,22 +38,24 @@ const VirtualizedRule: React.FC<VirtualizedRuleProps> = forwardRef<
     return (
       // TODO i wonder if i can just style the RuleProvider so this is less nested
       <Wrapper
-        style={style}
         ref={ref}
         {...provided.draggableProps}
         {...provided.dragHandleProps}
+        style={style}
       >
-        <RuleProvider
-          rule={rule}
-          id={id}
-          index={index}
-          initialContext={displayContext}
-          isCollapsed={isCollapsed}
-        >
-          <FocusedIndexProvider>
-            <VirtualizedRow recomputeRuleSize={recomputeRuleSize} />
-          </FocusedIndexProvider>
-        </RuleProvider>
+        <InnerWrapper>
+          <RuleProvider
+            rule={rule}
+            id={id}
+            index={index}
+            initialContext={displayContext}
+            isCollapsed={isCollapsed}
+          >
+            <FocusedIndexProvider>
+              <VirtualizedRow recomputeRuleSize={recomputeRuleSize} />
+            </FocusedIndexProvider>
+          </RuleProvider>
+        </InnerWrapper>
       </Wrapper>
     );
   }
@@ -62,9 +65,16 @@ export default VirtualizedRule;
 
 VirtualizedRule.whyDidYouRender = true;
 
+const InnerWrapper = styled.div`
+  display: flex;
+  height: 100%;
+  background: mediumslateblue;
+`;
+
 const Wrapper = styled.div`
   display: flex;
   background: mediumseagreen;
+  // this seems to be the height * number of rows...
   height: 100%;
 
   &:nth-child(odd) {
