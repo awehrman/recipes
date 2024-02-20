@@ -75,7 +75,10 @@ export default NoteImporter;
 
 const Pending = styled.div``;
 
-const PendingItem = styled.div``;
+const PendingItem = styled.div`
+  margin-bottom: 10px;
+  font-size: 14px;
+`;
 
 const ImportLocal = styled(Button)`
   border: 0;
