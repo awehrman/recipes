@@ -4,24 +4,28 @@ import styled from 'styled-components';
 import { Button } from 'components/common';
 import { useRuleContext } from 'contexts/rule-context';
 import useParserRule from 'hooks/use-parser-rule';
+import useParserRules from 'hooks/use-parser-rules';
 import TrashIcon from 'public/icons/trash-can.svg';
 import WarningIcon from 'public/icons/exclamation-triangle.svg';
 
 import ExpandButton from './expand-button';
 import Name from './name';
 import Label from './label';
+import { ParserRule } from '@prisma/client';
 
 const RuleHeader: React.FC<any> = ({ setFocus }: any) => {
+  const { rules = [], updateRulesOrder } = useParserRules();
   const [isInit, setIsInit] = useState<boolean>(false);
   const {
-    dispatch,
     state: { id, displayContext, hasWarning, index }
   } = useRuleContext();
   const { deleteRule } = useParserRule(id);
 
   function handleRemoveRuleClick() {
-    deleteRule(id);
     // TODO launch modal to confirm
+    deleteRule(id);
+    const updatedList = rules.filter((rule: ParserRule) => rule.id !== id);
+    updateRulesOrder(updatedList);
   }
 
   useEffect(() => {

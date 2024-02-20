@@ -18,7 +18,7 @@ function useParserRules() {
     UPDATE_PARSER_RULES_ORDER_MUTATION
   );
 
-  function updateRulesOrder(rules: any[]) {
+  function updateRulesOrder(rules: any[] = parserRules) {
     const input = {
       parserRules: rules.map(({ id }, index) => ({
         id,
