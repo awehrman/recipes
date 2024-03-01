@@ -1,6 +1,13 @@
 import { Extension } from '@codemirror/state';
-import { ParserRuleWithRelations, ParserRuleDefinition } from '@prisma/client';
+import {
+  ParserRule,
+  ParserRuleWithRelations,
+  ParserRuleDefinition
+} from '@prisma/client';
 import { Parser, DiagnosticNote } from 'peggy';
+import React, { CSSProperties } from 'react';
+import { DraggableProvided, DraggingStyle } from 'react-beautiful-dnd';
+import { ListChildComponentProps } from 'react-window';
 
 // TODO should all of these just exist in Prisma @types? or some other @type global?
 // i'm not a fan of these living in the components section when some of these are used
@@ -141,4 +148,29 @@ export type ParserRuleWithRelationsWithTypeName = ParserRuleWithRelations & {
 
 export type ListKeywordFocusProps = {
   [key: number]: boolean;
+};
+
+export interface ListItemRendererProps extends ListChildComponentProps {}
+export type DraggableRuleProps = ListItemRendererProps & {
+  resize: (index: number, size: number) => void;
+  isCollapsed: boolean;
+};
+
+export type GetStyleProps = {
+  index?: number; // only used for debugging
+  provided: DraggableProvided;
+  style: DraggingStyle | CSSProperties;
+  isDragging: boolean;
+};
+
+export type DisplayContext = 'add' | 'edit' | 'display';
+export type VirtualizedRuleProps = {
+  id: string;
+  displayContext: DisplayContext;
+  index: number;
+  recomputeRuleSize: (index: number, size: number, force?: boolean) => void;
+  rule: ParserRule; // TODO
+  style: CSSProperties;
+  provided: DraggableProvided;
+  ref: React.ForwardedRef<HTMLDivElement>;
 };

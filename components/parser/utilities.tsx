@@ -74,7 +74,7 @@ const generateEmbeddedList = (ruleString: string): React.ReactNode => {
 
 // TODO return type
 const generateUnlabeledRule = (
-  ruleString: string = '',
+  ruleString = '',
   ruleNames: string[] = []
 ): React.ReactNode[] => {
   const components: React.ReactNode[] = [];
@@ -108,7 +108,7 @@ const generateUnlabeledRule = (
 };
 
 const generateLabeledRule = (
-  ruleString: string = '',
+  ruleString = '',
   ruleNames: string[] = []
 ): React.ReactNode[] => {
   const components: React.ReactNode[] = [];
@@ -122,7 +122,7 @@ const generateLabeledRule = (
 };
 
 export const generateParsedRule = (
-  ruleString: string = '',
+  ruleString = '',
   ruleNames: string[] = []
 ): React.ReactNode[] => {
   const components: React.ReactNode[] = [];
@@ -136,7 +136,8 @@ export const generateParsedRule = (
   }
 
   const rules = ruleString.split(' ');
-  rules.forEach((ruleInstance) => {
+
+  for (const ruleInstance of rules) {
     const isUnlabeledRule = !ruleInstance.includes(':');
     if (isUnlabeledRule) {
       const unlabeledRule = generateUnlabeledRule(ruleInstance, ruleNames);
@@ -145,7 +146,7 @@ export const generateParsedRule = (
       const labeledRule = generateLabeledRule(ruleInstance, ruleNames);
       components.push([...labeledRule]);
     }
-  });
+  }
 
   return components.flatMap((c) => c);
 };

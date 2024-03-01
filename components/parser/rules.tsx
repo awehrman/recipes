@@ -3,26 +3,9 @@ import styled from 'styled-components';
 
 import { Button } from 'components/common';
 import { useParserContext } from 'contexts/parser-context';
-import usePEGParser from 'hooks/use-peg-parser';
-import useParserRules from 'hooks/use-parser-rules';
 
+import Grammar from './grammar';
 import ParserBuilder from './parser-builder';
-
-const Grammar: React.FC = () => {
-  const { rules = [] } = useParserRules();
-  const { grammar } = usePEGParser(rules);
-
-  return (
-    <Wrapper>
-      <pre>{grammar}</pre>
-    </Wrapper>
-  );
-};
-
-const Wrapper = styled.div`
-  font-size: 12px;
-  tab-size: 2;
-`;
 
 const Rules: React.FC = () => {
   const {

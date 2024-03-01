@@ -65,20 +65,21 @@ const Errors: React.FC = () => {
 
   function renderErrors() {
     return errors.map((error, index) => (
-      <Error key={`error-${index}-${error?.message}-Error`}>
+      <ErrorMessage key={`error-${index}-${error?.message}-Error`}>
         {error?.message ?? ''}
-      </Error>
+      </ErrorMessage>
     ));
   }
 
   return <ErrorWrapper>{renderErrors()}</ErrorWrapper>;
 };
 
-const Error = styled.div`
+const ErrorMessage = styled.div`
   color: tomato;
   font-size: 12px;
   margin-bottom: 4px;
 `;
+
 const ErrorWrapper = styled.div`
   margin-top: 10px;
 `;

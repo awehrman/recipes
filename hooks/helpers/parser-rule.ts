@@ -16,6 +16,7 @@ import {
   ParserUtility
 } from 'components/parser/types';
 import { defaultTests } from 'constants/parser-tests';
+import { ParserRule } from '@prisma/client';
 
 export const removeTypename = (data: ParserRuleWithRelationsWithTypeName) => {
   const input = {
@@ -53,7 +54,7 @@ export const handleAddRuleUpdate = (
       __typename: 'ParserRule'
     });
   } else {
-    parserRules = parserRules.map((rule: any) => {
+    parserRules = parserRules.map((rule: ParserRule) => {
       if (rule.id === '-1') {
         return {
           ...rule,

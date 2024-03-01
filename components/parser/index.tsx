@@ -5,9 +5,7 @@ import Rules from './rules';
 import Tests from './tests';
 import { ParserProvider } from 'contexts/parser-context';
 
-type ParserProps = {};
-
-const Parser: React.FC<ParserProps> = () => (
+const Parser: React.FC = () => (
   <Wrapper>
     <ParserProvider>
       <Rules />

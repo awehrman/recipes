@@ -1,27 +1,14 @@
-import React, { CSSProperties, forwardRef } from 'react';
+import React, { forwardRef } from 'react';
 import styled from 'styled-components';
 
-import { RuleProvider } from 'contexts/rule-context';
 import {
   useParserContext,
   FocusedIndexProvider
 } from 'contexts/parser-context';
+import { RuleProvider } from 'contexts/rule-context';
 
 import VirtualizedRow from './virtualized-row';
-import { RULE_BOTTOM_MARGIN } from './constants';
-
-// TODO move & fix types
-type DisplayContext = 'add' | 'edit' | 'display';
-type VirtualizedRuleProps = {
-  id: string;
-  displayContext: DisplayContext;
-  index: number;
-  recomputeRuleSize: (index: number, size: number, force?: boolean) => void;
-  rule: any; // TODO
-  style: CSSProperties;
-  provided: any;
-  ref: any;
-};
+import { VirtualizedRuleProps } from '../types';
 
 const VirtualizedRule: React.FC<VirtualizedRuleProps> = forwardRef<
   HTMLDivElement,

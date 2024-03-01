@@ -1,10 +1,15 @@
+import React, { CSSProperties } from 'react';
 import { ParserRuleDefinition } from '@prisma/client';
 import _ from 'lodash';
-
+import { RULE_BOTTOM_MARGIN } from './rule/constants';
 import { PEG_CHARACTERS } from 'constants/parser';
-import { ParserRuleDefinitionPreSave, WatchParserForm } from './types';
+import {
+  GetStyleProps,
+  ParserRuleDefinitionPreSave,
+  WatchParserForm
+} from './types';
 
-export const getDefaultDefinitions = (order: number = 0) => ({
+export const getDefaultDefinitions = (order = 0) => ({
   example: '',
   rule: '',
   formatter: '',
@@ -101,10 +106,7 @@ function excludeCharacters(inputString: string) {
   return inputString.replace(exclusionList, '');
 }
 
-export const hasRuleWarning = (
-  ruleString: string = '',
-  ruleNames: string[] = []
-) => {
+export const hasRuleWarning = (ruleString = '', ruleNames: string[] = []) => {
   let hasWarning = false;
   const isList = isEmbeddedList(ruleString);
   if (isList) {
@@ -131,7 +133,7 @@ export const hasRuleWarning = (
 
 export const getOptimisticParserRuleDefinition = (
   fields: Record<'id', string>[],
-  id: string = '-1'
+  id = '-1'
 ): ParserRuleDefinitionPreSave => ({
   id: `OPTIMISTIC-${(fields ?? []).length}`,
   parserRuleId: id,
@@ -181,4 +183,25 @@ const formatKeyword = (value: string): string => {
   const withSign = /^\$/.test(value ?? '');
   const autoFormatted = withQuote || withSign ? value : `\'${value}\'i`;
   return autoFormatted;
+};
+
+export const getDraggableStyle = ({
+  provided,
+  style,
+  isDragging
+}: GetStyleProps): CSSProperties => {
+  const combined = {
+    ...style,
+    ...provided.draggableProps.style
+  };
+
+  const marginBottom = RULE_BOTTOM_MARGIN;
+  // TODO hmm margin and background aren't on DraggingStyle...
+  const withSpacing: CSSProperties = {
+    ...combined,
+    marginBottom,
+    background: isDragging ? 'rgba(248, 248, 248, 1)' : 'white'
+  };
+
+  return withSpacing;
 };

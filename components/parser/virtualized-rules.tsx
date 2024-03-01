@@ -1,23 +1,30 @@
-import React, { CSSProperties, memo, useCallback, useRef } from 'react';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import React, { useCallback, useRef } from 'react';
+import {
+  DragDropContext,
+  Droppable,
+  DropResult,
+  DraggingStyle
+} from 'react-beautiful-dnd';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import { areEqual, VariableSizeList as List } from 'react-window';
+import { VariableSizeList as List } from 'react-window';
 import styled from 'styled-components';
 
+import { useParserContext } from 'contexts/parser-context';
 import useParserRules from 'hooks/use-parser-rules';
-import VirtualizedRule from './rule/virtualized-rule';
-import {
-  DEFAULT_GUTTER_SIZE,
-  DEFAULT_ROW_SIZE,
-  RULE_BOTTOM_MARGIN
-} from './rule/constants';
 
+import { DEFAULT_GUTTER_SIZE, DEFAULT_ROW_SIZE } from './rule/constants';
+import DraggableRule from './rule/draggable-rule';
+import VirtualizedRule from './rule/virtualized-rule';
+import { getDraggableStyle } from './utils';
 // NOTE: getting a warning about react-beautiful-dnd not supporting
 // nested scroll containers
 // i think react window might be putting their fingers in overflow settings
 // and that might cause this error
 
 const VirtualizedRules: React.FC = () => {
+  const {
+    state: { isCollapsed }
+  } = useParserContext();
   const { loading, rules = [], updateRulesOrder } = useParserRules();
   const listRef = useRef<List | null>(null);
   const sizeMap = useRef<{ [index: number]: number }>({});
@@ -38,12 +45,12 @@ const VirtualizedRules: React.FC = () => {
     sizeMap?.current?.[index] || DEFAULT_ROW_SIZE;
 
   // TODO i want to throw all of this drag crap into its own hook
-  function handleOnDragEnd(item: any) {
-    if (!item.destination) return;
+  function handleOnDragEnd(result: DropResult) {
+    if (!result.destination) return;
     const updatedList = [...rules];
     // re-order list
-    const [reorderedItem] = updatedList.splice(item.source.index, 1);
-    updatedList.splice(item.destination.index, 0, reorderedItem);
+    const [reorderedItem] = updatedList.splice(result.source.index, 1);
+    updatedList.splice(result.destination.index, 0, reorderedItem);
     // TODO this also needs to be called on rule removal
     updateRulesOrder(updatedList);
   }
@@ -73,16 +80,18 @@ const VirtualizedRules: React.FC = () => {
                 droppableId="droppable"
                 mode="virtual"
                 renderClone={(provided, snapshot, rubric) => (
-                  <Item
+                  <VirtualizedRule
+                    displayContext="display"
+                    id={rules[rubric.source.index].id}
                     index={rubric.source.index}
-                    isDragging={snapshot.isDragging}
-                    item={rules[rubric.source.index]}
                     provided={provided}
-                    resize={resize}
-                    style={getStyle({
+                    recomputeRuleSize={resize}
+                    ref={provided.innerRef}
+                    rule={rules[rubric.source.index]}
+                    style={getDraggableStyle({
                       index: rubric.source.index,
                       provided,
-                      style: provided.draggableProps.style,
+                      style: provided.draggableProps.style as DraggingStyle,
                       isDragging: snapshot.isDragging
                     })}
                   />
@@ -98,7 +107,13 @@ const VirtualizedRules: React.FC = () => {
                     outerRef={provided.innerRef}
                     width={width + DEFAULT_GUTTER_SIZE}
                   >
-                    {(props) => <Row {...props} resize={resize} />}
+                    {(props) => (
+                      <DraggableRule
+                        {...props}
+                        isCollapsed={isCollapsed}
+                        resize={resize}
+                      />
+                    )}
                   </StyledList>
                 )}
               </Droppable>
@@ -109,66 +124,6 @@ const VirtualizedRules: React.FC = () => {
     </RulesContent>
   );
 };
-
-function getStyle({ index, provided, style, isDragging }: any) {
-  const combined = {
-    ...style,
-    ...provided.draggableProps.style
-  };
-
-  const marginBottom = RULE_BOTTOM_MARGIN;
-  const withSpacing = {
-    ...combined,
-    marginBottom,
-    background: isDragging ? 'rgba(248, 248, 248, 1)' : 'white'
-  };
-
-  return withSpacing;
-}
-
-type ItemProps = {
-  index: number;
-  isDragging: boolean;
-  item: any;
-  provided: any;
-  resize: (index: number, size: number) => void;
-  style: CSSProperties;
-};
-
-function Item({ index, isDragging, item, provided, resize, style }: ItemProps) {
-  return (
-    <VirtualizedRule
-      displayContext="display"
-      id={item.id}
-      index={index}
-      provided={provided}
-      recomputeRuleSize={resize}
-      ref={provided.innerRef}
-      rule={item}
-      style={getStyle({ index, provided, style, isDragging })}
-    />
-  );
-}
-
-const Row = memo(function Row(props: any) {
-  const { data: rules, index, style, resize } = props;
-  const item = rules[index];
-
-  return (
-    <Draggable draggableId={item.id} index={index} key={item.id}>
-      {(provided, snapshot) => (
-        <Item
-          index={index}
-          isDragging={snapshot.isDragging}
-          item={item}
-          provided={provided}
-          resize={resize}
-          style={style}
-        />
-      )}
-    </Draggable>
-  );
-}, areEqual);
 
 export default VirtualizedRules;
 
