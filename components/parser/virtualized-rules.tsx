@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { CSSProperties, memo, useCallback, useRef } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { areEqual, VariableSizeList as List } from 'react-window';
@@ -12,25 +12,27 @@ import {
   RULE_BOTTOM_MARGIN
 } from './rule/constants';
 
+// NOTE: getting a warning about react-beautiful-dnd not supporting
+// nested scroll containers
+// i think react window might be putting their fingers in overflow settings
+// and that might cause this error
+
 const VirtualizedRules: React.FC = () => {
   const { loading, rules = [], updateRulesOrder } = useParserRules();
-  const listRef = React.useRef<List | null>(null);
-  const sizeMap = React.useRef<{ [index: number]: number }>({});
+  const listRef = useRef<List | null>(null);
+  const sizeMap = useRef<{ [index: number]: number }>({});
 
   // TODO i hate all this naming
-  const resize = React.useCallback(
-    (index: number, size: number) => {
-      const allMounted = sizeMap?.current && listRef?.current;
+  const resize = useCallback((index: number, size: number) => {
+    const allMounted = sizeMap?.current && listRef?.current;
 
-      if (allMounted) {
-        sizeMap.current = { ...sizeMap.current, [index]: size };
-        if (listRef.current !== null) {
-          listRef.current.resetAfterIndex(index);
-        }
+    if (allMounted) {
+      sizeMap.current = { ...sizeMap.current, [index]: size };
+      if (listRef.current !== null) {
+        listRef.current.resetAfterIndex(index);
       }
-    },
-    [loading]
-  );
+    }
+  }, []);
 
   const getSize = (index: number) =>
     sizeMap?.current?.[index] || DEFAULT_ROW_SIZE;
@@ -71,12 +73,21 @@ const VirtualizedRules: React.FC = () => {
                 droppableId="droppable"
                 mode="virtual"
                 renderClone={(provided, snapshot, rubric) => (
-                  <Item
-                    provided={provided}
-                    isDragging={snapshot.isDragging}
-                    item={rules[rubric.source.index]}
-                    resize={resize}
-                  />
+                  <ItemWrapper isDragging={snapshot.isDragging}>
+                    <Item
+                      index={rubric.source.index}
+                      isDragging={snapshot.isDragging}
+                      item={rules[rubric.source.index]}
+                      provided={provided}
+                      resize={resize}
+                      style={getStyle({
+                        index: rubric.source.index,
+                        provided,
+                        style: provided.draggableProps.style, // maybe?
+                        isDragging: snapshot.isDragging
+                      })}
+                    />
+                  </ItemWrapper>
                 )}
               >
                 {(provided) => (
@@ -84,10 +95,10 @@ const VirtualizedRules: React.FC = () => {
                     ref={listRef}
                     height={height}
                     itemCount={rules.length}
-                    itemSize={getSize}
-                    width={width + DEFAULT_GUTTER_SIZE}
-                    outerRef={provided.innerRef}
                     itemData={rules}
+                    itemSize={getSize}
+                    outerRef={provided.innerRef}
+                    width={width + DEFAULT_GUTTER_SIZE}
                   >
                     {(props) => <Row {...props} resize={resize} />}
                   </StyledList>
@@ -110,14 +121,27 @@ function getStyle({ provided, style, isDragging }: any) {
   const marginBottom = RULE_BOTTOM_MARGIN;
   const withSpacing = {
     ...combined,
-    height: isDragging ? combined.height : combined.height + RULE_BOTTOM_MARGIN,
+    height: isDragging
+      ? combined.height - RULE_BOTTOM_MARGIN
+      : combined.height + RULE_BOTTOM_MARGIN,
     marginBottom
+    // background: isDragging ? 'white' : combined.background,
+    // boxShadow: isDragging ? BOX_SHADOW : combined.boxShadow,
   };
 
   return withSpacing;
 }
 
-function Item({ provided, item, style, isDragging, index, resize }: any) {
+type ItemProps = {
+  index: number;
+  isDragging: boolean;
+  item: any;
+  provided: any;
+  resize: (index: number, size: number) => void;
+  style: CSSProperties;
+};
+
+function Item({ index, isDragging, item, provided, resize, style }: ItemProps) {
   return (
     <VirtualizedRule
       displayContext="display"
@@ -132,26 +156,66 @@ function Item({ provided, item, style, isDragging, index, resize }: any) {
   );
 }
 
-const Row = React.memo(function Row(props: any) {
+const Row = memo(function Row(props: any) {
   const { data: rules, index, style, resize } = props;
   const item = rules[index];
 
   return (
     <Draggable draggableId={item.id} index={index} key={item.id}>
-      {(provided) => (
-        <Item
-          index={index}
-          item={item}
-          provided={provided}
-          resize={resize}
-          style={style}
-        />
+      {(provided, snapshot) => (
+        <ItemWrapper
+          isDragging={snapshot.isDragging}
+          height={style.height ?? 60}
+        >
+          <Item
+            index={index}
+            isDragging={snapshot.isDragging}
+            item={item}
+            provided={provided}
+            resize={resize}
+            style={style}
+          />
+        </ItemWrapper>
       )}
     </Draggable>
   );
 }, areEqual);
 
 export default VirtualizedRules;
+
+type ItemWrapperProps = {
+  isDragging: boolean;
+  height: number;
+};
+
+const ItemWrapper = styled.div<ItemWrapperProps>`
+  // display: flex;
+  // flex-grow: 1;
+  // background: aqua;
+  // width: 100%;
+  // height: ${({ height }) => `${height ?? 46}px`};
+
+  &::after {
+    // content: '';
+    // position: relative;
+    // height: 50px;
+    // width: 100%;
+    // background: ${({ theme }) => theme.colors.highlight};
+    // // z-index: -1;
+    // opacity: 1;
+    transition: opacity 0.3s ease; /* Add a smooth transition for the opacity */
+  }
+
+  ${({ isDragging }) =>
+    isDragging &&
+    `
+      background: yellow;
+      &::after {
+        opacity: 1;
+        z-index: 900;
+      }
+    `}
+`;
 
 const Wrapper = styled.div`
   display: flex;

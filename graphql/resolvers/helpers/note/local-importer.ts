@@ -36,7 +36,7 @@ export const startLocalNotesImport = async (
   const { parsedNotes, ingHash } = await getLocalParsedNoteContent(
     importedNotes
   );
-
+  console.log(parsedNotes.length);
   console.log('saving ingredients...');
   const updatedHash = await saveNoteIngredients(ingHash, prisma);
 
@@ -143,6 +143,7 @@ const readNotesContent = async (filePath: string, file: string) => {
     const note = parseNoteFromCategoryFile($, element, file);
     notes.push(note);
   });
+  return notes;
 };
 
 export const readLocalCategoryFile = async (

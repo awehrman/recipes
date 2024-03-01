@@ -139,11 +139,10 @@ const RuleFormatter: React.FC<any> = memo(() => {
             displayContext === 'display' ? '' : '/* format rule return */'
           }
         />
-        {displayContext === 'display' ? (
+        {/* {displayContext === 'display' ? (
           <DisplayFormatter>{defaultComputedValue}</DisplayFormatter>
-        ) : (
-          <MemoizedEditor {...editorProps()} />
-        )}
+        ) : ( */}
+        <MemoizedEditor {...editorProps()} />
       </EditFormatter>
     </Wrapper>
   );

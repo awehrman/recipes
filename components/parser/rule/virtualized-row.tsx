@@ -69,16 +69,32 @@ type WrapperProps = {
 const Wrapper = styled.div<WrapperProps>`
   display: flex;
   flex-grow: 1;
-  border: ${RULE_BORDER_SIZE}px solid pink;
+  border: ${RULE_BORDER_SIZE}px solid transparent;
   width: 100%;
   z-index: 500;
   position: absolute;
 
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: ${({ theme }) => theme.colors.highlight};
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease; /* Add a smooth transition for the opacity */
+  }
+
   ${({ isVisible }) =>
     isVisible &&
     `
-    // TODO consider putting a drop shadow over this whole rule
-    border: ${RULE_BORDER_SIZE}px solid aqua;
-    z-index: 600;
+      // TODO consider putting a drop shadow over this whole rule
+      // border: ${RULE_BORDER_SIZE}px solid aqua;
+      &::after {
+        opacity: .05;
+        z-index: 900;
+      }
   `}
 `;

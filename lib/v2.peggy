@@ -66,13 +66,13 @@ amount "Amount" =
   	}
     // 1
     / amt:digits
-    {
-  		return {
-    		rule: `#${ORDER}_amount >> ${amt.rule}`,
-    		type: 'amount',
-    		values: [...amt.values]
-    	};
-  	}
+{
+  return {
+    rule: `#${ORDER}_amount >> ${amt.rule}`,
+    type: 'amount',
+    values: [...amt.values]
+  };
+}
 
 digits "Digits" =
   digits:$([0-9])+

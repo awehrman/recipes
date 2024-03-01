@@ -1,5 +1,4 @@
 import React, { CSSProperties, forwardRef } from 'react';
-import { Draggable } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 
 import { RuleProvider } from 'contexts/rule-context';
@@ -73,11 +72,11 @@ const InnerWrapper = styled.div`
 
 const Wrapper = styled.div`
   display: flex;
-  background: mediumseagreen;
+  // background: mediumseagreen;
   // this seems to be the height * number of rows...
   height: 100%;
 
   &:nth-child(odd) {
-    background: steelblue;
+    // background: steelblue;
   }
 `;
