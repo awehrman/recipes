@@ -67,16 +67,15 @@ VirtualizedRule.whyDidYouRender = true;
 const InnerWrapper = styled.div`
   display: flex;
   height: 100%;
-  background: mediumslateblue;
 `;
 
 const Wrapper = styled.div`
   display: flex;
   // background: mediumseagreen;
-  // this seems to be the height * number of rows...
-  height: 100%;
+  // border: 2px solid yellow;
+  // height: 100%;
 
-  &:nth-child(odd) {
-    // background: steelblue;
-  }
+  // &:nth-child(odd) {
+  //   background: steelblue;
+  // }
 `;

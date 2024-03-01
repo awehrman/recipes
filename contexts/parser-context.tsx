@@ -60,7 +60,7 @@ type ParserProviderProps = {
 export function ParserProvider({
   children,
   isAddButtonDisplayed = true,
-  isCollapsed = false,
+  isCollapsed = true,
   view = 'rules'
 }: ParserProviderProps) {
   const [state, dispatch] = useReducer(ruleReducer, {
@@ -71,7 +71,7 @@ export function ParserProvider({
 
   const memoizedContext = useMemo(() => {
     return { state, dispatch };
-  }, [state, dispatch]);
+  }, [state]);
 
   return (
     <ParserContext.Provider value={memoizedContext}>

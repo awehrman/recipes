@@ -73,21 +73,19 @@ const VirtualizedRules: React.FC = () => {
                 droppableId="droppable"
                 mode="virtual"
                 renderClone={(provided, snapshot, rubric) => (
-                  <ItemWrapper isDragging={snapshot.isDragging}>
-                    <Item
-                      index={rubric.source.index}
-                      isDragging={snapshot.isDragging}
-                      item={rules[rubric.source.index]}
-                      provided={provided}
-                      resize={resize}
-                      style={getStyle({
-                        index: rubric.source.index,
-                        provided,
-                        style: provided.draggableProps.style, // maybe?
-                        isDragging: snapshot.isDragging
-                      })}
-                    />
-                  </ItemWrapper>
+                  <Item
+                    index={rubric.source.index}
+                    isDragging={snapshot.isDragging}
+                    item={rules[rubric.source.index]}
+                    provided={provided}
+                    resize={resize}
+                    style={getStyle({
+                      index: rubric.source.index,
+                      provided,
+                      style: provided.draggableProps.style,
+                      isDragging: snapshot.isDragging
+                    })}
+                  />
                 )}
               >
                 {(provided) => (
@@ -112,7 +110,7 @@ const VirtualizedRules: React.FC = () => {
   );
 };
 
-function getStyle({ provided, style, isDragging }: any) {
+function getStyle({ index, provided, style, isDragging }: any) {
   const combined = {
     ...style,
     ...provided.draggableProps.style
@@ -121,12 +119,8 @@ function getStyle({ provided, style, isDragging }: any) {
   const marginBottom = RULE_BOTTOM_MARGIN;
   const withSpacing = {
     ...combined,
-    height: isDragging
-      ? combined.height - RULE_BOTTOM_MARGIN
-      : combined.height + RULE_BOTTOM_MARGIN,
-    marginBottom
-    // background: isDragging ? 'white' : combined.background,
-    // boxShadow: isDragging ? BOX_SHADOW : combined.boxShadow,
+    marginBottom,
+    background: isDragging ? 'rgba(248, 248, 248, 1)' : 'white'
   };
 
   return withSpacing;
@@ -163,59 +157,20 @@ const Row = memo(function Row(props: any) {
   return (
     <Draggable draggableId={item.id} index={index} key={item.id}>
       {(provided, snapshot) => (
-        <ItemWrapper
+        <Item
+          index={index}
           isDragging={snapshot.isDragging}
-          height={style.height ?? 60}
-        >
-          <Item
-            index={index}
-            isDragging={snapshot.isDragging}
-            item={item}
-            provided={provided}
-            resize={resize}
-            style={style}
-          />
-        </ItemWrapper>
+          item={item}
+          provided={provided}
+          resize={resize}
+          style={style}
+        />
       )}
     </Draggable>
   );
 }, areEqual);
 
 export default VirtualizedRules;
-
-type ItemWrapperProps = {
-  isDragging: boolean;
-  height: number;
-};
-
-const ItemWrapper = styled.div<ItemWrapperProps>`
-  // display: flex;
-  // flex-grow: 1;
-  // background: aqua;
-  // width: 100%;
-  // height: ${({ height }) => `${height ?? 46}px`};
-
-  &::after {
-    // content: '';
-    // position: relative;
-    // height: 50px;
-    // width: 100%;
-    // background: ${({ theme }) => theme.colors.highlight};
-    // // z-index: -1;
-    // opacity: 1;
-    transition: opacity 0.3s ease; /* Add a smooth transition for the opacity */
-  }
-
-  ${({ isDragging }) =>
-    isDragging &&
-    `
-      background: yellow;
-      &::after {
-        opacity: 1;
-        z-index: 900;
-      }
-    `}
-`;
 
 const Wrapper = styled.div`
   display: flex;

@@ -116,7 +116,7 @@ const RuleFormatter: React.FC<any> = memo(() => {
       width: '480px',
       value: currentValue
     }),
-    [displayContext, currentValue]
+    [displayContext, currentValue, extensions]
   );
 
   if (

@@ -52,11 +52,17 @@ const RuleContents: React.FC<any> = ({ recomputeRuleSize }) => {
     if (recomputeRuleSize !== undefined && height >= MIN_ROW_SIZE) {
       recomputeRuleSize(index, height);
     }
-  }, [index, heightWithoutMargins, displayContext]);
+  }, [
+    index,
+    heightWithoutMargins,
+    displayContext,
+    recomputeRuleSize,
+    rules.length
+  ]);
 
   useEffect(() => {
     resizeRow();
-  }, [heightWithoutMargins, index, displayContext]);
+  }, [resizeRow]);
 
   function handleReset(input: any = {}) {
     reset(input);
@@ -117,9 +123,9 @@ const Wrapper = styled.div`
 
 const InnerWrapper = styled.form`
   /* keep some kind of background so we can maintain hover */
-  background: white;
+  // background: white;
   max-width: 600px;
-  padding-bottom: ${RULE_BOTTOM_MARGIN}px;
+  // padding-bottom: ${RULE_BOTTOM_MARGIN}px;
 
   &.edit {
     // background: ${({ theme }) => theme.colors.lightBlue};

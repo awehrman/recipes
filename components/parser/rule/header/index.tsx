@@ -64,11 +64,11 @@ const StyledWarningIcon = styled(WarningIcon)`
 const Header = styled.div`
   display: flex;
   flex-basis: 100%;
-  position: relative;
+  // position: relative;
   font-size: 14px;
   font-weight: 600;
-  z-index: 2;
-  max-height: 19px;
+  // z-index: 2;
+  // max-height: 19px;
 `;
 
 const RemoveRuleButton = styled(Button)`
