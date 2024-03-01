@@ -10,9 +10,7 @@ import AuthenticateEvernote from './authenticate-evernote';
 import Notes from '../notes';
 import NoteActions from './note-actions';
 
-type NoteImporterProps = {};
-
-const NoteImporter: React.FC<NoteImporterProps> = () => {
+const NoteImporter: React.FC = () => {
   const { isAuthenticated } = useEvernote();
   const [status, setStatus] = useState(defaultLoadingStatus);
   const {
@@ -22,7 +20,7 @@ const NoteImporter: React.FC<NoteImporterProps> = () => {
     loading,
     notes = [],
     saveRecipes
-  } = useNotes(status, setStatus);
+  } = useNotes(setStatus, status);
 
   function handleImportLocalFiles() {
     importLocalNotes();

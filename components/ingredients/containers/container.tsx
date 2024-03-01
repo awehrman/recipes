@@ -1,4 +1,4 @@
-import { Container } from '@prisma/client';
+import { Container as PrismaContainer } from '@prisma/client';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -6,7 +6,7 @@ import List from './list';
 import CardList from './card-list';
 
 type ContainerProps = {
-  container: Container;
+  container: PrismaContainer;
   onContainerClick: (id: string) => void;
   onIngredientClick: (
     containerId: string,

@@ -36,7 +36,7 @@ const Ingredients: React.FC<IngredientsProps> = ({
     return sortedParsed.map((v: ParsedSegmentWithIngredient, index) => {
       let ingClassName = '';
       if (v.ingredient) {
-        ingClassName = !!v.ingredient.isValidated ? ' valid' : ' invalid';
+        ingClassName = v.ingredient.isValidated ? ' valid' : ' invalid';
       }
       // if v.value starts with a comma, remove the initial space
       // TODO extend this to a lookup of allowed punctuation characters

@@ -3,10 +3,10 @@ import styled from 'styled-components';
 
 const Loader = () => (
   <Icon>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div></div>
+    <div />
+    <div />
+    <div />
+    <div />
   </Icon>
 );
 

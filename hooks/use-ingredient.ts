@@ -72,8 +72,8 @@ function useIngredient({ id }: UseIngredientProps) {
             (ing: IngredientWithRelations) =>
               ing.id === data.data.saveIngredient.id
           );
-          if (!!hasIngredient) {
-            const ingredients = [...ctn?.ingredients];
+          if (hasIngredient) {
+            const ingredients = [...ctn.ingredients];
             const index = (ctn?.ingredients ?? []).findIndex(
               (ing) => ing.id === data.data.saveIngredient.id
             );

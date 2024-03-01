@@ -52,7 +52,7 @@ const HighlightedInput = ({
 
   useEffect(() => {
     trigger();
-  }, [level, trigger]);
+  }, [trigger]);
 
   return (
     <Wrapper className={className}>
@@ -103,7 +103,7 @@ const InputField = styled.input<InputProps>`
   padding: 4px 0;
   border-radius: 0;
   line-height: 1.2;
-  color: ${({ level }) => highlightHash?.[level] ?? `#222`};
+  color: ${({ level }) => highlightHash?.[level] ?? '#222'};
   font-size: 1em;
   border: 0;
   outline: 0;

@@ -20,8 +20,8 @@ type NotesResponse = {
 };
 
 function useNotes(
-  status: StatusProps = defaultLoadingStatus,
-  setStatus: React.Dispatch<SetStateAction<StatusProps>>
+  setStatus: React.Dispatch<SetStateAction<StatusProps>>,
+  status: StatusProps = defaultLoadingStatus
 ) {
   const { data = {}, loading, refetch } = useQuery(GET_ALL_NOTES_QUERY, {});
 
@@ -66,6 +66,7 @@ function useNotes(
         error: null
       }
     },
+    // biome-ignore lint/suspicious/noExplicitAny: apollo
     update: (cache, response: FetchResult<any>) => {
       const returnedNotes = response?.data?.getNotesMeta?.notes ?? [];
       const isOptimisticResponse = returnedNotes.some(

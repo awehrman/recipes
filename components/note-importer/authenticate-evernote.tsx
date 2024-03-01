@@ -5,9 +5,7 @@ import styled from 'styled-components';
 import useEvernote from '../../hooks/use-evernote';
 import Button from '../common/button';
 
-type AuthenticateEvernoteProps = {};
-
-const AuthenticateEvernote: React.FC<AuthenticateEvernoteProps> = () => {
+const AuthenticateEvernote: React.FC = () => {
   const { data } = useSession();
   if (!data?.user) {
     throw new Error('User not in session!');

@@ -67,14 +67,7 @@ function useEvernote() {
     update: () => refetch({ id })
   });
 
-  useEffect(handleEvernoteAuthVerifier, [
-    authenticateEvernote,
-    evernoteAuthToken,
-    id,
-    oauth_verifier,
-    refetch,
-    router
-  ]);
+  useEffect(handleEvernoteAuthVerifier, []);
 
   function handleEvernoteAuthVerifier() {
     if (oauth_verifier) {

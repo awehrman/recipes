@@ -26,7 +26,7 @@ const Containers: React.FC = () => {
         onIngredientClick(`${container?.id}`, `${query.id}`, null);
       }
     }
-  }, [query, loading, containers, onIngredientClick, router, group, view]);
+  }, [query, loading, containers, onIngredientClick]);
 
   function renderContainers() {
     return containers.map((container) => (

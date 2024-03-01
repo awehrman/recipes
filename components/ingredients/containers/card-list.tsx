@@ -67,7 +67,7 @@ const CardList = ({ container, onIngredientClick }: CardListProps) => {
       // listRef.current.resetAfterIndex(index - 1);
       listRef.current.scrollToItem(currentIngredientIndex - 1, 'start');
     }
-  }, [currentIngredientId, currentIngredientIndex, ingredients.length]);
+  }, [currentIngredientIndex]);
 
   return (
     <Wrapper>

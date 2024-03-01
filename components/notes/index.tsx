@@ -23,6 +23,7 @@ const Notes: React.FC<NotesProps> = ({
   function renderNotes() {
     return notes.map((note, index) => {
       const {
+        id,
         evernoteGUID,
         ingredients = [],
         instructions = [],
@@ -37,7 +38,7 @@ const Notes: React.FC<NotesProps> = ({
       const margin = !!image || ingredients?.length ? '0 0 20px' : '0';
 
       return (
-        <Note key={`note_${evernoteGUID}_${index}`}>
+        <Note key={`note_${evernoteGUID}_${id}`}>
           {/* Title */}
           <Title margin={margin}>{title}</Title>
 

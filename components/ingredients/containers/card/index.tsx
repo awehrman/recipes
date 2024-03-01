@@ -47,10 +47,10 @@ const Card = ({ id, cachedName = null, containerId }: CardProps) => {
   const { name, plural, isComposedIngredient, properties } = ingredient || {};
 
   const defaultProperties = useMemo(() => {
-    const props: any = {};
-    PROPERTY_ENUMS.forEach((key) => {
+    const props: Record<string, boolean> = {};
+    for (const key of PROPERTY_ENUMS) {
       props[`properties_${key}`] = (properties ?? []).includes(key);
-    });
+    }
     return props;
   }, [properties]);
 
@@ -74,7 +74,7 @@ const Card = ({ id, cachedName = null, containerId }: CardProps) => {
   useEffect(() => {
     const values = getDefaultValues();
     methods.reset(values);
-  }, [getDefaultValues, loading, methods]);
+  }, [getDefaultValues, methods]);
 
   function handleFormSubmit(data: IngredientWithRelations) {
     handleSaveIngredient(data, saveIngredientCallback, group, view);
@@ -108,9 +108,9 @@ const Card = ({ id, cachedName = null, containerId }: CardProps) => {
       );
     } else {
       // adjust input properties
-      (input?.properties ?? []).forEach((property: string) => {
+      for (const property of input?.properties ?? []) {
         properties[`properties_${property}`] = true;
-      });
+      }
       input.properties = properties;
       methods.reset(input);
       setIsEditMode(false);
