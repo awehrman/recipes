@@ -169,8 +169,24 @@ export type VirtualizedRuleProps = {
   displayContext: DisplayContext;
   index: number;
   recomputeRuleSize: (index: number, size: number, force?: boolean) => void;
-  rule: ParserRule; // TODO
+  rule: ParserRule;
   style: CSSProperties;
   provided: DraggableProvided;
   ref: React.ForwardedRef<HTMLDivElement>;
+};
+
+export type RecomputeRuleSizeProps = {
+  recomputeRuleSize: (index: number, size: number) => void;
+};
+
+export type RuleHeaderProps = {
+  setFocus: (fieldName: string) => void;
+};
+
+export type ResetProps = {
+  reset: () => void;
+};
+
+export type RuleTypeComponentProps = {
+  onTypeSwitch: () => void;
 };

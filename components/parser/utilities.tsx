@@ -72,7 +72,6 @@ const generateEmbeddedList = (ruleString: string): React.ReactNode => {
   return <RuleList key={embeddedListKey}>{formattedListString}</RuleList>;
 };
 
-// TODO return type
 const generateUnlabeledRule = (
   ruleString = '',
   ruleNames: string[] = []

@@ -25,7 +25,7 @@ const Rule: React.FC = memo(() => {
   const type = useWatch({ control, name: `definitions.${index}.type` });
   const showField = type === 'RULE';
   const fieldName = `definitions.${index}.rule`;
-  const placeholder = `rule definition`;
+  const placeholder = 'rule definition';
   const formUpdates = useWatch({ control });
   const updatedFormValue = getFieldUpdates({
     definitionId,

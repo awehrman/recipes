@@ -6,11 +6,7 @@ import { useRuleContext } from 'contexts/rule-context';
 import { useRuleDefinitionContext } from 'contexts/rule-definition-context';
 
 import { Button } from 'components/common';
-
-// TODO move
-type RuleTypeComponentProps = {
-  onTypeSwitch: any;
-};
+import { RuleTypeComponentProps } from 'components/parser/types';
 
 const RuleType: React.FC<RuleTypeComponentProps> = memo(({ onTypeSwitch }) => {
   const {

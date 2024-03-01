@@ -1,4 +1,4 @@
-import { ApolloCache } from '@apollo/client';
+import { ApolloCache, ApolloQueryResult, FetchResult } from '@apollo/client';
 import _ from 'lodash';
 import peggy, { Parser, DiagnosticNote } from 'peggy';
 
@@ -16,7 +16,8 @@ import {
   ParserUtility
 } from 'components/parser/types';
 import { defaultTests } from 'constants/parser-tests';
-import { ParserRule } from '@prisma/client';
+import { ParserRuleDefinition } from '@prisma/client';
+import { ParserRuleWithRelations } from '@prisma/client';
 
 export const removeTypename = (data: ParserRuleWithRelationsWithTypeName) => {
   const input = {
@@ -32,9 +33,11 @@ export const removeTypename = (data: ParserRuleWithRelationsWithTypeName) => {
 };
 
 export const handleAddRuleUpdate = (
+  // biome-ignore lint/suspicious/noExplicitAny: apollo
   cache: ApolloCache<any>,
-  res: any, // TODO fix type
-  input: any // TODO fix type
+  // biome-ignore lint/suspicious/noExplicitAny: apollo
+  res: Omit<FetchResult<any>, 'context'>,
+  input: ParserRuleWithRelationsWithTypeName
 ) => {
   const isOptimisticResponse = res.data.addParserRule.id === '-1';
   // TODO read/write fragment vs read/write all rules query vs read/write just this rule?
@@ -47,27 +50,29 @@ export const handleAddRuleUpdate = (
   if (isOptimisticResponse) {
     parserRules.push({
       ...input,
-      definitions: input.definitions.map((def: any) => ({
+      definitions: input.definitions.map((def: ParserRuleDefinition) => ({
         ...def,
         __typename: 'ParserRuleDefinition'
       })),
       __typename: 'ParserRule'
     });
   } else {
-    parserRules = parserRules.map((rule: ParserRule) => {
+    parserRules = parserRules.map((rule: ParserRuleWithRelations) => {
       if (rule.id === '-1') {
         return {
           ...rule,
-          definitions: rule.definitions.map((def: any, index: number) => {
-            if (def.id.includes(`OPTIMISTIC`)) {
-              optimisticDefinitionIds.push(def.id);
-              return {
-                ...def,
-                id: res.data.addParserRule.definitions[index].id
-              };
+          definitions: rule.definitions.map(
+            (def: ParserRuleDefinition, index: number) => {
+              if (def.id.includes('OPTIMISTIC')) {
+                optimisticDefinitionIds.push(def.id);
+                return {
+                  ...def,
+                  id: res.data.addParserRule.definitions[index].id
+                };
+              }
+              return def;
             }
-            return def;
-          }),
+          ),
           id: res.data.addParserRule.id
         };
       }
@@ -86,19 +91,24 @@ export const handleAddRuleUpdate = (
     cache.evict({
       id: 'ParserRule:-1'
     });
-    optimisticDefinitionIds.forEach((id) => {
+    for (const id of optimisticDefinitionIds) {
       cache.evict({
         id: `ParserRuleDefinitionId:${id}`
       });
-    });
+    }
   }
 };
 
 export const handleDeleteRuleUpdate = (
+  // biome-ignore lint/suspicious/noExplicitAny: apollo
   cache: ApolloCache<any>,
-  res: any,
+  // biome-ignore lint/suspicious/noExplicitAny: apollo
+  res: Omit<FetchResult<any>, 'context'>,
   id: string,
-  refetch: any
+  refetch: (
+    variables?: Partial<{ id: string }> | undefined
+    // biome-ignore lint/suspicious/noExplicitAny: apollo
+  ) => Promise<ApolloQueryResult<any>>
 ) => {
   /*
     Cache data may be lost when replacing the parserRules field of a Query object.
@@ -136,28 +146,30 @@ export const handleDeleteRuleUpdate = (
   refetch();
 };
 
-const getFormattedString = (formatter: string, index: number = 0) =>
+const getFormattedString = (formatter: string, index = 0) =>
   formatter
     .replace(/\${ORDER}/g, `${index}`)
     .replace(/(\n)(\s*)/g, (_, newline, spaces) => `${newline}\t${spaces}`);
 
 const styleRuleName = (name = '', label = '') => `\n${name} "${label}" = \n`;
-// TODO fix types
-const styleDefinitions = (definitions: any[] = []) =>
+// biome-ignore lint/style/noUnusedTemplateLiteral: quotes
+const styleList = (list: string[]) => `\t${list.join(` /\ `)}\n`;
+const styleDefinitions = (definitions: ParserRuleDefinition[] = []) =>
   definitions
-    .map((def: any, index: number) => {
+    .map((def, index) => {
       const prefix = `${index > 0 ? '/' : ''}`;
       if (def.type === 'LIST') {
-        return `${prefix}${styleList(def.list)}`;
-      } else {
-        return `${prefix}${styleRuleChunk(
-          def.example,
-          def.rule,
-          def.formatter,
-          index
-        )}`;
+        const { list = [] } = def;
+        return `${prefix}${styleList(list)}`;
       }
+      return `${prefix}${styleRuleChunk(
+        def.example,
+        def.rule,
+        `${def.formatter}`,
+        index
+      )}`;
     })
+    // biome-ignore lint/style/noUnusedTemplateLiteral: quotes
     .join(``);
 
 const styleRuleChunk = (example = '', rule = '', formatter = '', index = 0) => {
@@ -172,7 +184,6 @@ const styleExample = (example = '') => `\t// '${example}'\n`;
 const styleRule = (rule = '') => `\t${rule}\n`;
 const styleFormatter = (formatter = '', index = 0) =>
   `\t${getFormattedString(formatter, index)}\n`;
-const styleList = (list = []) => `\t${list.join(` /\ `)}\n`;
 
 export const getStyledParserRule = (rule: Rule) => {
   const parserRuleString = `${styleRuleName(
@@ -184,7 +195,7 @@ export const getStyledParserRule = (rule: Rule) => {
 
 export const compileGrammar = (
   rules: Rule[],
-  loading: boolean = false
+  loading = false
 ): ParserUtility => {
   if (loading) {
     return {
@@ -194,16 +205,17 @@ export const compileGrammar = (
     };
   }
 
-  let parser: Parser, parserSource: string;
-  const starter = `start = ingredientLine \n`;
+  let parser: Parser;
+  let parserSource: string;
+  const starter = 'start = ingredientLine \n';
   const grammar =
-    starter + rules.map((rule: Rule) => getStyledParserRule(rule)).join(`\n`);
+    starter + rules.map((rule: Rule) => getStyledParserRule(rule)).join('\n');
   const grammarErrors: DiagnosticNote[] = [];
   try {
     parserSource = peggy.generate(grammar, {
       cache: true,
       output: 'source',
-      error: function (_stage, message, location) {
+      error: (_stage, message, location) => {
         if (
           location?.start &&
           !grammarErrors.find((err) => err.message === message)
@@ -229,11 +241,11 @@ export const compileGrammar = (
 
 export const parseTests = (
   parser: Parser | undefined,
-  loading: boolean = false
+  loading = false
 ): TestProps[] => {
   const tests: TestProps[] = [...defaultTests];
   if (parser && !loading) {
-    tests.forEach((test: TestProps) => {
+    for (const test of tests) {
       try {
         const details = parser.parse(test.reference);
         test.parsed = true;
@@ -247,18 +259,23 @@ export const parseTests = (
           );
           return matchingDetail !== undefined;
         });
-      } catch (e: any) {
+      } catch (e: unknown) {
         test.parsed = false;
         test.error = {
           message: `${e}`
         };
       }
-    });
+    }
   }
   return tests;
 };
 
-export const handleUpdateRulesOrder = (cache: ApolloCache<any>, res: any) => {
+export const handleUpdateRulesOrder = (
+  // biome-ignore lint/suspicious/noExplicitAny: apollo
+  cache: ApolloCache<any>,
+  // biome-ignore lint/suspicious/noExplicitAny: apollo
+  res: Omit<FetchResult<any>, 'context'>
+) => {
   const rules: ParserRules | null = cache.readQuery({
     query: GET_ALL_PARSER_RULES_QUERY
   });
@@ -268,7 +285,7 @@ export const handleUpdateRulesOrder = (cache: ApolloCache<any>, res: any) => {
       .map((rule) => ({
         ...rule,
         order: res.data.updateParserRulesOrder.find(
-          (r: any) => r.id === rule.id
+          (r: ParserRuleWithRelations) => r.id === rule.id
         ).order
       }))
       .sort((a, b) => a.order - b.order)

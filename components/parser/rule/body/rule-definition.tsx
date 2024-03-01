@@ -12,7 +12,7 @@ import Rule from './rule';
 import Type from './type';
 import List from './list';
 
-const RuleDefinition: React.FC<any> = memo(() => {
+const RuleDefinition: React.FC = memo(() => {
   const {
     state: { displayContext, isExpanded }
   } = useRuleContext();

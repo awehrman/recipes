@@ -1,49 +1,15 @@
-import { ParserRuleWithRelations } from '@prisma/client';
-import React, {
-  createContext,
-  useContext,
-  useMemo,
-  useReducer,
-  ReactNode
-} from 'react';
-
-// TODO move these
-type DisplayContext = 'add' | 'edit' | 'display';
-export type RuleActionTypes =
-  | 'SET_DISPLAY_CONTEXT'
-  | 'SET_IS_EXPANDED'
-  | 'SET_IS_FOCUSED'
-  | 'SET_INDEX'
-  | 'RESET_DEFAULT_VALUES'
-  | 'UPDATE_FORM_STATE'
-  | 'SET_HAS_WARNING';
-
-type RuleState = {
-  id: string;
-  defaultValues: ParserRuleWithRelations;
-  displayContext: DisplayContext;
-  isExpanded: boolean;
-  isFocused: boolean;
-  index: number;
-  hasWarning: boolean;
-};
-
-type RuleAction =
-  | { type: 'SET_DISPLAY_CONTEXT'; payload: DisplayContext }
-  | { type: 'SET_IS_EXPANDED'; payload: boolean }
-  | { type: 'SET_IS_FOCUSED'; payload: boolean }
-  | { type: 'SET_INDEX'; payload: number }
-  | { type: 'RESET_DEFAULT_VALUES'; payload: ParserRuleWithRelations }
-  | { type: 'UPDATE_FORM_STATE'; payload: ParserRuleWithRelations }
-  | { type: 'SET_HAS_WARNING'; payload: boolean };
-
-export type RuleDispatch = (action: RuleAction) => void;
+import React, { createContext, useContext, useMemo, useReducer } from 'react';
+import {
+  RuleAction,
+  RuleState,
+  RuleDispatch,
+  RuleProviderProps
+} from './types';
 
 const RuleContext = createContext<
   | {
       state: RuleState;
       dispatch: RuleDispatch;
-      // recomputeRuleSize: (() => void) | undefined;
     }
   | undefined
 >(undefined);
@@ -88,16 +54,7 @@ function ruleReducer(state: RuleState, action: RuleAction): RuleState {
   }
 }
 
-type RuleProviderProps = {
-  children: ReactNode;
-  id: string;
-  initialContext: DisplayContext;
-  isCollapsed: boolean;
-  index: number;
-  rule: ParserRuleWithRelations;
-  // recomputeRuleSize: (() => void) | undefined;
-};
-
+// TODO put this in a constant
 export const getDefaultRuleValuesForIndex = (order = 0) => ({
   id: '-1',
   name: '',
@@ -105,7 +62,7 @@ export const getDefaultRuleValuesForIndex = (order = 0) => ({
   order,
   definitions: [
     {
-      id: `OPTIMISTIC-0`,
+      id: 'OPTIMISTIC-0',
       parserRuleId: '-1',
       example: '',
       rule: '',
@@ -124,8 +81,7 @@ export function RuleProvider({
   isCollapsed = false,
   index = 0,
   rule = {}
-}: // recomputeRuleSize
-RuleProviderProps) {
+}: RuleProviderProps) {
   const defaultValues = {
     ...getDefaultRuleValuesForIndex(index),
     ...(initialContext !== 'add' ? rule : {})
@@ -142,7 +98,7 @@ RuleProviderProps) {
 
   const memoizedContext = useMemo(() => {
     return { state, dispatch };
-  }, [state, dispatch]);
+  }, [state]);
 
   return (
     <RuleContext.Provider value={memoizedContext}>
@@ -151,7 +107,6 @@ RuleProviderProps) {
   );
 }
 
-// TODO idk consider renaming this
 export function useRuleContext() {
   const context = useContext(RuleContext);
   if (context === undefined) {
@@ -159,11 +114,3 @@ export function useRuleContext() {
   }
   return context;
 }
-
-// TODO
-/*
-  should we have a useRuleUI and a useRuleData? something that separates
-  the UI state (displayContext, isExpanded) from the data state (add, edit, load, rule)?
-
-  or rather, should the apollo hooks stuff live in here?
-*/

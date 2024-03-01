@@ -196,7 +196,6 @@ export const getDraggableStyle = ({
   };
 
   const marginBottom = RULE_BOTTOM_MARGIN;
-  // TODO hmm margin and background aren't on DraggingStyle...
   const withSpacing: CSSProperties = {
     ...combined,
     marginBottom,

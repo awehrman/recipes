@@ -9,18 +9,22 @@ import { useParserContext } from 'contexts/parser-context';
 import useParserRule from 'hooks/use-parser-rule';
 import useParserRules from 'hooks/use-parser-rules';
 
+import { RecomputeRuleSizeProps } from '../types';
 import { hasRuleWarning } from '../utils';
-import RuleHeader from './header';
-import RuleBody from './body';
-import { getAllParserRuleDefinitionNames, saveRule } from './utils';
+
 import {
   DEFAULT_ROW_SIZE,
   MIN_ROW_SIZE,
   RULE_BOTTOM_MARGIN,
   RULE_BORDER_SIZE
 } from './constants';
+import RuleHeader from './header';
+import RuleBody from './body';
+import { getAllParserRuleDefinitionNames, saveRule } from './utils';
 
-const RuleContents: React.FC<any> = ({ recomputeRuleSize }) => {
+const RuleContents: React.FC<RecomputeRuleSizeProps> = ({
+  recomputeRuleSize
+}) => {
   const {
     dispatch,
     state: { defaultValues, displayContext, id = '-1', index }
@@ -52,20 +56,14 @@ const RuleContents: React.FC<any> = ({ recomputeRuleSize }) => {
     if (recomputeRuleSize !== undefined && height >= MIN_ROW_SIZE) {
       recomputeRuleSize(index, height);
     }
-  }, [
-    index,
-    heightWithoutMargins,
-    displayContext,
-    recomputeRuleSize,
-    rules.length
-  ]);
+  }, [index, heightWithoutMargins, displayContext, recomputeRuleSize]);
 
   useEffect(() => {
     resizeRow();
   }, [resizeRow]);
 
-  function handleReset(input: any = {}) {
-    reset(input);
+  function handleReset() {
+    reset();
     resizeRow();
   }
 

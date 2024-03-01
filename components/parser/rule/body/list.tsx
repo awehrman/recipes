@@ -85,47 +85,49 @@ const ListItem = styled.li`
   }
 `;
 
-// TODO fix this type complaint
-const KeywordListInput = React.forwardRef((_props, ref: any) => {
-  const {
-    state: { index, listItemEntryValue },
-    dispatch
-  } = useRuleDefinitionContext();
-  const { control, setValue } = useFormContext();
-  const fieldName = `definitions.${index}.list`;
-  const list = useWatch({ control, name: fieldName });
+const KeywordListInput = React.forwardRef(
+  (_props, ref: React.ForwardedRef<HTMLInputElement>) => {
+    const {
+      state: { index, listItemEntryValue },
+      dispatch
+    } = useRuleDefinitionContext();
+    const { control, setValue } = useFormContext();
+    const fieldName = `definitions.${index}.list`;
+    const list = useWatch({ control, name: fieldName });
 
-  function handleOnChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const { value } = event.target;
-    dispatch({ type: 'SET_LIST_ITEM_ENTRY_VALUE', payload: value });
-  }
-
-  function handleOnKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
-    if (event.key === 'Enter') {
-      dispatch({ type: 'SET_SHOW_LIST_INPUT', payload: false });
-      const sortedList = formatKeywordList(listItemEntryValue ?? '', list);
-      setValue(fieldName, sortedList);
-      dispatch({ type: 'SET_LIST_ITEM_ENTRY_VALUE', payload: '' });
+    function handleOnChange(event: React.ChangeEvent<HTMLInputElement>) {
+      const { value } = event.target;
+      dispatch({ type: 'SET_LIST_ITEM_ENTRY_VALUE', payload: value });
     }
-  }
 
-  useEffect(() => {
-    if (ref?.current) {
-      ref.current.focus();
+    function handleOnKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+      if (event.key === 'Enter') {
+        dispatch({ type: 'SET_SHOW_LIST_INPUT', payload: false });
+        const sortedList = formatKeywordList(listItemEntryValue ?? '', list);
+        setValue(fieldName, sortedList);
+        dispatch({ type: 'SET_LIST_ITEM_ENTRY_VALUE', payload: '' });
+      }
     }
-  }, [ref]);
 
-  return (
-    <KeywordInput
-      ref={ref}
-      defaultValue={listItemEntryValue}
-      onKeyDown={handleOnKeyDown}
-      onChange={handleOnChange}
-      placeholder="enter a keyword"
-      type="text"
-    />
-  );
-});
+    // TODO come back to this
+    // useEffect(() => {
+    //   if (ref?.current) {
+    //     ref.current.focus();
+    //   }
+    // }, [ref]);
+
+    return (
+      <KeywordInput
+        ref={ref}
+        defaultValue={listItemEntryValue}
+        onKeyDown={handleOnKeyDown}
+        onChange={handleOnChange}
+        placeholder="enter a keyword"
+        type="text"
+      />
+    );
+  }
+);
 
 KeywordListInput.displayName = 'KeywordListInput';
 

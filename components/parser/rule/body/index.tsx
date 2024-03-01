@@ -11,9 +11,10 @@ import PlusIcon from 'public/icons/plus.svg';
 import { getOptimisticParserRuleDefinition } from '../../utils';
 import SaveOptions from './save-options';
 import RuleDefinition from './rule-definition';
+import { ResetProps } from 'components/parser/types';
 
 // NOTE: memoizing up here cause useFormContext and useFieldArray are noisy
-const RuleBody: React.FC<any> = memo(({ reset }) => {
+const RuleBody: React.FC<ResetProps> = memo(({ reset }) => {
   const {
     state: { id, defaultValues, displayContext }
   } = useRuleContext();
@@ -32,10 +33,10 @@ const RuleBody: React.FC<any> = memo(({ reset }) => {
   }
 
   function renderDefinitions() {
-    return fields.map((field: any, index: number) => {
+    return fields.map((field, index) => {
       const definitionId = definitions?.[index]?.id ?? `OPTIMISTIC-${index}`;
       const defaultValue = defaultValues.definitions?.[index];
-
+      console.log({ defaultValue });
       return (
         <RuleDefinitionProvider
           key={field.id}

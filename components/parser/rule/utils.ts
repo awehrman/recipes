@@ -61,6 +61,7 @@ const createInput = ({ data, order }: CreateInputProps) => {
   }
 
   if (data?.listItemEntryValue) {
+    // biome-ignore lint/performance/noDelete: TODO check if prisma is chill with an undefined here
     delete data.listItemEntryValue;
   }
 

@@ -58,11 +58,4 @@ const InnerWrapper = styled.div`
 
 const Wrapper = styled.div`
   display: flex;
-  // background: mediumseagreen;
-  // border: 2px solid yellow;
-  // height: 100%;
-
-  // &:nth-child(odd) {
-  //   background: steelblue;
-  // }
 `;

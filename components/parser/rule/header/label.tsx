@@ -36,7 +36,7 @@ const RuleLabel: React.FC = () => {
     ) {
       setValue('label', autoLabel, { shouldValidate: true });
     }
-  }, [id, isNameActiveElement, displayContext, setValue, watched]);
+  }, [isNameActiveElement, displayContext, setValue, watched]);
 
   return (
     <StyledAutoWidthInput

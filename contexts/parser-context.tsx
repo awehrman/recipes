@@ -1,28 +1,17 @@
 import React, {
   createContext,
-  useContext,
-  useReducer,
   ReactNode,
-  useMemo
+  useContext,
+  useMemo,
+  useReducer
 } from 'react';
-
-type ParserActionTypes =
-  | 'SET_IS_ADD_BUTTON_DISPLAYED'
-  | 'SET_PARSER_VIEW'
-  | 'SET_IS_COLLAPSED';
-
-type ParserState = {
-  isAddButtonDisplayed: boolean;
-  isCollapsed: boolean;
-  view: 'rules' | 'grammar';
-};
-
-type ParserAction = {
-  type: ParserActionTypes;
-  payload: any; // TODO
-};
-
-export type ParserDispatch = (action: ParserAction) => void;
+import {
+  ParserState,
+  ParserDispatch,
+  ParserAction,
+  FocusedIndexUpdaterContextType,
+  ParserProviderProps
+} from './types';
 
 const ParserContext = createContext<
   { state: ParserState; dispatch: ParserDispatch } | undefined
@@ -46,16 +35,9 @@ function ruleReducer(state: ParserState, action: ParserAction): ParserState {
       }
       return { ...state, isCollapsed: action.payload };
     default:
-      throw new Error(`Unhandled action type: ${action.type}`);
+      throw new Error('Unhandled action type');
   }
 }
-
-type ParserProviderProps = {
-  children: ReactNode;
-  isAddButtonDisplayed?: boolean;
-  isCollapsed?: boolean;
-  view?: 'rules' | 'grammar';
-};
 
 export function ParserProvider({
   children,
@@ -88,16 +70,12 @@ export function useParserContext() {
   return context;
 }
 
-type FocusedIndexUpdaterContextType = React.Dispatch<
-  React.SetStateAction<number | null>
->;
-
 const FocusedIndexStateContext = React.createContext<number | null>(null);
 const FocusedIndexUpdaterContext = React.createContext<
   FocusedIndexUpdaterContextType | undefined
 >(undefined);
 
-export function FocusedIndexProvider({ children }: any) {
+export function FocusedIndexProvider({ children }: { children: ReactNode }) {
   const [focusedIndex, setFocusedIndex] = React.useState<number | null>(null);
 
   return (

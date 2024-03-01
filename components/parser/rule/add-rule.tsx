@@ -10,9 +10,7 @@ import {
 import RuleContents from './rule-contents';
 import useParserRules from 'hooks/use-parser-rules';
 
-type AddRuleProps = {};
-
-const AddRule: React.FC<AddRuleProps> = () => {
+const AddRule: React.FC = () => {
   // const [isInit, setIsInit] = useState(false);
   const { rules = [] } = useParserRules();
   const {

@@ -1,3 +1,4 @@
+import { ParserRule } from '@prisma/client';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
@@ -11,9 +12,9 @@ import WarningIcon from 'public/icons/exclamation-triangle.svg';
 import ExpandButton from './expand-button';
 import Name from './name';
 import Label from './label';
-import { ParserRule } from '@prisma/client';
+import { RuleHeaderProps } from '../../types';
 
-const RuleHeader: React.FC<any> = ({ setFocus }: any) => {
+const RuleHeader: React.FC<RuleHeaderProps> = ({ setFocus }) => {
   const { rules = [], updateRulesOrder } = useParserRules();
   const [isInit, setIsInit] = useState<boolean>(false);
   const {

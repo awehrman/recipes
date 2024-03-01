@@ -35,11 +35,13 @@ type CodeMirrorElement = {
 // has the need to re-render the entire CodeMirror gizmo and it can cause jank
 // on auto height rows
 const MemoizedEditor = memo(
-  forwardRef((props, ref: any) => <StyledEditor {...props} ref={ref} />)
+  forwardRef((props, ref: React.ForwardedRef<CodeMirrorElement>) => (
+    <StyledEditor {...props} ref={ref} />
+  ))
 );
 MemoizedEditor.whyDidYouRender = true;
 
-const RuleFormatter: React.FC<any> = memo(() => {
+const RuleFormatter: React.FC = memo(() => {
   const { control, getValues, register, setValue } = useFormContext();
   const {
     state: { index, defaultValue, definitionId }
@@ -91,7 +93,7 @@ const RuleFormatter: React.FC<any> = memo(() => {
     if (displayContext === 'add') {
       return value.length > 0 ? value : defaultComputedValue;
     }
-    const isOptimisticAdd = definitionId.includes(`OPTIMISTIC`);
+    const isOptimisticAdd = definitionId.includes('OPTIMISTIC');
     if (displayContext === 'edit') {
       return !isOptimisticAdd ? value : defaultComputedValue;
     }
@@ -153,12 +155,12 @@ export default RuleFormatter;
 RuleFormatter.whyDidYouRender = true;
 
 // TODO we loose all our cute auto formatting with this but oh well
-const DisplayFormatter = styled.div`
-  font-size: 12px;
-  font-family: Menlo, Monaco, 'Courier New', monospace;
-  font-weight: 400;
-  white-space: pre-line;
-`;
+// const DisplayFormatter = styled.div`
+//   font-size: 12px;
+//   font-family: Menlo, Monaco, 'Courier New', monospace;
+//   font-weight: 400;
+//   white-space: pre-line;
+// `;
 
 const Wrapper = styled.div`
   position: relative;

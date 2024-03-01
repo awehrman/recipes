@@ -1,43 +1,13 @@
-import React, {
-  createContext,
-  useContext,
-  useMemo,
-  useReducer,
-  ReactNode
-} from 'react';
-import { v4 } from 'uuid';
-
-type RuleDefinitionActionTypes =
-  | 'SET_DEFINITION_ID'
-  | 'SET_SHOW_LIST_INPUT'
-  | 'SET_LIST_ITEM_ENTRY_VALUE';
-
-type RuleDefinitionState = {
-  index: number;
-  definitionId: string;
-  listItemEntryValue?: string;
-  showListInput?: boolean; // this should never be in RHF
-  // default values for RHF
-  defaultValue: {
-    id?: string;
-    example?: string;
-    formatter?: string | null;
-    list: string[];
-    rule?: string;
-    type: string;
-    order: number; // TODO keep thinking about if this should be separate from index
-  };
-};
-
-type RuleDefinitionAction = {
-  type: RuleDefinitionActionTypes;
-  payload: any; // TODO fix this
-};
-
-type RuleDispatch = (action: RuleDefinitionAction) => void;
+import React, { createContext, useContext, useMemo, useReducer } from 'react';
+import {
+  RuleDefinitionState,
+  RuleDefinitionAction,
+  RuleDefinitionDispatch,
+  RuleDefinitionProviderProps
+} from './types';
 
 const RuleDefinitionContext = createContext<
-  { state: RuleDefinitionState; dispatch: RuleDispatch } | undefined
+  { state: RuleDefinitionState; dispatch: RuleDefinitionDispatch } | undefined
 >(undefined);
 
 function ruleDefinitionReducer(
@@ -61,18 +31,9 @@ function ruleDefinitionReducer(
       }
       return { ...state, listItemEntryValue: action.payload };
     default:
-      throw new Error(`Unhandled action type: ${action.type}`);
+      throw new Error('Unhandled action type');
   }
 }
-
-type RuleDefinitionProviderProps = {
-  children: ReactNode;
-  index: number;
-  definitionId: string;
-  listItemEntryValue?: string;
-  showListInput?: boolean;
-  defaultValue?: any; // TODO fix type
-};
 
 export function RuleDefinitionProvider({
   children,
@@ -100,10 +61,7 @@ export function RuleDefinitionProvider({
     defaultValue: defaultValue ?? newDefault
   });
 
-  const memoizedContext = useMemo(
-    () => ({ state, dispatch }),
-    [state, dispatch]
-  );
+  const memoizedContext = useMemo(() => ({ state, dispatch }), [state]);
 
   return (
     <RuleDefinitionContext.Provider value={memoizedContext}>

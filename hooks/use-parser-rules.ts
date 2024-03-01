@@ -3,6 +3,7 @@ import { useQuery, useMutation } from '@apollo/client';
 import { GET_ALL_PARSER_RULES_QUERY } from '../graphql/queries/parser';
 import { UPDATE_PARSER_RULES_ORDER_MUTATION } from '../graphql/mutations/parser';
 import { handleUpdateRulesOrder } from './helpers/parser-rule';
+import { ParserRuleDefinition } from '@prisma/client';
 
 function useParserRules() {
   const {
@@ -18,7 +19,7 @@ function useParserRules() {
     UPDATE_PARSER_RULES_ORDER_MUTATION
   );
 
-  function updateRulesOrder(rules: any[] = parserRules) {
+  function updateRulesOrder(rules: ParserRuleDefinition[] = parserRules) {
     const input = {
       parserRules: rules.map(({ id }, index) => ({
         id,
