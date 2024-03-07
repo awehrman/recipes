@@ -36,7 +36,7 @@ const RuleBody: React.FC<ResetProps> = memo(({ reset }) => {
     return fields.map((field, index) => {
       const definitionId = definitions?.[index]?.id ?? `OPTIMISTIC-${index}`;
       const defaultValue = defaultValues.definitions?.[index];
-      console.log({ defaultValue });
+
       return (
         <RuleDefinitionProvider
           key={field.id}

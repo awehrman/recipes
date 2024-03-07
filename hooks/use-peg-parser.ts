@@ -1,21 +1,39 @@
-import { Rule, ParserUtility } from 'components/parser/types';
-import { compileGrammar, parseTests } from './helpers/parser-rule';
+import { Rule } from 'components/parser/types';
+import {
+  fetchTests,
+  compileGrammar,
+  compileParser,
+  runTests
+} from './helpers/parser-rule';
+import { TestProps } from 'components/parser/types';
 
 function usePEGParser(rules: Rule[], loading = false) {
-  const utils: ParserUtility = compileGrammar(rules, loading);
-  const { parser, errors = [], grammar } = utils;
-  const tests = parseTests(parser, loading);
-  const failedTests = tests.filter((test) => !!test?.error?.message);
-  const failedTestErrors = failedTests.map((test) => test.error);
-  const allErrors = [...errors, ...failedTestErrors];
+  let tests: TestProps[] = fetchTests();
+  let errors: Error[] = [];
+
+  if (loading) {
+    return {
+      tests,
+      grammar: '',
+      errors
+    };
+  }
+
+  const grammar = compileGrammar(rules);
+  try {
+    const { parser, errors: grammarErrors } = compileParser(grammar);
+    if (grammarErrors.length > 0) {
+      errors = grammarErrors;
+    }
+    tests = runTests(tests, parser);
+  } catch (e: unknown) {
+    errors.push(e as Error);
+  }
 
   return {
-    parser,
-    errors: allErrors,
-    grammar,
     tests,
-    compileGrammar,
-    parseTests
+    grammar,
+    errors
   };
 }
 export default usePEGParser;

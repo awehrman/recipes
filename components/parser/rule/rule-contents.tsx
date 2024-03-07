@@ -126,7 +126,7 @@ const InnerWrapper = styled.form`
   // padding-bottom: ${RULE_BOTTOM_MARGIN}px;
 
   &.edit {
-    // background: ${({ theme }) => theme.colors.lightBlue};
+    background: ${({ theme }) => theme.colors.lightBlue};
     // background: khaki;
     padding-top: ${RULE_BOTTOM_MARGIN}px;
   }

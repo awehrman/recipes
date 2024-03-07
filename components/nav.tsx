@@ -23,7 +23,13 @@ type IconProps = {
   label: string;
 };
 
-const links = [
+type LinkProp = {
+  href: string;
+  label: string;
+  icon: JSX.Element;
+};
+
+const links: LinkProp[] = [
   { href: '/', label: 'Home', icon: <HomeIcon /> },
   { href: '/import', label: 'Import', icon: <CloudDownloadIcon /> },
   { href: '/ingredients', label: 'Ingredients', icon: <LemonIcon /> },
@@ -42,7 +48,6 @@ const Navigation: React.FC<NavProps> = ({ isExpanded, setIsExpanded }) => {
     setIsExpanded,
     themeContext
   });
-  // console.log('[nav] render calling use-nav-button hook', { navIconRef });
 
   const IconAndLabel = ({ icon, label }: IconProps): JSX.Element => (
     <>

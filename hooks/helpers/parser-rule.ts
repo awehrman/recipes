@@ -1,6 +1,6 @@
 import { ApolloCache, ApolloQueryResult, FetchResult } from '@apollo/client';
 import _ from 'lodash';
-import peggy, { Parser, DiagnosticNote } from 'peggy';
+import peggy, { Parser } from 'peggy';
 
 import {
   GET_PARSER_RULE_QUERY,
@@ -193,78 +193,70 @@ export const getStyledParserRule = (rule: Rule) => {
   return parserRuleString;
 };
 
-export const compileGrammar = (
-  rules: Rule[],
-  loading = false
-): ParserUtility => {
-  if (loading) {
-    return {
-      parser: undefined,
-      errors: [],
-      grammar: ''
-    };
-  }
+export const fetchTests = (): TestProps[] => {
+  // TODO we'll ultimately want to grab these from the db
+  const tests: TestProps[] = [...defaultTests];
+  return tests;
+};
 
-  let parser: Parser;
-  let parserSource: string;
+export const compileGrammar = (rules: Rule[]): string => {
   const starter = 'start = ingredientLine \n';
   const grammar =
     starter + rules.map((rule: Rule) => getStyledParserRule(rule)).join('\n');
-  const grammarErrors: DiagnosticNote[] = [];
+  return grammar;
+};
+
+export const compileParser = (grammar: string) => {
+  let parser: Parser;
+  let parserSource: string;
+  const errors: Error[] = [];
+
   try {
     parserSource = peggy.generate(grammar, {
       cache: true,
       output: 'source',
       error: (_stage, message, location) => {
-        if (
-          location?.start &&
-          !grammarErrors.find((err) => err.message === message)
-        ) {
-          grammarErrors.push({ message, location });
+        if (location?.start && !errors.find((err) => err.message === message)) {
+          errors.push(new Error(message));
         }
       }
     });
-    parser = eval(parserSource.toString());
-    return {
-      parser,
-      errors: grammarErrors,
-      grammar
-    };
-  } catch (e) {
-    return {
-      parser: undefined,
-      errors: grammarErrors,
-      grammar
-    };
+  } catch (e: unknown) {
+    throw new Error(`Could not generate parser.\n${e}`);
   }
+
+  try {
+    parser = eval(parserSource);
+  } catch (e: unknown) {
+    throw new Error(`Could not evaluate parser./n${e}`);
+  }
+
+  return {
+    parser,
+    errors
+  };
 };
 
-export const parseTests = (
-  parser: Parser | undefined,
-  loading = false
-): TestProps[] => {
-  const tests: TestProps[] = [...defaultTests];
-  if (parser && !loading) {
-    for (const test of tests) {
-      try {
-        const details = parser.parse(test.reference);
-        test.parsed = true;
-        test.details = details;
-        test.passed = test.expected.every((exp) => {
-          const matchingDetail = details.values.find(
-            (detail: DetailsProps) =>
-              detail.type === exp.type &&
-              detail?.values &&
-              detail.values[0] === exp.value
-          );
-          return matchingDetail !== undefined;
-        });
-      } catch (e: unknown) {
-        test.parsed = false;
-        test.error = {
-          message: `${e}`
-        };
-      }
+export const runTests = (tests: TestProps[], parser: Parser): TestProps[] => {
+  for (const test of tests) {
+    try {
+      const details = parser.parse(test.reference);
+      test.parsed = true;
+      test.details = details;
+      test.passed = test.expected.every((exp) => {
+        const matchingDetail = details.values.find(
+          (detail: DetailsProps) =>
+            detail.type === exp.type &&
+            detail?.values &&
+            detail.values[0] === exp.value
+        );
+        return matchingDetail !== undefined;
+      });
+    } catch (e: unknown) {
+      test.parsed = false;
+      test.error = {
+        message: `${e}`
+      };
     }
   }
   return tests;
