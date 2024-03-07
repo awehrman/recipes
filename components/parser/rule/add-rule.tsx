@@ -11,7 +11,6 @@ import RuleContents from './rule-contents';
 import useParserRules from 'hooks/use-parser-rules';
 
 const AddRule: React.FC = () => {
-  // const [isInit, setIsInit] = useState(false);
   const { rules = [] } = useParserRules();
   const {
     state: { isAddButtonDisplayed }
@@ -20,14 +19,6 @@ const AddRule: React.FC = () => {
   if (isAddButtonDisplayed) {
     return null;
   }
-
-  // TODO we need to come back here anyways
-  // useEffect(() => {
-  //   if (!isInit) {
-  //     setFocus('name');
-  //     setIsInit(true);
-  //   }
-  // }, [isInit, setFocus]);
 
   function recomputeRuleSize() {
     // TODO idk do we need to do things here?

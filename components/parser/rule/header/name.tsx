@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useRuleContext } from 'contexts/rule-context';
 import useParserRule from 'hooks/use-parser-rule';
@@ -7,14 +7,25 @@ import useParserRules from 'hooks/use-parser-rules';
 
 import AutoWidthInput from '../auto-width-input';
 import { isDuplicateRule, isNotEmpty } from '../validators';
+import { useFormContext } from 'react-hook-form';
 
 const RuleName: React.FC = () => {
   const {
-    state: { id }
+    state: { id, displayContext }
   } = useRuleContext();
   const { rules = [] } = useParserRules();
   const { rule } = useParserRule(id);
   const { name = '' } = rule || {};
+
+  const [isInit, setIsInit] = useState(false);
+  const { setFocus } = useFormContext();
+
+  useEffect(() => {
+    if (displayContext === 'add' && !isInit) {
+      setFocus('name');
+      setIsInit(true);
+    }
+  }, [isInit, displayContext, setFocus]);
 
   return (
     <AutoWidthInput
