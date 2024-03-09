@@ -6,7 +6,7 @@ import usePEGParser from 'hooks/use-peg-parser';
 import useParserRules from 'hooks/use-parser-rules';
 import { TestComponentProps, TestWrapperProps } from './types';
 
-const Test: React.FC<TestComponentProps> = ({ test }) => {
+const Test: React.FC<TestComponentProps> = ({ test, loading }) => {
   const [showTestDetails, setShowTestDetails] = useState(false);
 
   function handleDetailsToggle() {
@@ -14,7 +14,11 @@ const Test: React.FC<TestComponentProps> = ({ test }) => {
   }
 
   return (
-    <TestWrapper parsed={test.parsed} onClick={handleDetailsToggle}>
+    <TestWrapper
+      loading={loading}
+      parsed={test.parsed}
+      onClick={handleDetailsToggle}
+    >
       {test.reference}
       {showTestDetails && test.parsed ? (
         <Details>
@@ -60,9 +64,9 @@ const Test: React.FC<TestComponentProps> = ({ test }) => {
 };
 
 const Errors: React.FC = () => {
-  const { rules = [], loading } = useParserRules();
+  const { rules = [], loading = true } = useParserRules();
   const { errors = [] } = usePEGParser(rules, loading);
-
+  console.log({ loading });
   function renderErrors() {
     return errors.map((error, index) => (
       <ErrorMessage key={`error-${index}-${error?.message}-Error`}>
@@ -90,7 +94,7 @@ const Tests: React.FC = () => {
 
   function renderTests() {
     return tests.map((test) => (
-      <Test key={`test-${test.reference}`} test={test} />
+      <Test key={`test-${test.reference}`} loading={loading} test={test} />
     ));
   }
 
@@ -106,7 +110,13 @@ export default Tests;
 
 const TestWrapper = styled.div<TestWrapperProps>`
   font-size: 14px;
-  color: ${({ parsed }) => (parsed ? 'MediumSeaGreen' : 'tomato')};
+  color: ${({ parsed, loading }) => {
+    console.log({ loading });
+    if (loading) {
+      return '#222';
+    }
+    return parsed ? 'MediumSeaGreen' : 'tomato';
+  }};
 
   &:hover {
     cursor: pointer;

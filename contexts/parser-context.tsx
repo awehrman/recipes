@@ -34,6 +34,11 @@ function ruleReducer(state: ParserState, action: ParserAction): ParserState {
         return state;
       }
       return { ...state, isCollapsed: action.payload };
+    case 'SET_IS_DRAG_ENABLED':
+      if (action.payload === state.isDragEnabled) {
+        return state;
+      }
+      return { ...state, isDragEnabled: action.payload };
     default:
       throw new Error('Unhandled action type');
   }
@@ -43,11 +48,13 @@ export function ParserProvider({
   children,
   isAddButtonDisplayed = true,
   isCollapsed = true,
+  isDragEnabled = false,
   view = 'rules'
 }: ParserProviderProps) {
   const [state, dispatch] = useReducer(ruleReducer, {
     isAddButtonDisplayed,
     isCollapsed,
+    isDragEnabled,
     view
   });
 

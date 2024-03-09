@@ -30,6 +30,11 @@ function ruleDefinitionReducer(
         return state;
       }
       return { ...state, listItemEntryValue: action.payload };
+    case 'SET_FORMATTER_HEIGHT':
+      if (action.payload === state.formatterHeight) {
+        return state;
+      }
+      return { ...state, formatterHeight: action.payload };
     default:
       throw new Error('Unhandled action type');
   }
@@ -41,7 +46,8 @@ export function RuleDefinitionProvider({
   definitionId,
   listItemEntryValue = '',
   showListInput = false,
-  defaultValue
+  defaultValue,
+  formatterHeight = 0
 }: RuleDefinitionProviderProps) {
   const newDefault = {
     id: definitionId ?? `OPTIMISTIC-${index}`,
@@ -58,7 +64,8 @@ export function RuleDefinitionProvider({
     definitionId,
     listItemEntryValue,
     showListInput,
-    defaultValue: defaultValue ?? newDefault
+    defaultValue: defaultValue ?? newDefault,
+    formatterHeight
   });
 
   const memoizedContext = useMemo(() => ({ state, dispatch }), [state]);

@@ -28,7 +28,7 @@ const RuleType: React.FC<RuleTypeComponentProps> = memo(({ onTypeSwitch }) => {
   }
 
   return (
-    <Wrapper>
+    <Wrapper isEditMode={displayContext === 'edit'}>
       <Label>
         <HiddenFormInput
           {...register(fieldName)}
@@ -37,7 +37,7 @@ const RuleType: React.FC<RuleTypeComponentProps> = memo(({ onTypeSwitch }) => {
           type="hidden"
         />
         <RuleTypeButton
-          label={type === 'RULE' ? 'Switch to List' : 'Switch to Rule'}
+          label={type === 'RULE' ? 'Use List' : 'Use Rule'}
           onClick={handleRuleTypeButtonClick}
         />
       </Label>
@@ -63,13 +63,25 @@ const RuleTypeButton = styled(Button)`
 `;
 
 const Label = styled.label``;
-const Wrapper = styled.fieldset`
+
+type WrapperProps = {
+  isEditMode: boolean;
+};
+
+const Wrapper = styled.fieldset<WrapperProps>`
   border: 0;
   padding: 0;
   margin: 0;
   position: absolute;
-  top: 2px;
+  top: -20px;
   right: 0;
   float: right;
   z-index: 100;
+
+  ${({ isEditMode }) =>
+    isEditMode &&
+    `
+    // allow room for our remove rule button
+    right: 20px;
+  `}
 `;

@@ -7,7 +7,7 @@ import PlusIcon from 'public/icons/plus.svg';
 
 const RuleActions: React.FC = () => {
   const {
-    state: { isAddButtonDisplayed, isCollapsed },
+    state: { isAddButtonDisplayed, isCollapsed, isDragEnabled },
     dispatch
   } = useParserContext();
 
@@ -21,12 +21,25 @@ const RuleActions: React.FC = () => {
     dispatch({ type: 'SET_IS_COLLAPSED', payload: !isCollapsed });
   }
 
+  function handleDragModeOnClick() {
+    if (!isDragEnabled) {
+      dispatch({ type: 'SET_IS_COLLAPSED', payload: true });
+    }
+    dispatch({ type: 'SET_IS_DRAG_ENABLED', payload: !isDragEnabled });
+  }
+
   return (
     <Wrapper>
       {!loading && rules.length > 0 && (
         <CollapseRules
-          label={!isCollapsed ? 'Collapse Rules' : 'Expand Rules'}
+          label={!isCollapsed ? 'Collapse' : 'Expand'}
           onClick={handleCollapseRulesOnClick}
+        />
+      )}
+      {!loading && rules.length > 0 && (
+        <ReorderRules
+          label={isDragEnabled ? 'Finish' : 'Reorder'}
+          onClick={handleDragModeOnClick}
         />
       )}
       {isAddButtonDisplayed && (
@@ -66,6 +79,17 @@ const AddRuleButton = styled(Button)`
 `;
 
 const CollapseRules = styled(Button)`
+  border: 0;
+  background: transparent;
+  font-weight: 600;
+  font-size: 13px;
+  color: #666;
+  padding: 4px 0px;
+  float: right;
+  margin-left: 10px;
+`;
+
+const ReorderRules = styled(Button)`
   border: 0;
   background: transparent;
   font-weight: 600;

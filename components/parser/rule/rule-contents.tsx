@@ -29,7 +29,10 @@ const RuleContents: React.FC<RecomputeRuleSizeProps> = ({
     dispatch,
     state: { defaultValues, displayContext, id = '-1', index }
   } = useRuleContext();
-  const { dispatch: parserDispatch } = useParserContext();
+  const {
+    state: { isCollapsed },
+    dispatch: parserDispatch
+  } = useParserContext();
   const {
     addRule,
     updateRule,
@@ -77,11 +80,16 @@ const RuleContents: React.FC<RecomputeRuleSizeProps> = ({
     parserDispatch
   };
 
+  function handleCollapseToggle() {
+    parserDispatch({ type: 'SET_IS_COLLAPSED', payload: true });
+  }
+
   // TODO i feel like this should live in its own warnings hook
   const definedRuleNames = rules.map(
     (rule: ParserRuleWithRelations) => rule.name
   );
   const ruleDefinitionNames = getAllParserRuleDefinitionNames(definitions);
+
   useEffect(() => {
     let triggedWarning = false;
     for (const rule of ruleDefinitionNames) {
@@ -95,13 +103,17 @@ const RuleContents: React.FC<RecomputeRuleSizeProps> = ({
   }, [ruleDefinitionNames, definedRuleNames, dispatch]);
 
   return (
-    <Wrapper>
+    // TODO this should probably be a checkbox?
+    <Wrapper
+      displayCursor={displayContext === 'display' && isCollapsed}
+      onClick={handleCollapseToggle}
+    >
       <InnerWrapper
+        ref={ref}
         className={displayContext}
         onSubmit={handleSubmit((data) =>
           saveRule({ data, ...props, reset: handleReset })
         )}
-        ref={ref}
       >
         <FormProvider {...methods}>
           <RuleHeader setFocus={setFocus} />
@@ -114,9 +126,15 @@ const RuleContents: React.FC<RecomputeRuleSizeProps> = ({
 
 export default RuleContents;
 
-const Wrapper = styled.div`
+type WrapperProps = {
+  displayCursor: boolean;
+};
+
+const Wrapper = styled.div<WrapperProps>`
   height: 100%;
   width: 100%;
+
+  ${({ displayCursor }) => (displayCursor ? 'cursor: pointer;' : '')};
 `;
 
 const InnerWrapper = styled.form`
@@ -126,14 +144,16 @@ const InnerWrapper = styled.form`
   // padding-bottom: ${RULE_BOTTOM_MARGIN}px;
 
   &.edit {
+    // TODO we've lost appropriate padding along the way
     background: ${({ theme }) => theme.colors.lightBlue};
     // background: khaki;
     padding-top: ${RULE_BOTTOM_MARGIN}px;
+    padding: 14px 20px;
   }
 
   &.add {
-    padding: 20px;
+    padding: 14px 20px;
     background: ${({ theme }) => theme.colors.lightGreen};
-    margin-bottom: 10px;
+    // margin-bottom: 10px;
   }
 `;

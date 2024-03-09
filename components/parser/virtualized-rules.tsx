@@ -9,7 +9,6 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import { VariableSizeList as List } from 'react-window';
 import styled from 'styled-components';
 
-import { useParserContext } from 'contexts/parser-context';
 import useParserRules from 'hooks/use-parser-rules';
 
 import { DEFAULT_GUTTER_SIZE, DEFAULT_ROW_SIZE } from './rule/constants';
@@ -22,9 +21,6 @@ import { getDraggableStyle } from './utils';
 // and that might cause this error
 
 const VirtualizedRules: React.FC = () => {
-  const {
-    state: { isCollapsed }
-  } = useParserContext();
   const { loading, rules = [], updateRulesOrder } = useParserRules();
   const listRef = useRef<List | null>(null);
   const sizeMap = useRef<{ [index: number]: number }>({});
@@ -107,13 +103,7 @@ const VirtualizedRules: React.FC = () => {
                     outerRef={provided.innerRef}
                     width={width + DEFAULT_GUTTER_SIZE}
                   >
-                    {(props) => (
-                      <DraggableRule
-                        {...props}
-                        isCollapsed={isCollapsed}
-                        resize={resize}
-                      />
-                    )}
+                    {(props) => <DraggableRule {...props} resize={resize} />}
                   </StyledList>
                 )}
               </Droppable>

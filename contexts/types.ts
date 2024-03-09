@@ -38,9 +38,9 @@ export type RuleProviderProps = {
   id: string;
   initialContext: DisplayContext;
   isCollapsed: boolean;
+  isDragEnabled: boolean;
   index: number;
   rule: ParserRuleWithRelations;
-  // recomputeRuleSize: (() => void) | undefined;
 };
 
 export type ParserActionTypes =
@@ -51,13 +51,15 @@ export type ParserActionTypes =
 export type ParserState = {
   isAddButtonDisplayed: boolean;
   isCollapsed: boolean;
+  isDragEnabled: boolean;
   view: 'rules' | 'grammar';
 };
 
 export type ParserAction =
   | { type: 'SET_IS_ADD_BUTTON_DISPLAYED'; payload: boolean }
   | { type: 'SET_PARSER_VIEW'; payload: 'grammar' | 'rules' } // TODO enum??
-  | { type: 'SET_IS_COLLAPSED'; payload: boolean };
+  | { type: 'SET_IS_COLLAPSED'; payload: boolean }
+  | { type: 'SET_IS_DRAG_ENABLED'; payload: boolean };
 
 export type ParserDispatch = (action: ParserAction) => void;
 
@@ -65,6 +67,7 @@ export type ParserProviderProps = {
   children: ReactNode;
   isAddButtonDisplayed?: boolean;
   isCollapsed?: boolean;
+  isDragEnabled?: boolean;
   view?: 'rules' | 'grammar';
 };
 
@@ -75,14 +78,16 @@ export type FocusedIndexUpdaterContextType = React.Dispatch<
 export type RuleDefinitionAction =
   | { type: 'SET_DEFINITION_ID'; payload: string }
   | { type: 'SET_SHOW_LIST_INPUT'; payload: boolean }
-  | { type: 'SET_LIST_ITEM_ENTRY_VALUE'; payload: string };
+  | { type: 'SET_LIST_ITEM_ENTRY_VALUE'; payload: string }
+  | { type: 'SET_FORMATTER_HEIGHT'; payload: number };
 
 export type RuleDefinitionDispatch = (action: RuleDefinitionAction) => void;
 
 export type RuleDefinitionActionTypes =
   | 'SET_DEFINITION_ID'
   | 'SET_SHOW_LIST_INPUT'
-  | 'SET_LIST_ITEM_ENTRY_VALUE';
+  | 'SET_LIST_ITEM_ENTRY_VALUE'
+  | 'SET_FORMATTER_HEIGHT';
 
 export type RuleDefinitionState = {
   index: number;
@@ -99,6 +104,7 @@ export type RuleDefinitionState = {
     type: string;
     order: number; // TODO keep thinking about if this should be separate from index
   };
+  formatterHeight?: number;
 };
 
 export type RuleDefinitionProviderProps = {
@@ -108,4 +114,5 @@ export type RuleDefinitionProviderProps = {
   listItemEntryValue?: string;
   showListInput?: boolean;
   defaultValue?: ParserRuleDefinition;
+  formatterHeight?: number;
 };

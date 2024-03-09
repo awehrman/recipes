@@ -29,11 +29,12 @@ const AddRule: React.FC = () => {
       <Header>Add New Rule</Header>
       {/* TODO is it bad practice to have multiple rule providers? */}
       <RuleProvider
-        rule={getDefaultRuleValuesForIndex(rules.length)}
         id={'-1'}
         index={rules.length}
         initialContext="add"
         isCollapsed={false}
+        isDragEnabled={false}
+        rule={getDefaultRuleValuesForIndex(rules.length)}
       >
         <RuleContents recomputeRuleSize={recomputeRuleSize} />
       </RuleProvider>
@@ -43,7 +44,9 @@ const AddRule: React.FC = () => {
 
 export default AddRule;
 
-const Wrapper = styled.div``;
+const Wrapper = styled.div`
+  margin-bottom: 20px;
+`;
 
 const Header = styled.h2`
   font-size: 16px;

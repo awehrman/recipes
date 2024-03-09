@@ -2,20 +2,25 @@ import React, { memo } from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { areEqual, VariableSizeList as List } from 'react-window';
 
+import { useParserContext } from 'contexts/parser-context';
+
 import VirtualizedRule from '../rule/virtualized-rule';
 import { getDraggableStyle } from '../utils';
 import { DraggableRuleProps } from '../types';
 
 const DraggableRule = memo(
-  ({ data: rules, index, style, resize, isCollapsed }: DraggableRuleProps) => {
+  ({ data: rules, index, style, resize }: DraggableRuleProps) => {
     const rule = rules[index];
+    const {
+      state: { isDragEnabled }
+    } = useParserContext();
 
     return (
       <Draggable
         draggableId={rule.id}
         index={index}
         key={rule.id}
-        isDragDisabled={!isCollapsed}
+        isDragDisabled={!isDragEnabled}
       >
         {(provided, snapshot) => (
           <VirtualizedRule

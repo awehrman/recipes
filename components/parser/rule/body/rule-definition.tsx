@@ -1,10 +1,12 @@
-import React, { memo } from 'react';
+import React, { memo, useEffect } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
+import useResizeObserver from 'use-resize-observer';
 
 import { Button } from 'components/common';
 import { useRuleContext } from 'contexts/rule-context';
 import { useRuleDefinitionContext } from 'contexts/rule-definition-context';
+import TrashIcon from 'public/icons/trash-can.svg';
 
 import Example from './example';
 import Formatter from './formatter';
@@ -20,8 +22,10 @@ const RuleDefinition: React.FC = memo(() => {
   const {
     state: {
       index,
-      defaultValue: { list: defaultList, type: defaultType }
-    }
+      defaultValue: { list: defaultList, type: defaultType },
+      formatterHeight
+    },
+    dispatch
   } = useRuleDefinitionContext();
   const list = useWatch({
     control,
@@ -55,21 +59,32 @@ const RuleDefinition: React.FC = memo(() => {
     setValue(`definitions.${index}.formatter`, '');
   }
 
+  const { ref, height = 0 } = useResizeObserver<HTMLDivElement>();
+
+  useEffect(() => {
+    if (height > 0 && height !== formatterHeight) {
+      dispatch({ type: 'SET_FORMATTER_HEIGHT', payload: height });
+    }
+  }, [height, formatterHeight, dispatch]);
+
   if (!(isExpanded || displayContext !== 'display')) {
     return null;
   }
 
   return (
-    <Wrapper>
+    <Wrapper ref={ref}>
       <Type onTypeSwitch={() => handleTypeChange(index, type)} />
+      {/* TODO we should probably group all of our "rule" types in their own container  */}
       <Example />
       <Rule />
       <Formatter />
       <List />
       {showDeleteDefinitionButton && (
         <DeleteButton
+          formatterHeight={formatterHeight ?? 0}
           onClick={() => handleRemoveDefinitionClick(index)}
-          label="Remove"
+          // label="Remove"
+          icon={<TrashIcon />}
         />
       )}
     </Wrapper>
@@ -81,14 +96,19 @@ export default RuleDefinition;
 RuleDefinition.whyDidYouRender = true;
 
 const Wrapper = styled.div`
-  margin: 6px 20px 0px;
+  margin: 6px 0px 6px 30px;
   font-size: 14px;
   position: relative;
   display: flex;
   flex-direction: column;
 `;
 
-const DeleteButton = styled(Button)`
+type DeleteButtonProps = {
+  formatterHeight: number;
+};
+
+const TYPE_HEIGHT = 20;
+const DeleteButton = styled(Button)<DeleteButtonProps>`
   border: 0;
   background: transparent;
   color: #aaa;
@@ -98,6 +118,14 @@ const DeleteButton = styled(Button)`
   padding: 0;
   display: flex;
   flex-basis: 100%;
-  align-self: flex-end;
-  margin-top: 6px;
+  align-self: flex-start;
+  position: absolute;
+  bottom: ${({ formatterHeight }) => `${formatterHeight - TYPE_HEIGHT ?? 0}px`};
+  left: -20px;
+
+  // TODO trigger only on
+  svg {
+    fill: #aaa;
+    height: 14px;
+  }
 `;

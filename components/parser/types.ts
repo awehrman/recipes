@@ -84,9 +84,11 @@ export type GrammarExpectedProps = {
 
 export type TestComponentProps = {
   test: GrammarTestProps;
+  loading: boolean;
 };
 
 export type TestWrapperProps = {
+  loading: boolean;
   parsed: boolean;
 };
 
@@ -153,7 +155,6 @@ export type ListKeywordFocusProps = {
 export interface ListItemRendererProps extends ListChildComponentProps {}
 export type DraggableRuleProps = ListItemRendererProps & {
   resize: (index: number, size: number) => void;
-  isCollapsed: boolean;
 };
 
 export type GetStyleProps = {

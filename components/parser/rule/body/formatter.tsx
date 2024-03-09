@@ -8,7 +8,7 @@ import CodeMirror, {
 } from '@uiw/react-codemirror';
 import { js_beautify } from 'js-beautify';
 import _ from 'lodash';
-import React, { forwardRef, memo, useCallback } from 'react';
+import React, { forwardRef, memo, useCallback, useEffect } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 
@@ -165,23 +165,21 @@ RuleFormatter.whyDidYouRender = true;
 const Wrapper = styled.div`
   position: relative;
   margin-top: 6px;
+  cursor: text;
 `;
 
-const LabelWrapper = styled.label`
+const EditFormatter = styled.label`
   display: flex;
   flex-direction: column;
   font-size: 14px;
   font-weight: 600;
   margin: 0;
+  position: relative;
+  cursor: text;
 `;
 
 const HiddenFormInput = styled.textarea`
   display: none;
-`;
-
-const EditFormatter = styled(LabelWrapper)`
-  margin-right: 10px;
-  position: relative;
 `;
 
 const StyledEditor = styled(CodeMirror)`
