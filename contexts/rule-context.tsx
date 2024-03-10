@@ -78,7 +78,7 @@ export function RuleProvider({
   children,
   id,
   initialContext = 'display',
-  isCollapsed = false,
+  isAllCollapsed = false,
   index = 0,
   rule = {}
 }: RuleProviderProps) {
@@ -90,7 +90,7 @@ export function RuleProvider({
     id,
     displayContext: initialContext,
     defaultValues,
-    isExpanded: isCollapsed ? false : true,
+    isExpanded: isAllCollapsed ? false : true,
     isFocused: initialContext === 'display' ? false : true,
     index,
     hasWarning: false

@@ -7,7 +7,7 @@ import PlusIcon from 'public/icons/plus.svg';
 
 const RuleActions: React.FC = () => {
   const {
-    state: { isAddButtonDisplayed, isCollapsed, isDragEnabled },
+    state: { isAddButtonDisplayed, isAllCollapsed, isDragEnabled },
     dispatch
   } = useParserContext();
 
@@ -18,12 +18,12 @@ const RuleActions: React.FC = () => {
   }
 
   function handleCollapseRulesOnClick() {
-    dispatch({ type: 'SET_IS_COLLAPSED', payload: !isCollapsed });
+    dispatch({ type: 'SET_IS_ALL_COLLAPSED', payload: !isAllCollapsed });
   }
 
   function handleDragModeOnClick() {
     if (!isDragEnabled) {
-      dispatch({ type: 'SET_IS_COLLAPSED', payload: true });
+      dispatch({ type: 'SET_IS_ALL_COLLAPSED', payload: true });
     }
     dispatch({ type: 'SET_IS_DRAG_ENABLED', payload: !isDragEnabled });
   }
@@ -32,7 +32,7 @@ const RuleActions: React.FC = () => {
     <Wrapper>
       {!loading && rules.length > 0 && (
         <CollapseRules
-          label={!isCollapsed ? 'Collapse' : 'Expand'}
+          label={!isAllCollapsed ? 'Collapse' : 'Expand'}
           onClick={handleCollapseRulesOnClick}
         />
       )}

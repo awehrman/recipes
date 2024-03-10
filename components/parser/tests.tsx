@@ -15,7 +15,7 @@ const Test: React.FC<TestComponentProps> = ({ test, loading }) => {
 
   return (
     <TestWrapper
-      loading={loading}
+      isLoading={loading}
       parsed={test.parsed}
       onClick={handleDetailsToggle}
     >
@@ -110,9 +110,8 @@ export default Tests;
 
 const TestWrapper = styled.div<TestWrapperProps>`
   font-size: 14px;
-  color: ${({ parsed, loading }) => {
-    console.log({ loading });
-    if (loading) {
+  color: ${({ parsed, isLoading }) => {
+    if (isLoading) {
       return '#222';
     }
     return parsed ? 'MediumSeaGreen' : 'tomato';

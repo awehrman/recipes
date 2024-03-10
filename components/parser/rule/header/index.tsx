@@ -77,8 +77,8 @@ const RemoveRuleButton = styled(Button)`
   font-size: 14px;
   align-self: flex-end;
   position: absolute;
-  top: -2px;
-  right: 0;
+  top: 16px;
+  right: 5px;
   margin-right: 8px;
   padding-top: 4px;
 

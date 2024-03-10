@@ -63,7 +63,7 @@ const EditButton = styled(Button)<EditButtonProps>`
   svg {
     height: 13px;
     width: 13px;
-    top: 2px;
+    top: 0px;
     position: relative;
     cursor: pointer;
     visibility: hidden;

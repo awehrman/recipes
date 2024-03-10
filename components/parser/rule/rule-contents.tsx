@@ -27,10 +27,10 @@ const RuleContents: React.FC<RecomputeRuleSizeProps> = ({
 }) => {
   const {
     dispatch,
-    state: { defaultValues, displayContext, id = '-1', index }
+    state: { defaultValues, displayContext, id = '-1', index, isExpanded }
   } = useRuleContext();
   const {
-    state: { isCollapsed },
+    // state: { isAllCollapsed },
     dispatch: parserDispatch
   } = useParserContext();
   const {
@@ -81,7 +81,7 @@ const RuleContents: React.FC<RecomputeRuleSizeProps> = ({
   };
 
   function handleCollapseToggle() {
-    parserDispatch({ type: 'SET_IS_COLLAPSED', payload: true });
+    dispatch({ type: 'SET_IS_EXPANDED', payload: !isExpanded });
   }
 
   // TODO i feel like this should live in its own warnings hook
@@ -105,7 +105,8 @@ const RuleContents: React.FC<RecomputeRuleSizeProps> = ({
   return (
     // TODO this should probably be a checkbox?
     <Wrapper
-      displayCursor={displayContext === 'display' && isCollapsed}
+      // TODO i think we just need an individual expanded
+      displayCursor={displayContext === 'display' /*&& isCollapsed*/}
       onClick={handleCollapseToggle}
     >
       <InnerWrapper

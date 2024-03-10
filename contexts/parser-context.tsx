@@ -29,11 +29,11 @@ function ruleReducer(state: ParserState, action: ParserAction): ParserState {
         return state;
       }
       return { ...state, view: action.payload };
-    case 'SET_IS_COLLAPSED':
-      if (action.payload === state.isCollapsed) {
+    case 'SET_IS_ALL_COLLAPSED': // TODO maybe rename to something like SET_IS_ALL_COLLAPSED
+      if (action.payload === state.isAllCollapsed) {
         return state;
       }
-      return { ...state, isCollapsed: action.payload };
+      return { ...state, isAllCollapsed: action.payload };
     case 'SET_IS_DRAG_ENABLED':
       if (action.payload === state.isDragEnabled) {
         return state;
@@ -47,13 +47,13 @@ function ruleReducer(state: ParserState, action: ParserAction): ParserState {
 export function ParserProvider({
   children,
   isAddButtonDisplayed = true,
-  isCollapsed = true,
+  isAllCollapsed = true,
   isDragEnabled = false,
   view = 'rules'
 }: ParserProviderProps) {
   const [state, dispatch] = useReducer(ruleReducer, {
     isAddButtonDisplayed,
-    isCollapsed,
+    isAllCollapsed,
     isDragEnabled,
     view
   });

@@ -19,7 +19,7 @@ const VirtualizedRule: React.FC<VirtualizedRuleProps> = forwardRef<
     ref
   ) => {
     const {
-      state: { isCollapsed, isDragEnabled }
+      state: { isAllCollapsed, isDragEnabled }
     } = useParserContext();
     return (
       // TODO i wonder if i can just style the RuleProvider so this is less nested
@@ -35,7 +35,7 @@ const VirtualizedRule: React.FC<VirtualizedRuleProps> = forwardRef<
             id={id}
             index={index}
             initialContext={displayContext}
-            isCollapsed={isCollapsed}
+            isAllCollapsed={isAllCollapsed}
             isDragEnabled={isDragEnabled}
           >
             <FocusedIndexProvider>

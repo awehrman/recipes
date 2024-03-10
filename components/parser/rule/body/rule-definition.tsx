@@ -1,4 +1,4 @@
-import React, { memo, useEffect } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 import useResizeObserver from 'use-resize-observer';
@@ -15,6 +15,9 @@ import Type from './type';
 import List from './list';
 
 const RuleDefinition: React.FC = memo(() => {
+  // TODO we need to move this higher up
+  const [showRuleDefinitionActions, setShowRuleDefinitionActions] =
+    useState<boolean>(false);
   const {
     state: { displayContext, isExpanded }
   } = useRuleContext();
@@ -40,6 +43,7 @@ const RuleDefinition: React.FC = memo(() => {
   const definitions = useWatch({ control, name: 'definitions' });
 
   const showDeleteDefinitionButton =
+    showRuleDefinitionActions &&
     displayContext !== 'display' &&
     ((type === 'LIST' && list.length > 0) || type === 'RULE');
 
@@ -67,12 +71,28 @@ const RuleDefinition: React.FC = memo(() => {
     }
   }, [height, formatterHeight, dispatch]);
 
+  function handleOnMouseEnter() {
+    if (!showRuleDefinitionActions) {
+      setShowRuleDefinitionActions(true);
+    }
+  }
+
+  function handleOnMouseLeave() {
+    if (showRuleDefinitionActions) {
+      setShowRuleDefinitionActions(false);
+    }
+  }
+
   if (!(isExpanded || displayContext !== 'display')) {
     return null;
   }
 
   return (
-    <Wrapper ref={ref}>
+    <Wrapper
+      ref={ref}
+      onMouseEnter={handleOnMouseEnter}
+      onMouseLeave={handleOnMouseLeave}
+    >
       <Type onTypeSwitch={() => handleTypeChange(index, type)} />
       {/* TODO we should probably group all of our "rule" types in their own container  */}
       <Example />
@@ -81,9 +101,9 @@ const RuleDefinition: React.FC = memo(() => {
       <List />
       {showDeleteDefinitionButton && (
         <DeleteButton
+          className="delete-definition"
           formatterHeight={formatterHeight ?? 0}
           onClick={() => handleRemoveDefinitionClick(index)}
-          // label="Remove"
           icon={<TrashIcon />}
         />
       )}
@@ -96,11 +116,12 @@ export default RuleDefinition;
 RuleDefinition.whyDidYouRender = true;
 
 const Wrapper = styled.div`
-  margin: 6px 0px 6px 30px;
+  margin: 6px 0px 6px 0px;
   font-size: 14px;
   position: relative;
   display: flex;
   flex-direction: column;
+  padding-left: 30px;
 `;
 
 type DeleteButtonProps = {
@@ -121,7 +142,7 @@ const DeleteButton = styled(Button)<DeleteButtonProps>`
   align-self: flex-start;
   position: absolute;
   bottom: ${({ formatterHeight }) => `${formatterHeight - TYPE_HEIGHT ?? 0}px`};
-  left: -20px;
+  left: 0px;
 
   // TODO trigger only on
   svg {

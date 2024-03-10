@@ -62,14 +62,7 @@ const RuleFormatter: React.FC = memo(() => {
   const showField = type === 'RULE';
 
   const watchedName = useWatch({ name: 'name', defaultValue: name });
-  const defaultFormatter = getDefaultFormatter(
-    displayContext === 'display' ? watchedName : name
-  );
-  const formattedWithOrder = insertOrder(`${defaultValue.formatter}`, index);
   const uniqueId = `${id}-${fieldName}`;
-  const defaultComputedValue =
-    displayContext === 'display' ? formattedWithOrder : defaultFormatter;
-  const currentValue = getEditorValue();
 
   const editorRef = React.useRef<CodeMirrorElement>(null);
   const wrapperRef = React.useRef<HTMLDivElement>(null);
@@ -88,7 +81,18 @@ const RuleFormatter: React.FC = memo(() => {
     }
   });
 
-  function getEditorValue() {
+  const getDefaultComputedValue = useCallback(() => {
+    const defaultFormatter = getDefaultFormatter(
+      displayContext !== 'edit' ? watchedName : name
+    );
+    const formattedWithOrder = insertOrder(`${defaultValue.formatter}`, index);
+    const defaultComputedValue =
+      displayContext === 'display' ? formattedWithOrder : defaultFormatter;
+    return defaultComputedValue;
+  }, [displayContext, defaultValue, watchedName, name, index]);
+  const defaultComputedValue = getDefaultComputedValue();
+
+  const getEditorValue = useCallback(() => {
     const value = getValues(fieldName) ?? '';
     if (displayContext === 'add') {
       return value.length > 0 ? value : defaultComputedValue;
@@ -99,7 +103,14 @@ const RuleFormatter: React.FC = memo(() => {
     }
     const formattedWithOrder = insertOrder(`${value}`, index);
     return formattedWithOrder;
-  }
+  }, [
+    defaultComputedValue,
+    displayContext,
+    index,
+    definitionId,
+    fieldName,
+    getValues
+  ]);
 
   const extensions = [javascript({ jsx: true }), handleOnBlur];
   const editorProps = useCallback(
@@ -109,20 +120,20 @@ const RuleFormatter: React.FC = memo(() => {
       editable: displayContext !== 'display',
       extensions: extensions,
       height: 'auto',
-      // indentWithTab,
       onChange: handleOnChange,
       placeholder:
         displayContext === 'display' ? '' : '/* format rule return */',
       readOnly: displayContext === 'display',
       theme: themeOptions[displayContext as ThemeOptionKey],
       width: '480px',
-      value: currentValue
+      value: getEditorValue()
     }),
-    [displayContext, currentValue, extensions]
+    [displayContext, extensions, getEditorValue]
   );
 
   if (
-    (displayContext === 'display' && formattedWithOrder.length === 0) ||
+    (displayContext === 'display' &&
+      (defaultValue?.formatter ?? '').length === 0) ||
     !showField
   ) {
     return null;

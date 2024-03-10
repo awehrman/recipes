@@ -59,6 +59,7 @@ const Wrapper = styled.fieldset`
   font-size: 14px;
   font-weight: 600;
   margin-bottom: 4px;
+  margin-left: 16px;
 
   input {
     color: #aaa;
@@ -67,7 +68,7 @@ const Wrapper = styled.fieldset`
   :before {
     content: '//';
     top: 3px;
-    left: -16px;
+    left: -14px;
     position: absolute;
   }
 `;

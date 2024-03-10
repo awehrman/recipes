@@ -88,7 +88,7 @@ export type TestComponentProps = {
 };
 
 export type TestWrapperProps = {
-  loading: boolean;
+  isLoading: boolean;
   parsed: boolean;
 };
 

@@ -32,7 +32,7 @@ const AddRule: React.FC = () => {
         id={'-1'}
         index={rules.length}
         initialContext="add"
-        isCollapsed={false}
+        isAllCollapsed={false}
         isDragEnabled={false}
         rule={getDefaultRuleValuesForIndex(rules.length)}
       >

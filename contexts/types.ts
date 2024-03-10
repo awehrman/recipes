@@ -37,7 +37,7 @@ export type RuleProviderProps = {
   children: ReactNode;
   id: string;
   initialContext: DisplayContext;
-  isCollapsed: boolean;
+  isAllCollapsed: boolean;
   isDragEnabled: boolean;
   index: number;
   rule: ParserRuleWithRelations;
@@ -46,11 +46,11 @@ export type RuleProviderProps = {
 export type ParserActionTypes =
   | 'SET_IS_ADD_BUTTON_DISPLAYED'
   | 'SET_PARSER_VIEW'
-  | 'SET_IS_COLLAPSED';
+  | 'SET_IS_ALL_COLLAPSED';
 
 export type ParserState = {
   isAddButtonDisplayed: boolean;
-  isCollapsed: boolean;
+  isAllCollapsed: boolean;
   isDragEnabled: boolean;
   view: 'rules' | 'grammar';
 };
@@ -58,7 +58,7 @@ export type ParserState = {
 export type ParserAction =
   | { type: 'SET_IS_ADD_BUTTON_DISPLAYED'; payload: boolean }
   | { type: 'SET_PARSER_VIEW'; payload: 'grammar' | 'rules' } // TODO enum??
-  | { type: 'SET_IS_COLLAPSED'; payload: boolean }
+  | { type: 'SET_IS_ALL_COLLAPSED'; payload: boolean }
   | { type: 'SET_IS_DRAG_ENABLED'; payload: boolean };
 
 export type ParserDispatch = (action: ParserAction) => void;
@@ -66,7 +66,7 @@ export type ParserDispatch = (action: ParserAction) => void;
 export type ParserProviderProps = {
   children: ReactNode;
   isAddButtonDisplayed?: boolean;
-  isCollapsed?: boolean;
+  isAllCollapsed?: boolean;
   isDragEnabled?: boolean;
   view?: 'rules' | 'grammar';
 };
