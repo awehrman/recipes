@@ -14,11 +14,12 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
 }
 
 const sourceSansPro = Source_Sans_Pro({
-  weight: ['300', '400', '600'],
+  weight: ['300', '400', '600', '900'],
   style: ['normal', 'italic'],
   subsets: ['latin'],
   preload: true,
-  display: 'fallback'
+  display: 'fallback',
+  variable: '--font-sourceSansPro'
 });
 
 // type Metric = {
@@ -39,12 +40,15 @@ export default function App({ Component, pageProps }: AppProps) {
       <SessionProvider session={pageProps.session} refetchInterval={5 * 60}>
         <GlobalStyle />
         <ThemeProvider theme={theme}>
-          <style jsx global>{`
+          {/* <style jsx global>{`
             html {
               font-family: ${sourceSansPro.style.fontFamily};
             }
-          `}</style>
-          <Component {...pageProps} />
+          `}</style> */}
+
+          <main className={sourceSansPro.className}>
+            <Component {...pageProps} />
+          </main>
         </ThemeProvider>
       </SessionProvider>
     </ApolloProvider>

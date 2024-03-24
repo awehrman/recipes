@@ -117,7 +117,7 @@ const NavStyles = styled.nav<NavStylesProps>`
       }
 
       a {
-        font-family: 'Source Sans Pro', Verdana, sans-serif;
+        font-family: var(--font-sourceSansPro), Verdana, sans-serif;
         border: 0;
         background: transparent;
         cursor: pointer;

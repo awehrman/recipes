@@ -107,7 +107,7 @@ const InputField = styled.input<InputProps>`
   font-size: 1em;
   border: 0;
   outline: 0;
-  font-family: 'Source Sans Pro', Verdana, sans-serif;
+  font-family: var(--font-sourceSansPro), Verdana, sans-serif;
   margin-bottom: 5px; /* you'll want at least the height of the span border */
   background-color: transparent;
 
@@ -143,7 +143,7 @@ const InputHighlight = styled.span<InputProps>`
   top: 27px; /* 19 (height of input) + 4x (padding) */
   height: 0;
   color: transparent;
-  font-family: 'Source Sans Pro', Verdana, sans-serif;
+  font-family: var(--font-sourceSansPro), Verdana, sans-serif;
   overflow: hidden;
 
   &.auto-suggest {

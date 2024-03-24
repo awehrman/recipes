@@ -88,7 +88,7 @@ const WidthTracker = styled.span`
   display: inline;
   visibility: hidden;
   // border: 2px solid blue;
-  font-family: 'Source Sans Pro', Verdana, sans-serif;
+  font-family: var(--font-sourceSansPro), Verdana, sans-serif;
   white-space: pre;
   margin-top: -28px;
   position: relative;
@@ -113,7 +113,7 @@ const InputField = styled.input`
   font-size: 14px;
   border: 0;
   outline: 0;
-  font-family: 'Source Sans Pro', Verdana, sans-serif;
+  font-family: var(--font-sourceSansPro), Verdana, sans-serif;
   // margin-bottom: 5px; /* you'll want at least the height of the span border */
   background-color: transparent;
   width: 100%;

@@ -80,7 +80,7 @@ const Content = styled.article<ContentProps>`
   min-height: calc(100vh - 120px);
   color: ${({ theme }) => theme.colors.bodyText};
   font-size: 16px;
-  font-family: 'Source Sans Pro', Verdana, sans-serif;
+  font-family: var(--font-sourceSansPro), Verdana, sans-serif;
 `;
 
 type WrapperProps = {

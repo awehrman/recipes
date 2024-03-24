@@ -66,7 +66,7 @@ const Test: React.FC<TestComponentProps> = ({ test, loading }) => {
 const Errors: React.FC = () => {
   const { rules = [], loading = true } = useParserRules();
   const { errors = [] } = usePEGParser(rules, loading);
-  console.log({ loading });
+
   function renderErrors() {
     return errors.map((error, index) => (
       <ErrorMessage key={`error-${index}-${error?.message}-Error`}>

@@ -61,7 +61,7 @@ export const GlobalStyle = createGlobalStyle`
     -webkit-font-smoothing: antialiased;
     margin: 0;
     padding: 0;
-    font-family: 'Source Sans Pro', Verdana, sans-serif;
+    font-family: var(--font-sourceSansPro), Verdana, sans-serif;
     font-weight: 400;
     font-size: 100%;
     color: ${theme.colors.bodyText};
