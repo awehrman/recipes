@@ -61,7 +61,7 @@ amount "Amount" =
   		return {
     		rule: `#${ORDER}_amount >> ${amt.rule}`,
     		type: 'amount',
-    		values: [...amt.values]
+    		values: [...amt.values] // ...amt
     	};
   	}
     // 1

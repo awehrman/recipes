@@ -209,7 +209,7 @@ const updateParserRule = async (
 ) => {
   const { prisma } = ctx;
   const { input } = args;
-  let { id, name, label = '', order = 0, definitions = [] } = input || {};
+  const { id, name, label = '', order = 0, definitions = [] } = input || {};
   if (!id || !name) {
     // TODO come back and make this a better error
     return { id: 'false' };
@@ -296,7 +296,7 @@ const updateParserRulesOrder = async (
 ) => {
   const { prisma } = ctx;
   const { input } = args;
-  let { parserRules = [] } = input || {};
+  const { parserRules = [] } = input || {};
   const response = parserRules;
   try {
     await prisma.$transaction(

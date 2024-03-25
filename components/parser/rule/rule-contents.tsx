@@ -52,7 +52,7 @@ const RuleContents: React.FC<RecomputeRuleSizeProps> = ({
     let height = heightWithoutMargins;
     height += RULE_BORDER_SIZE * 2;
     height +=
-      displayContext === 'edit' ? RULE_BOTTOM_MARGIN * 2 : RULE_BOTTOM_MARGIN;
+      displayContext === 'edit' ? RULE_BOTTOM_MARGIN * 4 : RULE_BOTTOM_MARGIN;
     if (recomputeRuleSize !== undefined && height >= MIN_ROW_SIZE) {
       recomputeRuleSize(index, height);
     }
@@ -136,15 +136,10 @@ const Wrapper = styled.div<WrapperProps>`
 `;
 
 const InnerWrapper = styled.form`
-  /* keep some kind of background so we can maintain hover */
-  // background: white;
   max-width: 600px;
-  // padding-bottom: ${RULE_BOTTOM_MARGIN}px;
 
   &.edit {
-    // TODO we've lost appropriate padding along the way
     background: ${({ theme }) => theme.colors.lightBlue};
-    // background: khaki;
     padding-top: ${RULE_BOTTOM_MARGIN}px;
     padding: 14px 20px;
   }
@@ -152,6 +147,5 @@ const InnerWrapper = styled.form`
   &.add {
     padding: 14px 20px;
     background: ${({ theme }) => theme.colors.lightGreen};
-    // margin-bottom: 10px;
   }
 `;

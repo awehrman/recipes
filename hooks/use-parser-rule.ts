@@ -11,7 +11,8 @@ import {
 
 import {
   handleAddRuleUpdate,
-  handleDeleteRuleUpdate
+  handleDeleteRuleUpdate,
+  handleUpdateRuleUpdate
 } from './helpers/parser-rule';
 
 function useParserRule(id: string) {
@@ -61,7 +62,8 @@ function useParserRule(id: string) {
           ...data
         }
       },
-      variables: { input: data }
+      variables: { input: data },
+      update: (cache, res) => handleUpdateRuleUpdate(cache, res, id)
     });
   }
 

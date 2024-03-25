@@ -1,4 +1,5 @@
 import { ApolloCache, ApolloQueryResult, FetchResult } from '@apollo/client';
+import Prisma from '@prisma/client';
 import _ from 'lodash';
 import peggy, { Parser } from 'peggy';
 
@@ -143,7 +144,57 @@ export const handleDeleteRuleUpdate = (
     data: { parserRule: null }
   });
 
-  refetch();
+  // refetch();
+};
+
+export const handleUpdateRuleUpdate = (
+  // biome-ignore lint/suspicious/noExplicitAny: apollo
+  cache: ApolloCache<any>,
+  // biome-ignore lint/suspicious/noExplicitAny: apollo
+  res: Omit<FetchResult<any>, 'context'>,
+  id: string
+) => {
+  const {
+    data: { updateParserRule }
+  } = res;
+  let parserRule = {};
+
+  const rules: ParserRules | null = cache.readQuery({
+    query: GET_ALL_PARSER_RULES_QUERY
+  });
+
+  const parserRules = (rules?.parserRules ?? []).map((rule, index) => {
+    if (rule.id === id) {
+      parserRule = {
+        ...rule,
+        ...updateParserRule,
+        order: updateParserRule?.order ?? index,
+        definitions: (updateParserRule.definitions ?? []).map(
+          (def: Prisma.ParserRuleDefinition, defIndex: number) => ({
+            ...def,
+            example: def?.example ?? '',
+            formatter: def?.formatter ?? '',
+            type: def?.type ?? 'RULE',
+            list: def?.list ?? [],
+            order: def?.order ?? defIndex
+          })
+        )
+      };
+      return parserRule;
+    }
+    return rule;
+  });
+
+  cache.writeQuery({
+    query: GET_ALL_PARSER_RULES_QUERY,
+    data: { parserRules }
+  });
+
+  cache.writeQuery({
+    query: GET_PARSER_RULE_QUERY,
+    variables: { id },
+    data: { parserRule }
+  });
 };
 
 const getFormattedString = (formatter: string, index = 0) =>
@@ -274,11 +325,12 @@ export const handleUpdateRulesOrder = (
 
   const data = {
     parserRules: (rules?.parserRules ?? [])
-      .map((rule) => ({
+      .map((rule, index) => ({
         ...rule,
-        order: res.data.updateParserRulesOrder.find(
-          (r: ParserRuleWithRelations) => r.id === rule.id
-        ).order
+        order:
+          res.data.updateParserRulesOrder.find(
+            (r: ParserRuleWithRelations) => r.id === rule.id
+          )?.order ?? index
       }))
       .sort((a, b) => a.order - b.order)
   };
