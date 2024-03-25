@@ -66,6 +66,8 @@ const Wrapper = styled.fieldset`
   }
 
   :before {
+    font-family: var(--font-sourceSansPro), Verdana, sans-serif;
+    font-weight: 300;
     content: '//';
     top: 3px;
     left: -14px;

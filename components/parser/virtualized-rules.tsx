@@ -85,7 +85,6 @@ const VirtualizedRules: React.FC = () => {
                     ref={provided.innerRef}
                     rule={rules[rubric.source.index]}
                     style={getDraggableStyle({
-                      index: rubric.source.index,
                       provided,
                       style: provided.draggableProps.style as DraggingStyle,
                       isDragging: snapshot.isDragging

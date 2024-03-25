@@ -32,7 +32,6 @@ const DraggableRule = memo(
             ref={provided.innerRef}
             rule={rule}
             style={getDraggableStyle({
-              index,
               provided,
               style,
               isDragging: snapshot.isDragging

@@ -36,7 +36,7 @@ const RuleActions: React.FC = () => {
           onClick={handleCollapseRulesOnClick}
         />
       )}
-      {!loading && rules.length > 0 && (
+      {!loading && rules.length > 1 && isAllCollapsed && (
         <ReorderRules
           label={isDragEnabled ? 'Finish' : 'Reorder'}
           onClick={handleDragModeOnClick}

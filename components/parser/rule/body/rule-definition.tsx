@@ -116,12 +116,12 @@ export default RuleDefinition;
 RuleDefinition.whyDidYouRender = true;
 
 const Wrapper = styled.div`
-  margin: 6px 0px 6px 0px;
+  margin: 6px 0px;
   font-size: 14px;
   position: relative;
   display: flex;
   flex-direction: column;
-  padding-left: 30px;
+  padding-left: 20px;
 `;
 
 type DeleteButtonProps = {
@@ -144,7 +144,6 @@ const DeleteButton = styled(Button)<DeleteButtonProps>`
   bottom: ${({ formatterHeight }) => `${formatterHeight - TYPE_HEIGHT ?? 0}px`};
   left: 0px;
 
-  // TODO trigger only on
   svg {
     fill: #aaa;
     height: 14px;

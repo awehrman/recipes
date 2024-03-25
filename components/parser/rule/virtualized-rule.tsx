@@ -21,6 +21,7 @@ const VirtualizedRule: React.FC<VirtualizedRuleProps> = forwardRef<
     const {
       state: { isAllCollapsed, isDragEnabled }
     } = useParserContext();
+
     return (
       // TODO i wonder if i can just style the RuleProvider so this is less nested
       <Wrapper

@@ -54,15 +54,17 @@ const RuleBody: React.FC<ResetProps> = memo(({ reset }) => {
     <Wrapper>
       {renderDefinitions()}
 
-      {displayContext !== 'display' ? (
-        <AddNewDefinition
-          icon={<PlusIcon />}
-          label="Add New Definition"
-          onClick={handleAddNewDefinitionClick}
-        />
-      ) : null}
+      <InnerWrapper>
+        {displayContext !== 'display' ? (
+          <AddNewDefinition
+            icon={<PlusIcon />}
+            label="Add New Definition"
+            onClick={handleAddNewDefinitionClick}
+          />
+        ) : null}
 
-      {displayContext !== 'display' ? <SaveOptions reset={reset} /> : null}
+        {displayContext !== 'display' ? <SaveOptions reset={reset} /> : null}
+      </InnerWrapper>
     </Wrapper>
   );
 });
@@ -71,6 +73,10 @@ export default RuleBody;
 
 RuleBody.whyDidYouRender = true;
 
+const InnerWrapper = styled.div`
+  margin-top: 20px;
+`;
+
 const AddNewDefinition = styled(Button)`
   background: transparent;
   font-weight: 600;
@@ -78,7 +84,8 @@ const AddNewDefinition = styled(Button)`
   border: 0;
   padding: 0;
   font-size: 12px;
-  margin-top: 20px;
+  padding: 4px 6px;
+  margin-right: -6px;
   float: right;
 
   svg {

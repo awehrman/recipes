@@ -158,7 +158,6 @@ export type DraggableRuleProps = ListItemRendererProps & {
 };
 
 export type GetStyleProps = {
-  index?: number; // only used for debugging
   provided: DraggableProvided;
   style: DraggingStyle | CSSProperties;
   isDragging: boolean;

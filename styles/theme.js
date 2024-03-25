@@ -1,4 +1,14 @@
+import { Source_Sans_Pro } from '@next/font/google';
 import { createGlobalStyle } from 'styled-components';
+
+export const sourceSansPro = Source_Sans_Pro({
+  weight: ['300', '400', '600', '900'],
+  style: ['normal', 'italic'],
+  subsets: ['latin'],
+  preload: true,
+  display: 'fallback',
+  variable: '--font-sourceSansPro'
+});
 
 export const theme = {
   colors: {
@@ -40,7 +50,9 @@ export const theme = {
     desktopListHeight: '200px',
 
     desktopCardWidth: '880px'
-  }
+  },
+  fontFamily: `${sourceSansPro.style.fontFamily}, Verdana, sans-serif`,
+  fontWeight: sourceSansPro.style.fontWeight
 };
 
 export const GlobalStyle = createGlobalStyle`
@@ -61,8 +73,8 @@ export const GlobalStyle = createGlobalStyle`
     -webkit-font-smoothing: antialiased;
     margin: 0;
     padding: 0;
-    font-family: var(--font-sourceSansPro), Verdana, sans-serif;
-    font-weight: 400;
+    font-family: ${theme.fontFamily};
+    font-weight: ${theme.fontWeight};
     font-size: 100%;
     color: ${theme.colors.bodyText};
     height: 100%;

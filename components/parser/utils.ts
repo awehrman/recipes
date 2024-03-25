@@ -44,13 +44,12 @@ export const getFieldUpdates = ({
 
 export const getDefaultFormatter = (ruleName: string): string =>
   `{
-    const values = [...].flatMap(value => value);
-    return {
-      rule: \`#\${ORDER}_${_.camelCase(ruleName)}\`,
-      type: '${_.camelCase(ruleName)}',
-      values
-    };
-  }`;
+  return {
+    rule: \`#\${ORDER}_${_.camelCase(ruleName)}\`,
+    type: '${_.camelCase(ruleName)}',
+    values: [].flatMap(value => value)
+  };
+}`;
 
 export const formatEmbeddedList = (rule: string): string => {
   const hasSquareBracketRange = /\]/.test(rule);
@@ -188,19 +187,30 @@ const formatKeyword = (value: string): string => {
 export const getDraggableStyle = ({
   provided,
   style,
-  isDragging
+  isDragging,
+  clone
 }: GetStyleProps): CSSProperties => {
   const combined = {
     ...style,
     ...provided.draggableProps.style
   };
-
+  // console.log(clone, { style, provided, isDragging });
   const marginBottom = RULE_BOTTOM_MARGIN;
   const withSpacing: CSSProperties = {
     ...combined,
     marginBottom,
-    background: isDragging ? 'rgba(248, 248, 248, 1)' : 'white'
+    background: isDragging ? 'rgba(248, 248, 248, 1)' : 'white',
+    color: 'rgba(248, 248, 248, 1)'
   };
+
+  if (clone === 'clone') {
+    // delete withSpacing.boxSizing;
+    // delete withSpacing.opacity;
+    // delete withSpacing.pointerEvents;
+    // delete withSpacing.transform;
+    // delete withSpacing.transition;
+    // delete withSpacing.zIndex;
+  }
 
   return withSpacing;
 };

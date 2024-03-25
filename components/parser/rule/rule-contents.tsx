@@ -29,10 +29,7 @@ const RuleContents: React.FC<RecomputeRuleSizeProps> = ({
     dispatch,
     state: { defaultValues, displayContext, id = '-1', index, isExpanded }
   } = useRuleContext();
-  const {
-    // state: { isAllCollapsed },
-    dispatch: parserDispatch
-  } = useParserContext();
+  const { dispatch: parserDispatch } = useParserContext();
   const {
     addRule,
     updateRule,

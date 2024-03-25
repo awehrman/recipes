@@ -42,7 +42,6 @@ export default SaveOptions;
 SaveOptions.whyDidYouRender = true;
 
 const Wrapper = styled.div`
-  margin-top: 20px;
   align-self: flex-end;
 `;
 
