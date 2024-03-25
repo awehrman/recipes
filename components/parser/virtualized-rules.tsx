@@ -15,10 +15,55 @@ import { DEFAULT_GUTTER_SIZE, DEFAULT_ROW_SIZE } from './rule/constants';
 import DraggableRule from './rule/draggable-rule';
 import VirtualizedRule from './rule/virtualized-rule';
 import { getDraggableStyle } from './utils';
+
 // NOTE: getting a warning about react-beautiful-dnd not supporting
 // nested scroll containers
 // i think react window might be putting their fingers in overflow settings
 // and that might cause this error
+
+function LoadingSkeletons() {
+  const placeholderItems = Array.from({ length: 5 }).map((_, index) => {
+    const width = Math.floor(Math.random() * (100 - 20 + 1)) + 20;
+    return (
+      // biome-ignore lint/suspicious/noArrayIndexKey:
+      <LoadingRow key={`parser-rule-placeholder-${index}`}>
+        <LoadingName width={width} />
+        <LoadingLabel width={width * 1.2} />
+      </LoadingRow>
+    );
+  });
+
+  return <LoadingWrapper>{placeholderItems}</LoadingWrapper>;
+}
+
+const LoadingWrapper = styled.div`
+  margin-top: 10px;
+`;
+
+const LoadingRow = styled.div`
+  height: 40px;
+  width: 100%;
+  display: flex;
+`;
+
+type LoadingProps = {
+  width?: number;
+};
+
+const LoadingName = styled.div<LoadingProps>`
+  background: ${({ theme }) => theme.colors.headerBackground};
+  height: 13px;
+  border-radius: 5px;
+  margin-right: 20px;
+  width: ${({ width }) => `${width}px` || 'auto'};
+`;
+
+const LoadingLabel = styled.div<LoadingProps>`
+  background: ${({ theme }) => theme.colors.headerBackground};
+  height: 13px;
+  width: ${({ width }) => `${width}px` || 'auto'};
+  border-radius: 5px;
+`;
 
 const VirtualizedRules: React.FC = () => {
   const { loading, rules = [], updateRulesOrder } = useParserRules();
@@ -53,16 +98,12 @@ const VirtualizedRules: React.FC = () => {
 
   function renderMessages() {
     if (loading && !rules.length) {
-      return <Loading>Loading rules...</Loading>;
+      return <LoadingSkeletons />;
     }
 
     if (!rules.length && !loading) {
       return <Message>No parsing rules exist.</Message>;
     }
-  }
-
-  if (loading) {
-    return null;
   }
 
   return (
