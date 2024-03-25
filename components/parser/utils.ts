@@ -187,30 +187,18 @@ const formatKeyword = (value: string): string => {
 export const getDraggableStyle = ({
   provided,
   style,
-  isDragging,
-  clone
+  isDragging
 }: GetStyleProps): CSSProperties => {
   const combined = {
     ...style,
     ...provided.draggableProps.style
   };
-  // console.log(clone, { style, provided, isDragging });
   const marginBottom = RULE_BOTTOM_MARGIN;
   const withSpacing: CSSProperties = {
     ...combined,
     marginBottom,
-    background: isDragging ? 'rgba(248, 248, 248, 1)' : 'white',
-    color: 'rgba(248, 248, 248, 1)'
+    background: isDragging ? 'rgba(248, 248, 248, 1)' : 'white'
   };
-
-  if (clone === 'clone') {
-    // delete withSpacing.boxSizing;
-    // delete withSpacing.opacity;
-    // delete withSpacing.pointerEvents;
-    // delete withSpacing.transform;
-    // delete withSpacing.transition;
-    // delete withSpacing.zIndex;
-  }
 
   return withSpacing;
 };
