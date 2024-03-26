@@ -1,23 +1,26 @@
+import { useQuery } from '@apollo/client';
 import { Rule } from 'components/parser/types';
-import {
-  fetchTests,
-  compileGrammar,
-  compileParser,
-  runTests
-} from './helpers/parser-rule';
+import { compileGrammar, compileParser, runTests } from './helpers/parser-rule';
 import { TestProps } from 'components/parser/types';
+import { GET_ALL_GRAMMAR_TESTS_QUERY } from '../graphql/queries/grammar-tests';
 
 function usePEGParser(rules: Rule[], loading = false) {
-  let tests: TestProps[] = fetchTests();
   let errors: Error[] = [];
+  let tests: TestProps[] = [];
+  const { data = {}, loading: loadingTests } = useQuery(
+    GET_ALL_GRAMMAR_TESTS_QUERY,
+    {}
+  );
 
-  if (loading) {
+  if (loading || loadingTests) {
     return {
       tests,
       grammar: '',
       errors
     };
   }
+
+  tests = data?.tests ?? [];
 
   const grammar = compileGrammar(rules);
   try {

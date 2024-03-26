@@ -67,8 +67,29 @@ type EvernoteSession {
   userId: String
 }
 
+type ExpectedGrammarTest {
+  id: String
+  type: GrammarTypeEnum
+  value: String!
+}
+
 type GenericResponse {
   error: String
+}
+
+type GrammarTest {
+  expected: [ExpectedGrammarTest]
+  id: String
+  reference: String!
+}
+
+enum GrammarTypeEnum {
+  AMOUNT
+  COMMENTS
+  DESCRIPTORS
+  INGREDIENT
+  OTHER
+  UNIT
 }
 
 type Ingredient {
@@ -256,6 +277,7 @@ type Query {
   notes: [Note]!
   parserRule(id: ID): ParserRule
   parserRules: [ParserRule]
+  tests: [GrammarTest]
   users: [User]!
 }
 

@@ -301,3 +301,30 @@ enum ParserRuleDefinitionType {
   RULE
   LIST
 }
+
+enum GrammarType {
+  INGREDIENT
+  AMOUNT
+  UNIT
+  DESCRIPTORS
+  COMMENTS
+  OTHER
+}
+
+model ExpectedGrammarTestResult {
+  id        String   @id @default(cuid())
+  type      GrammarType
+  value     String
+
+  grammarTest   GrammarTest? @relation(fields: [grammarTestId], references: [id])
+  grammarTestId String?
+}
+
+model GrammarTest {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reference String
+  expected  ExpectedGrammarTestResult[]
+}

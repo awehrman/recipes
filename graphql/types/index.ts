@@ -8,6 +8,7 @@ export * from './admin-tools';
 export * from './container';
 export * from './category';
 export * from './evernote-session';
+export * from './grammar-tests';
 export * from './ingredient-line';
 export * from './instruction-line';
 export * from './note';
