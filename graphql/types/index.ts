@@ -4,6 +4,7 @@ export * from './ingredient/parsed-segment';
 export * from './ingredient/properties';
 
 export * from './account';
+export * from './admin-tools';
 export * from './container';
 export * from './category';
 export * from './evernote-session';

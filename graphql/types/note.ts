@@ -1,10 +1,8 @@
 import {
-  scalarType,
   extendType,
   FieldResolver,
   idArg,
   objectType,
-  stringArg,
   asNexusMethod
 } from 'nexus';
 import { JSONResolver } from 'graphql-scalars';
@@ -15,7 +13,6 @@ import {
   getNotesMeta,
   saveRecipes
 } from 'graphql/resolvers/helpers/note/evernote-importer';
-import { resetDatabase } from '../resolvers/admin-tools';
 
 // TODO can this be an extension of NoteMeta?
 export const Note = objectType({
@@ -185,17 +182,6 @@ export const SaveRecipes = extendType({
   }
 });
 
-export const ResetDatabase = extendType({
-  type: 'Mutation',
-  definition(t) {
-    t.field('resetDatabase', {
-      type: 'EvernoteSession',
-      args: { userId: stringArg() },
-      resolve: resetDatabase as FieldResolver<'Mutation', 'resetDatabase'>
-    });
-  }
-});
-
 export const ImportLocalNotes = extendType({
   type: 'Mutation',
   definition(t) {
@@ -214,6 +200,7 @@ export const ImportLocalNotes = extendType({
 //   }
 // });
 
+// biome-ignore lint/suspicious/noShadowRestrictedNames: nexus
 export const JSON = asNexusMethod(JSONResolver, 'json');
 
 export const CategoriesResponse = objectType({

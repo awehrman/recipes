@@ -78,6 +78,10 @@ declare module '@prisma/client' {
     notes: NoteWithRelations[];
   };
 
+  type GenericResponse = {
+    error?: string;
+  };
+
   type LocalCategoriesResponse = {
     error?: string;
     categories: any;

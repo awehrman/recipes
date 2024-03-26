@@ -179,7 +179,6 @@ const NavigationButton = styled(Button)<NavigationButtonProps>`
   font-size: 1em;
 
   svg {
-    /* TODO look into SVG FOUT issues */
     height: 16px !important;
   }
 

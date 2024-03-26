@@ -31,3 +31,38 @@ export const resetDatabase = async (
   }
   return response;
 };
+
+type EmptyArgs = {};
+
+export const resetParserRules = async (
+  _root: unknown,
+  args: EmptyArgs,
+  ctx: AppContext
+): Promise<GenericResponse> => {
+  const { prisma } = ctx;
+  const response: GenericResponse = {};
+
+  try {
+    // TODO
+  } catch (err) {
+    response.error = `${err}`;
+  }
+  return response;
+};
+
+export const seedBasicParserRules = async (
+  _root: unknown,
+  args: EmptyArgs,
+  ctx: AppContext
+): Promise<GenericResponse> => {
+  const { prisma } = ctx;
+  const { userId } = args;
+  const response: GenericResponse = {};
+
+  try {
+    // TODO
+  } catch (err) {
+    response.error = `${err}`;
+  }
+  return response;
+};

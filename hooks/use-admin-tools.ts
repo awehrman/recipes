@@ -1,14 +1,11 @@
-import { gql, useMutation } from '@apollo/client';
+import { useMutation } from '@apollo/client';
 
 import { GET_ALL_NOTES_QUERY } from '../graphql/queries/note';
-
-export const RESET_DATABASE_MUTATION = gql`
-  mutation RESET_DATABASE_MUTATION {
-    resetDatabase {
-      error
-    }
-  }
-`;
+import {
+  RESET_ALL_PARSER_RULES_MUTATION,
+  RESET_DATABASE_MUTATION,
+  SEED_BASIC_PARSER_RULES_MUTATION
+} from '../graphql/mutations/admin-tools';
 
 function useAdminTools() {
   const [resetDatabase] = useMutation(RESET_DATABASE_MUTATION, {
@@ -20,8 +17,14 @@ function useAdminTools() {
     }
   });
 
+  // TODO we should probably refetch parser rule queries or manually flush cache
+  const [resetParserRules] = useMutation(RESET_ALL_PARSER_RULES_MUTATION);
+  const [seedBasicParserRules] = useMutation(SEED_BASIC_PARSER_RULES_MUTATION);
+
   return {
-    resetDatabase
+    resetDatabase,
+    resetParserRules,
+    seedBasicParserRules
   };
 }
 

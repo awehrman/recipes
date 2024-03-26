@@ -1,15 +1,17 @@
 import React from 'react';
 import styled from 'styled-components';
 
+import { ParserProvider } from 'contexts/parser-context';
+import AdminTools from './admin-tools';
 import Rules from './rules';
 import Tests from './tests';
-import { ParserProvider } from 'contexts/parser-context';
 
 const Parser: React.FC = () => (
   <Wrapper>
     <ParserProvider>
       <Rules />
       <Tests />
+      <AdminTools />
     </ParserProvider>
   </Wrapper>
 );

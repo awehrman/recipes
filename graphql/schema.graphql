@@ -67,6 +67,10 @@ type EvernoteSession {
   userId: String
 }
 
+type GenericResponse {
+  error: String
+}
+
 type Ingredient {
   alternateNames: [AlternateName]
   createdAt: String
@@ -125,7 +129,9 @@ type Mutation {
   getNotesMeta: EvernoteNotesMetaResponse
   importLocal: EvernoteNotesResponse
   resetDatabase(userId: String): EvernoteSession
+  resetParserRules: GenericResponse
   saveRecipes: EvernoteNotesResponse
+  seedBasicParserRules: GenericResponse
   toggleContainer(id: String): Container
   toggleContainerIngredient(currentIngredientId: String, currentIngredientName: String, id: String): Container
   updateParserRule(input: ParserRuleInput): ParserRule
