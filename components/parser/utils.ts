@@ -47,7 +47,7 @@ export const getDefaultFormatter = (ruleName: string): string =>
   return {
     rule: \`#\${ORDER}_${_.camelCase(ruleName)}\`,
     type: '${_.camelCase(ruleName)}',
-    values: [].flatMap(value => value)
+    values: []
   };
 }`;
 

@@ -6,6 +6,7 @@ import {
   RESET_DATABASE_MUTATION,
   SEED_BASIC_PARSER_RULES_MUTATION
 } from '../graphql/mutations/admin-tools';
+import { GET_ALL_PARSER_RULES_QUERY } from 'graphql/queries/parser';
 
 function useAdminTools() {
   const [resetDatabase] = useMutation(RESET_DATABASE_MUTATION, {
@@ -17,9 +18,13 @@ function useAdminTools() {
     }
   });
 
-  // TODO we should probably refetch parser rule queries or manually flush cache
-  const [resetParserRules] = useMutation(RESET_ALL_PARSER_RULES_MUTATION);
-  const [seedBasicParserRules] = useMutation(SEED_BASIC_PARSER_RULES_MUTATION);
+  // TODO this could be optimized, but its quick and easy for our immediate needs
+  const [resetParserRules] = useMutation(RESET_ALL_PARSER_RULES_MUTATION, {
+    refetchQueries: [{ query: GET_ALL_PARSER_RULES_QUERY }]
+  });
+  const [seedBasicParserRules] = useMutation(SEED_BASIC_PARSER_RULES_MUTATION, {
+    refetchQueries: [{ query: GET_ALL_PARSER_RULES_QUERY }]
+  });
 
   return {
     resetDatabase,

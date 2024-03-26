@@ -93,7 +93,7 @@ _ "Whitespace" =
     }
 
 letter "Letter" =
-  [a-z]i
+  
 
 digit "Digit" =
   [0-9]

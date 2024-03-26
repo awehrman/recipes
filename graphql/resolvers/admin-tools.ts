@@ -1,6 +1,7 @@
-import { EvernoteSession } from '@prisma/client';
+import { EvernoteSession, GenericResponse } from '@prisma/client';
 import { AppContext } from '../context';
 
+import { importSeed } from 'prisma/seeds/parser-rules';
 import { getDefaultEvernoteSessionResponse } from './helpers/evernote-session';
 
 type ResetDatabaseArgs = {
@@ -32,35 +33,35 @@ export const resetDatabase = async (
   return response;
 };
 
-type EmptyArgs = {};
-
 export const resetParserRules = async (
   _root: unknown,
-  args: EmptyArgs,
+  _args: unknown,
   ctx: AppContext
 ): Promise<GenericResponse> => {
+  console.log('resetParserRules');
   const { prisma } = ctx;
   const response: GenericResponse = {};
 
   try {
-    // TODO
+    await prisma.parserRuleDefinition.deleteMany({});
+    await prisma.parserRule.deleteMany({});
   } catch (err) {
+    console.log({ err });
     response.error = `${err}`;
   }
+  console.log({ response });
   return response;
 };
 
 export const seedBasicParserRules = async (
   _root: unknown,
-  args: EmptyArgs,
+  _args: unknown,
   ctx: AppContext
 ): Promise<GenericResponse> => {
-  const { prisma } = ctx;
-  const { userId } = args;
   const response: GenericResponse = {};
 
   try {
-    // TODO
+    await importSeed(ctx);
   } catch (err) {
     response.error = `${err}`;
   }

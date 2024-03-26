@@ -3,18 +3,26 @@ import styled from 'styled-components';
 
 import GearsIcon from 'public/icons/parser.svg';
 import { Button } from 'components/common';
+import useAdminTools from 'hooks/use-admin-tools';
 
 // TODO this should probably only display for super admins
 const AdminTools: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
+  const { resetParserRules, seedBasicParserRules } = useAdminTools();
 
   function handleAdminToolsOnClick() {
     setIsExpanded(!isExpanded);
   }
 
-  function handleResetOnClick() {}
+  function handleResetOnClick() {
+    resetParserRules();
+    setIsExpanded(false);
+  }
 
-  function handleSeedOnClick() {}
+  function handleSeedOnClick() {
+    seedBasicParserRules();
+    setIsExpanded(false);
+  }
 
   return (
     <Wrapper isExpanded={isExpanded}>
