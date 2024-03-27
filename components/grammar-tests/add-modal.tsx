@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { useForm, Controller, useFieldArray } from 'react-hook-form';
+import { useForm, Controller, useFieldArray, useWatch } from 'react-hook-form';
 import Modal from 'react-modal';
 import styled from 'styled-components';
 
 import { Button } from 'components/common';
 import PlusIcon from 'public/icons/plus.svg';
+import AutoWidthInput from 'components/parser/rule/auto-width-input';
 
 // this is apparently for accessibility
 Modal.setAppElement('#main-app');
@@ -15,6 +16,7 @@ const customStyles = {
     left: '50%',
     right: 'auto',
     bottom: 'auto',
+    width: '500px',
     marginRight: '-50%',
     transform: 'translate(-50%, -50%)'
   }
@@ -23,13 +25,28 @@ const customStyles = {
 const AddModal: React.FC = () => {
   const [modalIsOpen, setIsOpen] = useState(false);
 
-  const { register, handleSubmit, control } = useForm();
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { isDirty }
+  } = useForm({
+    mode: 'onBlur'
+  });
   const { fields, append } = useFieldArray({
     control,
     name: 'expectations'
   });
 
-  const onSubmit = (data) => {
+  // TODO we'll re-use this for editing eventually and can pull this from a grammar specific context
+  const defaultValue = '';
+  const formUpdates = useWatch({ control });
+  const dirtyValue = !isDirty ? defaultValue : formUpdates.reference;
+  const placeholder = '1 cup fresh sliced, apples (cut into pieces)';
+  const displaySizePlaceholder = !dirtyValue?.length ? placeholder : dirtyValue;
+
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  const onSubmit = (data: any) => {
     console.log(data);
   };
 
@@ -40,7 +57,6 @@ const AddModal: React.FC = () => {
   function handleCloseModalOnClick() {
     setIsOpen(false);
   }
-
   return (
     <Wrapper>
       <AddTestButton
@@ -54,18 +70,27 @@ const AddModal: React.FC = () => {
         style={customStyles}
         contentLabel="Add a New Grammar Test"
       >
-        <h1>Add a New Grammar Test</h1>
+        <Header>Add a New Grammar Test</Header>
 
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div>
-            <label htmlFor="referenceInput">Reference:</label>
-            <input
-              id="referenceInput"
-              type="text"
-              {...register('reference')}
+          <ReferenceLine>
+            <label htmlFor="grammar-test-reference-line">Test sentence:</label>
+            <ReferenceInput
               aria-label="Reference Input"
+              className="grammar-test-input"
+              defaultValue={''}
+              displaySizePlaceholder={displaySizePlaceholder}
+              isDisabled={false}
+              isSpellCheck={true}
+              // onBlur={(event: React.ChangeEvent<HTMLInputElement>) =>
+              //   onBlur(event)
+              // }
+              // onFocus={() => onFocus()}
+              placeholder={placeholder}
+              registerField={{ ...register('reference') }}
+              uniqueId="grammar-test-reference-line"
             />
-          </div>
+          </ReferenceLine>
           <div>
             <button
               type="button"
@@ -84,9 +109,12 @@ const AddModal: React.FC = () => {
                 defaultValue=""
                 render={({ field }) => (
                   <select {...field} id={`expectation${index}`}>
-                    <option value="option1">Option 1</option>
-                    <option value="option2">Option 2</option>
-                    <option value="option3">Option 3</option>
+                    <option value="INGREDIENT">Ingredient</option>
+                    <option value="AMOUNT">Amount</option>
+                    <option value="UNIT">Unit</option>
+                    <option value="DESCRIPTORS">Descriptors</option>
+                    <option value="COMMENTS">Comments</option>
+                    <option value="OTHER">Other</option>
                   </select>
                 )}
               />
@@ -107,7 +135,32 @@ const AddModal: React.FC = () => {
 
 export default AddModal;
 
-const Reference = styled.div``;
+const ReferenceInput = styled(AutoWidthInput)`
+  flex-basis: 100%;
+  border-bottom: 2px solid ${({ theme }) => theme.colors.altGreen}};
+`;
+
+const ReferenceLine = styled.fieldset`
+  border: 0;
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+
+  label {
+    flex-basis: 100%;
+    font-weight: 400;
+  }
+`;
+
+const Header = styled.h1`
+  margin: 0;
+  font-size: 18px;
+  font-weight: 300;
+  margin-bottom: 8px;
+`;
 
 const AddTestButton = styled(Button)`
   border: 0;

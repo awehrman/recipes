@@ -8,7 +8,7 @@ import useParserRules from 'hooks/use-parser-rules';
 
 import { getFieldUpdates } from '../../utils';
 
-import AutoWidthInput from '../auto-width-input';
+import RuleInput from '../rule-input';
 import { isDuplicateRule, isNotEmpty } from '../validators';
 import ValidatedRule from './validated-rule';
 
@@ -58,7 +58,7 @@ const Rule: React.FC = memo(() => {
           onFocus={handleOnFocus}
         />
       ) : (
-        <AutoWidthInput
+        <RuleInput
           definitionId={definitionId}
           defaultValue={defaultValue.rule}
           fieldName="rule"

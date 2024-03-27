@@ -7,6 +7,7 @@ import {
 import { Parser, DiagnosticNote } from 'peggy';
 import React, { CSSProperties } from 'react';
 import { DraggableProvided, DraggingStyle } from 'react-beautiful-dnd';
+import { UseFormRegisterReturn } from 'react-hook-form';
 import { ListChildComponentProps } from 'react-window';
 
 // TODO should all of these just exist in Prisma @types? or some other @type global?
@@ -19,19 +20,32 @@ export interface ParserThemeSettings {
   [key: string]: Extension;
 }
 
-export type AutoWidthInputProps = {
+export type RuleInputProps = {
+  // onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   defaultValue?: string;
   definitionId?: string;
   definitionPath?: string;
+  fieldName?: string;
   index?: number;
   isRequired?: boolean;
-  fieldName?: string;
   onBlur?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onFocus?: () => void;
-  // onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   placeholder?: string;
   spellcheck?: boolean;
   validators?: ValidatorsProps;
+};
+
+export type AutoWidthInputProps = {
+  className: string;
+  defaultValue: string;
+  displaySizePlaceholder: string | null;
+  isDisabled: boolean;
+  isSpellCheck?: boolean;
+  onBlur?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onFocus?: () => void;
+  placeholder?: string;
+  registerField: UseFormRegisterReturn;
+  uniqueId: string;
 };
 
 type ValidatorsProps = {

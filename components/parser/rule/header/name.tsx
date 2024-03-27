@@ -5,7 +5,7 @@ import { useRuleContext } from 'contexts/rule-context';
 import useParserRule from 'hooks/use-parser-rule';
 import useParserRules from 'hooks/use-parser-rules';
 
-import AutoWidthInput from '../auto-width-input';
+import RuleInput from '../rule-input';
 import { isDuplicateRule, isNotEmpty } from '../validators';
 import { useFormContext } from 'react-hook-form';
 
@@ -28,7 +28,7 @@ const RuleName: React.FC = () => {
   }, [isInit, displayContext, setFocus]);
 
   return (
-    <AutoWidthInput
+    <RuleInput
       defaultValue={name}
       fieldName="name"
       isRequired

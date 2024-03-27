@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { useRuleContext } from 'contexts/rule-context';
 import { useRuleDefinitionContext } from 'contexts/rule-definition-context';
 
-import AutoWidthInput from '../auto-width-input';
+import RuleInput from '../rule-input';
 
 const RuleExample: React.FC = memo(() => {
   const {
@@ -30,7 +30,7 @@ const RuleExample: React.FC = memo(() => {
 
   return (
     <Wrapper>
-      <AutoWidthInput
+      <RuleInput
         definitionId={definitionId}
         defaultValue={defaultValue.example}
         fieldName="example"

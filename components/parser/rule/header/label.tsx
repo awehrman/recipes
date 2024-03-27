@@ -7,7 +7,7 @@ import { useRuleContext } from 'contexts/rule-context';
 import useParserRule from 'hooks/use-parser-rule';
 import useParserRules from 'hooks/use-parser-rules';
 
-import AutoWidthInput from '../auto-width-input';
+import RuleInput from '../rule-input';
 import { isDuplicateRule } from '../validators';
 
 const RuleLabel: React.FC = () => {
@@ -39,7 +39,7 @@ const RuleLabel: React.FC = () => {
   }, [isNameActiveElement, displayContext, setValue, watched]);
 
   return (
-    <StyledAutoWidthInput
+    <StyledRuleInput
       defaultValue={label}
       fieldName="label"
       placeholder="label"
@@ -53,7 +53,7 @@ const RuleLabel: React.FC = () => {
 
 export default RuleLabel;
 
-const StyledAutoWidthInput = styled(AutoWidthInput)`
+const StyledRuleInput = styled(RuleInput)`
   font-weight: 600;
 
   &::placeholder {

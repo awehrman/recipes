@@ -1,54 +1,22 @@
 import _ from 'lodash';
 import React from 'react';
-import { useFormContext, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 
-import { useRuleContext } from 'contexts/rule-context';
-
-import { getFieldUpdates } from '../utils';
 import { AutoWidthInputProps } from '../types';
 
 const AutoWidthInput: React.FC<AutoWidthInputProps> = ({
-  fieldName = '',
-  isRequired = false,
-  defaultValue = '',
-  definitionId = null,
-  definitionPath = null,
   onBlur = () => {},
   onFocus = () => {},
-  placeholder = null,
-  validators = {},
-  spellcheck = true,
-  index,
+  className,
+  defaultValue,
+  displaySizePlaceholder,
+  isDisabled = false,
+  registerField,
+  placeholder,
+  isSpellCheck = true,
+  uniqueId,
   ...props
 }) => {
-  const registeredFieldName = definitionPath ?? fieldName;
-  const {
-    state: { id, displayContext }
-  } = useRuleContext();
-  const {
-    control,
-    formState: { isDirty },
-    register
-  } = useFormContext();
-  const formUpdates = useWatch({ control });
-  const updatedFormValue = getFieldUpdates({
-    definitionId,
-    fieldName,
-    state: formUpdates
-  });
-  const dirtyValue = !isDirty ? defaultValue : updatedFormValue;
-  const displaySizePlaceholder =
-    displayContext !== 'display' && !dirtyValue?.length
-      ? placeholder
-      : dirtyValue;
-  const isSpellCheck = displayContext !== 'display' ? spellcheck : false;
-  const uniqueId = `${id}-${registeredFieldName}`;
-  const registerField = register(registeredFieldName, {
-    required: isRequired,
-    validate: { ...validators }
-  });
-
   return (
     <Wrapper>
       <Label id={`label-${uniqueId}`} htmlFor={uniqueId}>
@@ -56,12 +24,12 @@ const AutoWidthInput: React.FC<AutoWidthInputProps> = ({
           {...registerField}
           id={uniqueId}
           autoComplete="off"
-          className={`${displayContext}`}
+          className={className}
           defaultValue={defaultValue}
-          disabled={displayContext === 'display'}
-          onBlur={(event: React.ChangeEvent<HTMLInputElement>) => onBlur(event)}
-          onFocus={() => onFocus()}
-          placeholder={placeholder ?? fieldName}
+          disabled={isDisabled}
+          onBlur={onBlur}
+          onFocus={onFocus}
+          placeholder={placeholder}
           spellCheck={isSpellCheck}
           type="text"
           {...props}
@@ -87,6 +55,7 @@ const Wrapper = styled.fieldset`
 const WidthTracker = styled.span`
   display: inline;
   visibility: hidden;
+  // borders can now just be applied to the entire input
   // border: 2px solid blue;
   font-family: var(--font-sourceSansPro), Verdana, sans-serif;
   white-space: pre;
@@ -104,6 +73,7 @@ const Label = styled.label`
   position: relative;
 `;
 
+// TODO we should move these edit & add classes to the rule input level
 const InputField = styled.input` 
   position: relative;
   padding: 4px 0;
