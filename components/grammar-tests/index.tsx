@@ -11,6 +11,9 @@ import Errors from './errors';
 const Tests: React.FC = () => {
   const { rules = [], loading } = useParserRules();
   const { tests, errors = [] } = usePEGParser(rules, loading);
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  const numFailed = tests.filter((test: any) => test.passed).length;
+  const header = `Tests${tests.length ? ` (${numFailed} failed)` : ''}`;
 
   function renderTests() {
     return tests.map((test) => (
@@ -20,6 +23,7 @@ const Tests: React.FC = () => {
 
   return (
     <Wrapper>
+      <Header>{header}</Header>
       {renderTests()}
       {errors.length > 0 && <Errors />}
       <AddModal />
@@ -28,6 +32,15 @@ const Tests: React.FC = () => {
 };
 
 export default Tests;
+
+const Header = styled.h2`
+  margin: 0;
+  padding: 0;
+  font-weight: 600;
+  font-size: 14px;
+  margin-top: 4px;
+  margin-bottom: 10px;
+`;
 
 const Wrapper = styled.div`
   margin-top: 32px;

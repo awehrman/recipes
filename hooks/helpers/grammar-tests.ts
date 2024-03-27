@@ -8,9 +8,11 @@ export const handleAddGrammarRuleUpdate = (
   cache: ApolloCache<any>,
   // biome-ignore lint/suspicious/noExplicitAny: apollo
   res: Omit<FetchResult<any>, 'context'>,
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   input: any
 ) => {
   const isOptimisticResponse = res.data.addGrammarTest.id === '-1';
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const tests: any | null = cache.readQuery({
     query: GET_ALL_GRAMMAR_TESTS_QUERY
   });
