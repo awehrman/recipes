@@ -28,7 +28,7 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <ApolloProvider client={apolloClient}>
       <SessionProvider session={pageProps.session} refetchInterval={5 * 60}>
-        <main className={sourceSansPro.className}>
+        <main className={sourceSansPro.className} id="main-app">
           <GlobalStyle />
           <ThemeProvider theme={theme}>
             <Component {...pageProps} />

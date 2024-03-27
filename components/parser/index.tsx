@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { ParserProvider } from 'contexts/parser-context';
 import AdminTools from './admin-tools';
 import Rules from './rules';
-import Tests from './tests';
+import Tests from '../grammar-tests';
 
 const Parser: React.FC = () => (
   <Wrapper>

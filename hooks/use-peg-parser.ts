@@ -24,10 +24,7 @@ function usePEGParser(rules: Rule[], loading = false) {
   tests = (data?.tests ?? []).map((test: GrammarTest) => ({
     ...test,
     parsed: false
-    // passed: false
-    // details: {}
   }));
-  console.log({ tests });
 
   const grammar = compileGrammar(rules);
   try {

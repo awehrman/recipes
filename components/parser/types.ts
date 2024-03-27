@@ -60,38 +60,6 @@ export type RuleContentProps = {
   rule: ParserRuleWithRelations;
 };
 
-export type ClientGrammarTestProps = {
-  reference: string;
-  parsed: boolean;
-  expected: GrammarExpectedProps[];
-  passed?: boolean;
-  details?: GrammarDetailsProps;
-  error?: {
-    message?: string;
-  };
-};
-
-export type GrammarDetailsProps = {
-  rule?: string;
-  type?: string;
-  values?: GrammarDetailsProps[];
-};
-
-export type GrammarExpectedProps = {
-  type: string;
-  value: string;
-};
-
-export type TestComponentProps = {
-  test: ClientGrammarTestProps;
-  loading: boolean;
-};
-
-export type TestWrapperProps = {
-  isLoading: boolean;
-  parsed: boolean;
-};
-
 // TODO grab from prisma instead
 export type Rule = {
   id: string;
