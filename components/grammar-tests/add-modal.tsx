@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { useForm, Controller, useFieldArray, useWatch } from 'react-hook-form';
 import Modal from 'react-modal';
-import styled from 'styled-components';
+import styled, { ThemeContext } from 'styled-components';
 
 import { Button } from 'components/common';
 import PlusIcon from 'public/icons/plus.svg';
@@ -17,13 +17,31 @@ const customStyles = {
     right: 'auto',
     bottom: 'auto',
     width: '500px',
+    padding: '30px',
     marginRight: '-50%',
     transform: 'translate(-50%, -50%)'
   }
 };
 
+// TODO move
+// TODO this is really similar to getFieldUpdates,
+// we should probably generalize these more generally for field array usage
+const getExpectationPlaceholder = (
+  index: number,
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  formState: any,
+  placeholder: string
+) => {
+  const { expectations = [] } = formState;
+  const { value = '' } = expectations?.[index] ?? {};
+  return value.length > 0 ? value : placeholder;
+};
+
 const AddModal: React.FC = () => {
   const [modalIsOpen, setIsOpen] = useState(false);
+  const {
+    colors: { altGreen }
+  } = useContext(ThemeContext);
 
   const {
     register,
@@ -57,6 +75,7 @@ const AddModal: React.FC = () => {
   function handleCloseModalOnClick() {
     setIsOpen(false);
   }
+
   return (
     <Wrapper>
       <AddTestButton
@@ -77,6 +96,7 @@ const AddModal: React.FC = () => {
             <label htmlFor="grammar-test-reference-line">Test sentence:</label>
             <ReferenceInput
               aria-label="Reference Input"
+              borderColor={altGreen}
               className="grammar-test-input"
               defaultValue={''}
               displaySizePlaceholder={displaySizePlaceholder}
@@ -91,42 +111,64 @@ const AddModal: React.FC = () => {
               uniqueId="grammar-test-reference-line"
             />
           </ReferenceLine>
-          <div>
-            <button
-              type="button"
+          <Fields>
+            {fields.map((item, index) => (
+              <Field key={item.id}>
+                {/* <label htmlFor={`expectation${index}`}>Expectation:</label> */}
+                <Controller
+                  name={`expectations[${index}].type`}
+                  control={control}
+                  defaultValue="INGREDIENT"
+                  render={({ field }) => (
+                    <StyledSelect {...field} id={`expectation${index}`}>
+                      <option value="INGREDIENT">Ingredient</option>
+                      <option value="AMOUNT">Amount</option>
+                      <option value="UNIT">Unit</option>
+                      <option value="DESCRIPTORS">Descriptors</option>
+                      <option value="COMMENTS">Comments</option>
+                      <option value="OTHER">Other</option>
+                    </StyledSelect>
+                  )}
+                />
+                <ValueInput
+                  aria-label="Value Input"
+                  borderColor={altGreen}
+                  className="grammar-test-definition-input"
+                  defaultValue={''}
+                  displaySizePlaceholder={getExpectationPlaceholder(
+                    index,
+                    formUpdates,
+                    'apples'
+                  )}
+                  isDisabled={false}
+                  isSpellCheck={true}
+                  // onBlur={(event: React.ChangeEvent<HTMLInputElement>) =>
+                  //   onBlur(event)
+                  // }
+                  // onFocus={() => onFocus()}
+                  registerField={{
+                    ...register(`expectations[${index}].value`)
+                  }}
+                  // TODO we should change this based on the selected type
+                  placeholder="apples"
+                  uniqueId={`expectations[${index}].value`}
+                />
+              </Field>
+            ))}
+            <AddExpectationButton
+              icon={<PlusIcon />}
+              label="Add Expectation"
               onClick={() => append({})}
-              aria-label="Add Expectation"
-            >
-              Add Expectation
-            </button>
-          </div>
-          {fields.map((item, index) => (
-            <div key={item.id}>
-              <label htmlFor={`expectation${index}`}>Expectation:</label>
-              <Controller
-                name={`expectations[${index}].type`}
-                control={control}
-                defaultValue=""
-                render={({ field }) => (
-                  <select {...field} id={`expectation${index}`}>
-                    <option value="INGREDIENT">Ingredient</option>
-                    <option value="AMOUNT">Amount</option>
-                    <option value="UNIT">Unit</option>
-                    <option value="DESCRIPTORS">Descriptors</option>
-                    <option value="COMMENTS">Comments</option>
-                    <option value="OTHER">Other</option>
-                  </select>
-                )}
-              />
-              <Controller
-                name={`expectations[${index}].value`}
-                control={control}
-                defaultValue=""
-                render={({ field }) => <input {...field} type="text" />}
-              />
-            </div>
-          ))}
-          <button type="submit">Submit</button>
+            />
+          </Fields>
+          <SaveActions>
+            <CancelButton
+              type="button"
+              label="Cancel"
+              onClick={handleCloseModalOnClick}
+            />
+            <SaveButton type="submit" label="Add Test" />
+          </SaveActions>
         </form>
       </Modal>
     </Wrapper>
@@ -135,9 +177,78 @@ const AddModal: React.FC = () => {
 
 export default AddModal;
 
+const SaveActions = styled.div`
+  float: right;
+`;
+
+const StyledSelect = styled.select`
+  border: 0;
+  padding: 0;
+  margin: 0;
+  margin-left: -4px;
+`;
+
+const Fields = styled.div`
+  margin: 20px;
+  width: 100%;
+`;
+
+const Field = styled.div`
+  margin-bottom: 20px;
+`;
+
+const AddExpectationButton = styled(Button)`
+  background: transparent;
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.altGreen};
+  border: 0;
+  padding: 0;
+  font-size: 12px;
+  padding: 4px 6px;
+  margin-left: -25px;
+
+  svg {
+    position: relative;
+    height: 12px;
+    fill: ${({ theme }) => theme.colors.altGreen};
+    top: 2px;
+    margin-right: 5px;
+  }
+`;
+
+const CancelButton = styled(Button)`
+  border: 0;
+  background: #ccc;
+  font-weight: 600;
+  color: #fff;
+  padding: 4px 6px;
+  border-radius: 5px;
+  margin-right: 10px;
+`;
+
+const SaveButton = styled(Button)`
+  border: 0;
+  background: ${({ theme }) => theme.colors.altGreen};
+  font-weight: 600;
+  color: #fff;
+  padding: 4px 6px;
+  border-radius: 5px;
+`;
+
 const ReferenceInput = styled(AutoWidthInput)`
   flex-basis: 100%;
-  border-bottom: 2px solid ${({ theme }) => theme.colors.altGreen}};
+
+  &::placeholder {
+    color: silver;
+    font-style: italic;
+  }
+`;
+
+const ValueInput = styled(AutoWidthInput)`
+  &::placeholder {
+    color: silver;
+    font-style: italic;
+  }
 `;
 
 const ReferenceLine = styled.fieldset`
@@ -147,11 +258,11 @@ const ReferenceLine = styled.fieldset`
   font-size: 14px;
   display: flex;
   flex-wrap: wrap;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 
   label {
     flex-basis: 100%;
-    font-weight: 400;
+    font-weight: 600;
   }
 `;
 

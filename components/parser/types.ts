@@ -36,6 +36,7 @@ export type RuleInputProps = {
 };
 
 export type AutoWidthInputProps = {
+  borderColor?: string | null;
   className: string;
   defaultValue: string;
   displaySizePlaceholder: string | null;
@@ -44,7 +45,7 @@ export type AutoWidthInputProps = {
   onBlur?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onFocus?: () => void;
   placeholder?: string;
-  registerField: UseFormRegisterReturn;
+  registerField?: UseFormRegisterReturn;
   uniqueId: string;
 };
 

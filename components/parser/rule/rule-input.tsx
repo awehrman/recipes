@@ -51,22 +51,28 @@ const RuleInput: React.FC<RuleInputProps> = ({
   });
 
   return (
-    <AutoWidthInput
-      className={displayContext}
-      defaultValue={defaultValue}
-      displaySizePlaceholder={displaySizePlaceholder}
-      isDisabled={displayContext === 'display'}
-      isSpellCheck={isSpellCheck}
-      onBlur={(event: React.ChangeEvent<HTMLInputElement>) => onBlur(event)}
-      onFocus={() => onFocus()}
-      placeholder={placeholder ?? fieldName}
-      registerField={registerField}
-      uniqueId={uniqueId}
-      {...props}
-    />
+    <Wrapper>
+      <AutoWidthInput
+        className={displayContext}
+        defaultValue={defaultValue}
+        displaySizePlaceholder={displaySizePlaceholder}
+        isDisabled={displayContext === 'display'}
+        isSpellCheck={isSpellCheck}
+        onBlur={(event: React.ChangeEvent<HTMLInputElement>) => onBlur(event)}
+        onFocus={() => onFocus()}
+        placeholder={placeholder ?? fieldName}
+        registerField={registerField}
+        uniqueId={uniqueId}
+        {...props}
+      />
+    </Wrapper>
   );
 };
 
 export default RuleInput;
 
 // RuleInput.whyDidYouRender = true;
+
+const Wrapper = styled.div`
+  margin-right: 10px;
+`;

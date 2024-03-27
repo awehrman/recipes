@@ -7,6 +7,7 @@ import { AutoWidthInputProps } from '../types';
 const AutoWidthInput: React.FC<AutoWidthInputProps> = ({
   onBlur = () => {},
   onFocus = () => {},
+  borderColor = null,
   className,
   defaultValue,
   displaySizePlaceholder,
@@ -21,7 +22,8 @@ const AutoWidthInput: React.FC<AutoWidthInputProps> = ({
     <Wrapper>
       <Label id={`label-${uniqueId}`} htmlFor={uniqueId}>
         <InputField
-          {...registerField}
+          {...(registerField ?? {})}
+          borderColor={borderColor}
           id={uniqueId}
           autoComplete="off"
           className={className}
@@ -49,18 +51,16 @@ const Wrapper = styled.fieldset`
   border: 0;
   padding: 0;
   margin: 0;
-  margin-right: 10px;
+  // margin-right: 10px;
 `;
 
 const WidthTracker = styled.span`
   display: inline;
   visibility: hidden;
-  // borders can now just be applied to the entire input
-  // border: 2px solid blue;
-  font-family: var(--font-sourceSansPro), Verdana, sans-serif;
   white-space: pre;
   margin-top: -28px;
   position: relative;
+  font-family: var(--font-sourceSansPro), Verdana, sans-serif;
   // keep our z-index lower than the input so we don't trim any input text
   z-index: 1;
 `;
@@ -69,12 +69,15 @@ const Label = styled.label`
   margin: 0;
   padding: 0;
   border: 0;
-  // min-width: 40px;
   position: relative;
 `;
 
+type InputProps = {
+  borderColor?: string | null;
+};
+
 // TODO we should move these edit & add classes to the rule input level
-const InputField = styled.input` 
+const InputField = styled.input<InputProps>` 
   position: relative;
   padding: 4px 0;
   border-radius: 0;
@@ -84,8 +87,9 @@ const InputField = styled.input`
   border: 0;
   outline: 0;
   font-family: var(--font-sourceSansPro), Verdana, sans-serif;
-  // margin-bottom: 5px; /* you'll want at least the height of the span border */
   background-color: transparent;
+  border-bottom: 2px solid ${({ borderColor }) => borderColor ?? 'transparent'};
+
   width: 100%;
   white-space: pre;
   position: absolute;
