@@ -1,4 +1,28 @@
-import { enumType, extendType, objectType } from 'nexus';
+import { enumType, extendType, inputObjectType, objectType } from 'nexus';
+
+import { addGrammarTest } from './helpers/grammar-test';
+
+export const GrammarTestDefinitionInput = inputObjectType({
+  name: 'GrammarTestDefinitionInput',
+  definition(t) {
+    t.nullable.string('id');
+    t.field('type', {
+      type: 'GrammarTypeEnum'
+    });
+    t.nonNull.string('value');
+  }
+});
+
+export const GrammarTestInput = inputObjectType({
+  name: 'GrammarTestInput',
+  definition(t) {
+    t.nullable.string('id');
+    t.nonNull.string('reference');
+    t.list.field('expected', {
+      type: GrammarTestDefinitionInput
+    });
+  }
+});
 
 export const GrammarTypeEnum = enumType({
   name: 'GrammarTypeEnum',
@@ -30,7 +54,6 @@ export const GrammarTest = objectType({
 });
 
 // Queries
-
 export const GrammarTestQuery = extendType({
   type: 'Query',
   definition(t) {
@@ -51,9 +74,20 @@ export const GrammarTestQuery = extendType({
             }
           }
         });
-        console.log({ tests });
         return tests;
       }
+    });
+  }
+});
+
+// Mutations
+export const AddGrammarTestMutation = extendType({
+  type: 'Mutation',
+  definition(t) {
+    t.field('addGrammarTest', {
+      type: 'GrammarTest',
+      args: { input: GrammarTestInput },
+      resolve: addGrammarTest
     });
   }
 });

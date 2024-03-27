@@ -83,6 +83,18 @@ type GrammarTest {
   reference: String!
 }
 
+input GrammarTestDefinitionInput {
+  id: String
+  type: GrammarTypeEnum
+  value: String!
+}
+
+input GrammarTestInput {
+  expected: [GrammarTestDefinitionInput]
+  id: String
+  reference: String!
+}
+
 enum GrammarTypeEnum {
   AMOUNT
   COMMENTS
@@ -142,6 +154,7 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
 
 type Mutation {
+  addGrammarTest(input: GrammarTestInput): GrammarTest
   addParserRule(input: ParserRuleInput): ParserRule
   authenticateEvernote(oauthVerifier: String, userId: String): EvernoteSession
   clearEvernoteSession(userId: String): EvernoteSession

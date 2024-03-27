@@ -12,9 +12,7 @@ import {
   Rule,
   ParserRuleWithRelationsWithTypeName,
   ParserRuleDefinitionWithRelationsWithTypeName,
-  TestProps,
-  DetailsProps,
-  ParserUtility
+  DetailsProps
 } from 'components/parser/types';
 import { defaultTests } from 'constants/parser-tests';
 import { ParserRuleDefinition } from '@prisma/client';
@@ -244,9 +242,9 @@ export const getStyledParserRule = (rule: Rule) => {
   return parserRuleString;
 };
 
-export const fetchTests = (): TestProps[] => {
+export const fetchTests = (): any[] => {
   // TODO we'll ultimately want to grab these from the db
-  const tests: TestProps[] = [...defaultTests];
+  const tests: any[] = [...defaultTests];
   return tests;
 };
 

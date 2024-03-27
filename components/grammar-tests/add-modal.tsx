@@ -6,6 +6,7 @@ import styled, { ThemeContext } from 'styled-components';
 import { Button } from 'components/common';
 import PlusIcon from 'public/icons/plus.svg';
 import AutoWidthInput from 'components/parser/rule/auto-width-input';
+import useGrammarTests from 'hooks/use-grammar-tests';
 
 // this is apparently for accessibility
 Modal.setAppElement('#main-app');
@@ -32,12 +33,13 @@ const getExpectationPlaceholder = (
   formState: any,
   placeholder: string
 ) => {
-  const { expectations = [] } = formState;
-  const { value = '' } = expectations?.[index] ?? {};
+  const { expected = [] } = formState;
+  const { value = '' } = expected?.[index] ?? {};
   return value.length > 0 ? value : placeholder;
 };
 
 const AddModal: React.FC = () => {
+  const { addTest } = useGrammarTests();
   const [modalIsOpen, setIsOpen] = useState(false);
   const {
     colors: { altGreen }
@@ -53,7 +55,7 @@ const AddModal: React.FC = () => {
   });
   const { fields, append } = useFieldArray({
     control,
-    name: 'expectations'
+    name: 'expected'
   });
 
   // TODO we'll re-use this for editing eventually and can pull this from a grammar specific context
@@ -66,6 +68,7 @@ const AddModal: React.FC = () => {
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const onSubmit = (data: any) => {
     console.log(data);
+    addTest(data);
   };
 
   function handleOpenModalOnClick() {
@@ -116,7 +119,7 @@ const AddModal: React.FC = () => {
               <Field key={item.id}>
                 {/* <label htmlFor={`expectation${index}`}>Expectation:</label> */}
                 <Controller
-                  name={`expectations[${index}].type`}
+                  name={`expected[${index}].type`}
                   control={control}
                   defaultValue="INGREDIENT"
                   render={({ field }) => (
@@ -147,11 +150,11 @@ const AddModal: React.FC = () => {
                   // }
                   // onFocus={() => onFocus()}
                   registerField={{
-                    ...register(`expectations[${index}].value`)
+                    ...register(`expected[${index}].value`)
                   }}
                   // TODO we should change this based on the selected type
                   placeholder="apples"
-                  uniqueId={`expectations[${index}].value`}
+                  uniqueId={`expected[${index}].value`}
                 />
               </Field>
             ))}

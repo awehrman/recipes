@@ -43,4 +43,5 @@ function usePEGParser(rules: Rule[], loading = false) {
     errors
   };
 }
+
 export default usePEGParser;
