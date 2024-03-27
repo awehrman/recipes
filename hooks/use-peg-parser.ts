@@ -1,12 +1,13 @@
 import { useQuery } from '@apollo/client';
 import { Rule } from 'components/parser/types';
 import { compileGrammar, compileParser, runTests } from './helpers/parser-rule';
-import { TestProps } from 'components/parser/types';
+import { ClientTestProps } from 'components/parser/types';
 import { GET_ALL_GRAMMAR_TESTS_QUERY } from '../graphql/queries/grammar-tests';
+import { GrammarTest } from '@prisma/client';
 
 function usePEGParser(rules: Rule[], loading = false) {
   let errors: Error[] = [];
-  let tests: TestProps[] = [];
+  let tests: ClientTestProps[] = [];
   const { data = {}, loading: loadingTests } = useQuery(
     GET_ALL_GRAMMAR_TESTS_QUERY,
     {}
@@ -20,7 +21,13 @@ function usePEGParser(rules: Rule[], loading = false) {
     };
   }
 
-  tests = data?.tests ?? [];
+  tests = (data?.tests ?? []).map((test: GrammarTest) => ({
+    ...test,
+    parsed: false
+    // passed: false
+    // details: {}
+  }));
+  console.log({ tests });
 
   const grammar = compileGrammar(rules);
   try {

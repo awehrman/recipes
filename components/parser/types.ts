@@ -60,7 +60,7 @@ export type RuleContentProps = {
   rule: ParserRuleWithRelations;
 };
 
-export type GrammarTestProps = {
+export type ClientGrammarTestProps = {
   reference: string;
   parsed: boolean;
   expected: GrammarExpectedProps[];
@@ -83,7 +83,7 @@ export type GrammarExpectedProps = {
 };
 
 export type TestComponentProps = {
-  test: GrammarTestProps;
+  test: ClientGrammarTestProps;
   loading: boolean;
 };
 
@@ -100,7 +100,7 @@ export type Rule = {
   definitions: ParserRuleDefinition[];
 };
 
-export type TestProps = {
+export type ClientTestProps = {
   reference: string;
   parsed: boolean;
   passed?: boolean;

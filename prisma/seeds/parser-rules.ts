@@ -111,7 +111,7 @@ export async function importSeed(ctx: PrismaContext) {
               example: 'one',
               order: 0,
               rule: 'amt:amountKeyword',
-              formatterValues: '[...amt]',
+              formatterValues: '[amt]',
               name: 'amount'
             }),
             createParserRuleDefinition({
